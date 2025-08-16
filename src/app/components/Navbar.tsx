@@ -21,11 +21,11 @@ const Navbar  = () => {
 
         <div className="gap-2 flex ml-auto mr-4">
             <Link href="#" >
-                <Button className="w">Sign up</Button>
+                <Button className="bg-blue-600 hover:bg-blue-800">Sign up</Button>
             </Link>
         
             <Link href="#">
-                <Button>Log in</Button>
+                <Button className="bg-blue-600 hover:bg-blue-800">Log in</Button>
             </Link>
 
             <DropdownMenu>
