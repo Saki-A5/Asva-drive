@@ -20,7 +20,7 @@ const Navbar  = () => {
         </Link>
 
         <div className="gap-2 flex ml-auto mr-4">
-            <Link href="#" >
+            <Link href="/signup" >
                 <Button className="bg-blue-600 hover:bg-blue-800">Sign up</Button>
             </Link>
         
