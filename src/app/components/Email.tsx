@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { ArrowRight } from "lucide-react"
 import { useForm } from "react-hook-form"
 import z from "zod"
 
@@ -32,22 +33,28 @@ const Emailstep = ({email, setEmail, nextStep}: Emailprops) => {
         <div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}
-                className="w-4/5 mx-auto border-8"
+                className="w-4/5 mx-auto"
                 >
-                    <img src="/asva logo.jpg" alt="asva logo" height={30} width={30}/>
+                    <img src="/asva logo.jpg" alt="asva logo" height={60} width={70} className="mx-auto pt-4 pb-12"/>
+                    <h2 className="font-bold text-xl text-center pb-4">Sign in with Google</h2>
                 <FormField 
                 control={form.control}
                 name = 'email'
                 render={({field}) => (
                     <FormItem>
-                        <FormControl>
-                            <Input placeholder="Email" {...field}  className="w-4/5"/>
+                        <div className="flex mx-auto mt-16 mb-4 items-center relative w-4/5">
+                        <FormControl className="flex-1">
+                            <Input placeholder="Email" {...field}  className="h-12 pr-10"/>
                         </FormControl>
-                        <FormMessage/>
+                        <Button type="submit" size="icon" variant="ghost" 
+                className="absolute right-1 top-1/2 -translate-y-5"><ArrowRight className="w-5 h-5"/></Button>
+                        </div>
+                        <FormMessage className="text-center mb-4"/>
                     </FormItem>
                 )}
                 />
-                <Button>Next</Button>
+                {/* <Button type="submit" size="icon" variant="ghost" 
+                className="absolute right-1 top-1/2 -translate-y-12">Next</Button> */}
                 </form>
             </Form>
         </div>

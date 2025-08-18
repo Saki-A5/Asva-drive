@@ -1,32 +1,34 @@
 'use client'
-import { email } from "zod"
 import Emailstep from "../components/Email"
-import Email from "../components/Email"
 import { useState } from "react"
 import Link from "next/link"
+import Details from "../components/SignupDetail"
+import { Button } from "@/components/ui/button"
 
 
 const Signup = () => {
 
-    const [step, setStep] = useState(1)
+    const [step, setStep] = useState<"email" | "details">("email")
     const [email, setEmail] = useState('')
 
+    const nextStep = () => setStep("details")
     return(
         <>
         <div className=" flex h-20 pt-2">
             <Link href="/">
-            <Link href="/">
             <h2 className="font-bold ml-4">ASVA</h2>
             </Link>
+            <Link className="ml-auto mr-4" href="#">
+                <Button className="bg-blue-600 hover:bg-blue-800">Log in</Button>
             </Link>
         </div>
-        {step === 1 && (
+        {step === "email" ? (
         <Emailstep
         email={email}
         setEmail={setEmail}
-        nextStep={() => setStep(2)} 
+        nextStep={nextStep} 
         />
-    )}
+    ) : (<Details email={email} />)}
         </>
     )
 }
