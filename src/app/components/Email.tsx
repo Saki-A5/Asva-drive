@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowRight } from "lucide-react"
 import { useForm } from "react-hook-form"
 import z from "zod"
+import Link from "next/link"
 
 interface Emailprops {
     email: string
@@ -33,7 +34,7 @@ const Emailstep = ({email, setEmail, nextStep}: Emailprops) => {
         <div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}
-                className="w-4/5 mx-auto"
+                className="w-4/5 mx-auto sm:w-3/5 md:w-2/5 mt-24"
                 >
                     <img src="/asva logo.jpg" alt="asva logo" height={60} width={70} className="mx-auto pt-4 pb-12"/>
                     <h2 className="font-bold text-xl text-center pb-4">Sign in with Google</h2>
@@ -53,8 +54,7 @@ const Emailstep = ({email, setEmail, nextStep}: Emailprops) => {
                     </FormItem>
                 )}
                 />
-                {/* <Button type="submit" size="icon" variant="ghost" 
-                className="absolute right-1 top-1/2 -translate-y-12">Next</Button> */}
+                <p className="text-center mt-4 mb-4">already have an account? <span><Link href="#" className="underline">Login</Link></span></p>
                 </form>
             </Form>
         </div>

@@ -8,16 +8,16 @@ const Home = () => {
     <div>
       <Navbar />
       <div className="md:grid md:grid-cols-2">
-        <div className="w-4/5 mx-auto mb-8">
+        <div className="w-4/5 mx-auto mb-8 md:order-2 lg:mr-100">
           <h2 className="font-bold text-2xl mb-2">Asva Drive - Your Smart Hub for Learning, Organizing, and Sharing</h2>
           <p className="mb-4">Manage your files and content effortlessly. Organize with precision, share without limits, and stay instantly informed on every update - easy to use platform</p>
           <Link href="/signup"><Button className="bg-blue-600 hover:bg-blue-800 w-full">Get Started</Button></Link>
         </div>
 
         <div className="max-w-full pb-4 flex justify-center items-center">
-        <div className="relative w-[250px] h-[200px] right-10">
+        <div className="relative w-[250px] lg:w-[350px] h-[200px] right-10">
           <Image src='/myfiles.jpg' alt="first image" fill className="object-fill"/>
-          <div className="absolute top-25 left-26 w-[250px] h-[150px] shadow-lg overflow-hidden ">
+          <div className="absolute top-25 left-26 w-[250px] lg:w-[350px] h-[150px] shadow-lg overflow-hidden ">
             <Image src="/myfiles2.jpg" alt="overlay" fill className="object-fill"/>
           </div>
         </div>
@@ -25,19 +25,38 @@ const Home = () => {
       </div>
 
       {/* learning made easy */}
-      <div className="mb-100 mt-34">
+      <div className="mb-45 mt-34">
+        <div className="flex justify-center items-center border rounded-lg w-60 mx-auto mb-4">
+          <Image src="/reading.png" alt="learning made easy" width={26} height={26}/>
+          <h3 className="pl-2 font-semibold">learning made easy</h3>
+        </div>
         <div className="mx-auto w-4/5">
         <p className="text-center mb-8">Asva makes learning easy with its intuitive interface and powerful features. Access your learning materials anytime, anywhere, and stay organized with smart content management.</p>
         </div>
         <div className="max-w-full pb-4 flex justify-center items-center">
-        <div className="relative w-[270px] h-[200px] left-10 float-right">
+        <div className="relative w-[270px] h-[200px] md:w-[330px] md:h-[280px] lg:w-[400px] left-10 md:left-20 lg:left-15 float-right">
           <Image src='/child.png' alt="first image" fill className="object-fill "/>
-          <div className="absolute top-25 right-40 w-47 sm:w-75 h-[150px] shadow-lg overflow-hidden">
+          <div className="absolute top-25 right-40 w-[200px] md:w-[270px] h-[150px] md:right-55 lg:right-65 md:top-38 md:h-[210px] shadow-lg overflow-hidden">
             <Image src="/books.png" alt="overlay" fill className="object-fill"/>
           </div>
-        </div>        </div>
+        </div>        
+        </div>
       </div>
 
+      {/* smart organization for content management */}
+      <div className="mb-4">
+        <div className="flex justify-center items-center border rounded-lg w-80 sm:w-100 mx-auto mb-4">
+          <Image src="/reading.png" alt="content management" width={26} height={26}/>
+          <h3 className="pl-2 font-semibold text-center sm:text-left">Smart Organization for content Management</h3>
+        </div>
+        <div className="mx-auto w-4/5 text-center">
+          <p>Asva drive's smart organization features help you manage your content efficiently.</p>
+          <p>Easily categorize, search, and retrieve files, enusring you always have what you need at your fingertips.</p>
+        </div>
+        <div className="flex justify-center items-center mt-6 w-[370px] h-[300px] relative mx-auto">
+          <Image src="/content management.png" alt="content management" fill />
+        </div>
+      </div>
 
     </div>
     )

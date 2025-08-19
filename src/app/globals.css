@@ -126,12 +126,3 @@ body {
   }
 
 }
-
-@media only screen and (min-width:510px) {
-    .here{
-      @apply w-[306px] flex items-center justify-center 
-    }
-    .heree{
-
-    }
-  }
