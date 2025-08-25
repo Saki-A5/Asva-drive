@@ -61,7 +61,7 @@ const Home = () => {
       </div>
 
       {/* Seamless file sharing */}
-      <div className="mb-12">
+      <div className="mb-24 md:mb-52 lg:mb-68">
         <div className="flex justify-center items-center border rounded-lg w-80 sm:w-100 mx-auto mb-4">
           <Image src="/reading.png" alt="content management" width={26} height={26}/>
           <h3 className="pl-2 font-semibold text-center sm:text-left">Seamless file sharing</h3>
@@ -70,8 +70,27 @@ const Home = () => {
           <div className="mx-auto w-4/5 text-center md:mr-0 md:my-auto">
             <p>Share files seamlessly with Asva drive. Collaborate with team members and partners effortlessly, ensuring everyone has access to the latest verrsions of your documents.</p>
           </div>
+          <div className="flex justify-center items-center mt-6 md:mt-0 md:top-10 w-[370px] h-[300px] lg:w-[440px] xl:w-[500px] xl:ml-12 lg:right-10 relative mx-auto">
+            <Image src="/wifi.png" alt="file sharing" fill />
+            <div className="absolute md:w-[380px] lg:w-[420px] xl:w-[445px] md:right-55 lg:right-85 md:top-55 md:h-[210px] lg:h-[260px] shadow-lg overflow-hidden z-[-1] hidden md:block">
+            <Image src="/online-collaboration.png" alt="overlay" fill className="object-fill"/>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Ai assistance */}
+      <div className="mb-24">
+        <div className="flex justify-center items-center border rounded-lg w-80 sm:w-100 mx-auto mb-4">
+          <Image src="/reading.png" alt="content management" width={26} height={26}/>
+          <h3 className="pl-2 font-semibold text-center sm:text-left">AI assistance and search</h3>
+        </div>
+        <div className="md:grid md:grid-cols-2">
+          <div className="mx-auto w-4/5 text-center md:mr-0 md:mt-10 text-pink-600">
+            <p>Share files seamlessly with Asva Drive. Collaborate with team members, clients, and partners effortlessly, ensuring everyone has access to the latest versions of your documents.</p>
+          </div>
           <div className="flex justify-center items-center mt-6 w-[370px] h-[300px] lg:w-[440px] xl:w-[500px] xl:ml-12 lg:right-10 relative mx-auto">
-            <Image src="/content management.png" alt="content management" fill />
+            <Image src="/robot.png" alt="content management" fill />
           </div>
         </div>
       </div>
