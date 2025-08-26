@@ -1,6 +1,6 @@
-import {initializeApp} from 'firebase/app';
+import {initializeApp, getApps} from 'firebase/app';
 import { getAuth,  GoogleAuthProvider, signInWithPopup} from 'firebase/auth';
-import { getAnalytics } from "firebase/analytics";
+// import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -12,9 +12,12 @@ const firebaseConfig = {
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
 };
 
+console.log("Firebase Config:", firebaseConfig)
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider()
-const analytics = getAnalytics(app);
+// const analytics = getAnalytics(app);
+
+export default app;
