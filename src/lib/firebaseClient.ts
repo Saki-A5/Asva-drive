@@ -7,19 +7,14 @@ import { getAnalytics } from "firebase/analytics";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCi8UJab8VMn3j66fy1zsrRTJxw4dEM7Js",
-  authDomain: "asva-drive.firebaseapp.com",
-  projectId: "asva-drive",
-  storageBucket: "asva-drive.firebasestorage.app",
-  messagingSenderId: "611614337335",
-  appId: "1:611614337335:web:a93f1900f737a1e7c892b2",
-  measurementId: "G-ZHX8MRSPGP"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
 };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider()
+export const auth = getAuth(app);
+export const provider = new GoogleAuthProvider()
 const analytics = getAnalytics(app);
-
-export default auth; provider;
