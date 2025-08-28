@@ -1,3 +1,4 @@
+"use client"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -6,6 +7,10 @@ import { ArrowRight } from "lucide-react"
 import { useForm } from "react-hook-form"
 import z from "zod"
 import Link from "next/link"
+import axios from "axios"
+import { auth, provider } from "@/lib/firebaseClient"
+import { signInWithPopup } from "firebase/auth"
+import { useRouter } from "next/navigation"
 
 interface Emailprops {
     email: string
@@ -24,20 +29,41 @@ const Emailstep = ({email, setEmail, nextStep}: Emailprops) => {
             email: email || '',
         }
     })
+
+    const router = useRouter()
+
     const onSubmit = (values: z.infer<typeof emailSchema>) => {
         setEmail(values.email)
         nextStep()
     }
-   
+    const handleGoogleSignIn = async () => {
+        try {
+          const result = await signInWithPopup(auth, provider);
+          const token = await result.user.getIdToken();
+    
+          // Send token to backend
+          await axios.post("/api/auth", { idToken: token });
+        //   alert("Google sign-in successful!");
+          router.push("/"); 
+        } catch (error:any) {
+          console.error("Google Sign-in Error: ", error.response?.data || error.message || error);
+          alert("Google sign-in failed. Please try again" );
+        }
+      };
+
     return(
         <>
-        <div>
+        <div className="mt-24">
+            <img src="/asva logo.jpg" alt="asva logo" height={60} width={70} className="mx-auto pt-4 pb-12"/>
+            <Button onClick={handleGoogleSignIn}
+                className="mb-4 text-black bg-white grid grid-cols-[auto_auto] items-center w-62 h-12 border hover:bg-transparent rounded-full mx-auto">
+                <span className="text-center">Sign in with Google</span>
+                <img src="/google.png" alt="google"/>
+            </Button>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}
-                className="w-4/5 mx-auto sm:w-3/5 md:w-2/5 mt-24"
+                className="w-4/5 mx-auto sm:w-3/5 md:w-2/5 mt-4"
                 >
-                    <img src="/asva logo.jpg" alt="asva logo" height={60} width={70} className="mx-auto pt-4 pb-12"/>
-                    <h2 className="font-bold text-xl text-center pb-4">Sign in with Google</h2>
                 <FormField 
                 control={form.control}
                 name = 'email'
