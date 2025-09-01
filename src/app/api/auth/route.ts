@@ -13,7 +13,7 @@ export const POST = async(req: Request) => {
 
     // Verify Firebase ID token
     const decodedToken = await adminAuth.verifyIdToken(idToken);
-    const { uid, email, name, picture } = decodedToken;
+    const { uid, email, name} = decodedToken;
 
     await dbConnect();
 
@@ -23,14 +23,14 @@ export const POST = async(req: Request) => {
       user = await User.create({
         uid,
         email,
-        name: name || "",
+        name: name || (email? email.split("@")[0]: "User")
         // picture: picture || "",
       });
     }
 
-    return NextResponse.json({ message: "Google sign-in successful", user });
+    return NextResponse.json({ message: "user sign-in successful", user });
   } catch (error: any) {
-    console.error("Google Sign-in Error:", error);
+    console.error("Sign-up Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

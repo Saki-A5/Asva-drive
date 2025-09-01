@@ -6,6 +6,11 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import {auth} from "@/lib/firebaseClient"
+import axios from "axios"
+import { useRouter } from "next/navigation"
+import { createUserWithEmailAndPassword } from "firebase/auth"
+import { error } from "console"
 
 interface Detailsprop {
     email: string
@@ -32,9 +37,31 @@ const Details = ({email} : Detailsprop) => {
         }
     })
 
-    const onSubmit = (e:any) => {
-        e.preventDefault()        
+    const router = useRouter()
+
+    const onSubmit = async(values: DetailsFormValues) => {
+        try {
+      // 1. Create Firebase user
+            const userCredential = await createUserWithEmailAndPassword(auth, email, values.password);
+            const user = userCredential.user;
+            const idToken = await user.getIdToken();
+
+      // 3. Send token + name to backend
+            const res = await axios.post("/api/auth", {
+                idToken,
+                name: values.name,
+            })
+            router.push("/");
+            } catch (error:any) {
+                if (axios.isAxiosError(error)) {
+                console.error("Axios error: ", error.response?.data || error.message);
+                alert("Signup failed. Please try again.");       
+                } else {
+                console.error("sign-up error: ", error.message);
+                alert(error.message);
+            }
         }
+    };
 
     return(
         <>
