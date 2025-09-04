@@ -32,8 +32,8 @@ const Home = () => {
           <Image src="/reading.png" alt="learning made easy" width={26} height={26}/>
           <h3 className="pl-2 font-semibold">learning made easy</h3>
         </div>
-        <div className="mx-auto w-4/5">
-        <p className="text-center text-xl mb-8">Asva  Drive makes learning easy with its intuitive interface and powerful features. Access your learning materials anytime, anywhere, and stay organized with smart content management.</p>
+        <div className="mx-auto w-3/5">
+        <p className="text-center text mb-8">Asva  Drive makes learning easy with its intuitive interface and powerful features. Access your learning materials anytime, anywhere, and stay organized with smart content management.</p>
         </div>
         <div className="max-w-full pb-4 flex justify-center items-center">
         <div className="relative w-[270px] h-[200px] md:w-[330px] md:h-[280px] lg:w-[400px] left-10 md:left-20 lg:left-15 float-right">
