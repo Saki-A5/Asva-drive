@@ -32,7 +32,7 @@ const Loginpage = () => {
         
             // Send token to backend
             await axios.post("/api/loginauth", { idToken: token });
-            router.push("/"); 
+            router.push("/dashboard"); 
         } catch (error:any) {
             console.error("Google login Error: ", error.response?.data || error.message || error);
             alert("Google login failed." );
@@ -46,12 +46,21 @@ const Loginpage = () => {
 
       // 3. Send token + name to backend
             await axios.post("/api/loginauth", {
-                idToken: idToken
+                idToken
             })
-            router.push("/");
+            router.push("/dashboard");
         } catch (error:any) {
-            console.error("Email login error: ", error.message);
-            alert("Login failed: " + (error.message || "Please try again."));       
+            let message = "Login failed. Please try again.";
+            if (error.code === 'auth/user-not-found') {
+                message = "No user found with this email. Please sign up first.";
+            } else if (error.code === 'auth/wrong-password') {
+                message = "Incorrect password. Please try again.";
+            } else if (error.code === 'auth/invalid-credential') {
+                message = "Invalid credentials. Please check your email and password.";
+            }
+
+            console.error("Email login error: ", error);
+            alert(error.code || message);       
         }
     };
 

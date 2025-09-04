@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import { NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import dbConnect from "@/lib/dbConnect";
@@ -18,7 +20,7 @@ export const POST = async(req: Request) => {
     await dbConnect();
 
     // Find or create user
-    let user = await User.findOne({ uid });
+    let user = await User.findOne({ email });
     if (!user) {
       user = await User.create({
         uid,
@@ -28,7 +30,16 @@ export const POST = async(req: Request) => {
       });
     }
 
-    return NextResponse.json({ message: "user sign-in successful", user });
+    // cookie
+        const res = NextResponse.json({ message: "Signup successful", user });
+        res.cookies.set("token", idToken, { 
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === "production",  
+          path: '/',
+          maxAge: 60 * 60 * 24 
+        });
+
+    return res;
   } catch (error: any) {
     console.error("Sign-up Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });

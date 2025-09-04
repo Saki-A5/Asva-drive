@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import { NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import dbConnect from "@/lib/dbConnect";
@@ -13,17 +15,26 @@ export const POST = async(req: Request) => {
 
     // Verify Firebase ID token
     const decodedToken = await adminAuth.verifyIdToken(idToken);
-    const { uid, email, name} = decodedToken;
+    const { email} = decodedToken;
 
     await dbConnect();
 
     // Find or create user
-    let user = await User.findOne({ uid });
+    let user = await User.findOne({ email });
     if (!user) {
       return NextResponse.json({ error: "User not found. Please sign up first" }, { status: 404 });
     }
 
-    return NextResponse.json({ message: "Login successful", user });
+    // cookie
+    const res = NextResponse.json({ message: "Login successful", user });
+    res.cookies.set("token", idToken, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production",  
+      path: '/',
+      maxAge: 60 * 60 * 24 * 5 
+    });
+
+    return res;
   } catch (error: any) {
     console.error("Login Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
