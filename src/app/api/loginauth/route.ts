@@ -20,17 +20,12 @@ export const POST = async(req: Request) => {
     // Find or create user
     let user = await User.findOne({ uid });
     if (!user) {
-      user = await User.create({
-        uid,
-        email,
-        name: name || (email? email.split("@")[0]: "User")
-        // picture: picture || "",
-      });
+      return NextResponse.json({ error: "User not found. Please sign up first" }, { status: 404 });
     }
 
-    return NextResponse.json({ message: "user sign-in successful", user });
+    return NextResponse.json({ message: "Login successful", user });
   } catch (error: any) {
-    console.error("Sign-up Error:", error);
+    console.error("Login Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

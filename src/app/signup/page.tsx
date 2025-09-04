@@ -18,7 +18,7 @@ const Signup = () => {
             <Link href="/">
             <h2 className="font-bold ml-4">ASVA</h2>
             </Link>
-            <Link className="ml-auto mr-4" href="#">
+            <Link className="ml-auto mr-4" href="/login">
                 <Button className="bg-blue-600 hover:bg-blue-800">Log in</Button>
             </Link>
         </div>

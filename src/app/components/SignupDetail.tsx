@@ -10,7 +10,6 @@ import {auth} from "@/lib/firebaseClient"
 import axios from "axios"
 import { useRouter } from "next/navigation"
 import { createUserWithEmailAndPassword } from "firebase/auth"
-import { error } from "console"
 
 interface Detailsprop {
     email: string

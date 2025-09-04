@@ -24,7 +24,7 @@ const Navbar  = () => {
                 <Button className="bg-blue-600 hover:bg-blue-800">Sign up</Button>
             </Link>
         
-            <Link href="#">
+            <Link href="/login">
                 <Button className="bg-blue-600 hover:bg-blue-800">Log in</Button>
             </Link>
 

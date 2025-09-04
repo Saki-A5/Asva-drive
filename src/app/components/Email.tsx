@@ -80,7 +80,7 @@ const Emailstep = ({email, setEmail, nextStep}: Emailprops) => {
                     </FormItem>
                 )}
                 />
-                <p className="text-center mt-4 mb-4">already have an account? <span><Link href="#" className="underline">Login</Link></span></p>
+                <p className="text-center mt-4 mb-4">already have an account? <span><Link href="/login" className="underline">Login</Link></span></p>
                 </form>
             </Form>
         </div>
