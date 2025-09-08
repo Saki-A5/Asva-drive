@@ -98,7 +98,7 @@ const Loginpage = () => {
                     <FormItem>
                         <div className="mx-auto mt-2 w-4/5">
                         <FormControl>
-                            <Input type="password" placeholder="Password" {...field}  />
+                            <Input type="password" placeholder="Password" {...field}  className="h-12 pr-10"/>
                         </FormControl>
                         </div>
                         <FormMessage className="text-center mb-4"/>

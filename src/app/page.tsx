@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button"
 
 const Home = () => {
   return (
-    <div>
-      <Navbar />
+    <div>      <Navbar />
       <div className="md:grid md:grid-cols-2">
         <div className="w-4/5 mx-auto mb-8 md:order-2 lg:mr-100">
           <h2 className="font-bold text-2xl mb-2">Asva Drive - Your Smart Hub for Learning, Organizing, and Sharing</h2>

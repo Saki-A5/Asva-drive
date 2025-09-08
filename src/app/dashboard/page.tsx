@@ -1,7 +1,14 @@
+import Sidenav from "../components/Sidenav";
+
+
 const Dashboard = () => {
   return (
     <>
-    <h1>hey</h1>
+    <Sidenav>
+      <div>
+        <h1 className="text-2xl font-bold mb-4">Welcome to Your Dashboard</h1>  
+    </div>
+    </Sidenav>
     </>
   );
 }
