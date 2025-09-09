@@ -1,13 +1,20 @@
+"use client"
+import Loginnav from "../components/Loginnav";
 import Sidenav from "../components/Sidenav";
 
+const user = async() =>{
+  
+}
 
 const Dashboard = () => {
+
   return (
     <>
     <Sidenav>
+      <Loginnav />
       <div>
-        <h1 className="text-2xl font-bold mb-4">Welcome to Your Dashboard</h1>  
-    </div>
+        <h1>hello</h1>
+      </div>
     </Sidenav>
     </>
   );

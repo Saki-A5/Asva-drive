@@ -37,7 +37,7 @@ const sidelinks: SideItem[] = [
 const Sidenav = ({ children }: { children: React.ReactNode })  => {
   const desktopview = () => {
     return (
-      <nav className="flex flex-col space-y-2">
+      <nav className="flex flex-col space-y-1">
           {sidelinks.map((section, index) => {
             // Narrow: is this a grouped section (has links) or a single link?
             const isGroup = 'links' in section && Array.isArray(section.links)
@@ -47,14 +47,14 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
             if (isGroup) {
               return (
                 <div key={key}>
-                  <div className="flex flex-col space-y-2">
+                  <div className="space-y-2">
                     {section.links.map((link) => {
                       const Icon = link.icon
                       return (
                         <Link
                           key={link.href}
                           href={link.href}
-                          className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-accent hover:text-accent-foreground transition"
+                          className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition"
                         >
                           <Icon className="h-5 w-5" />
                           <span className="font-semibold ">{link.label}</span>
@@ -64,7 +64,7 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
                   </div>
 
                   {index < sidelinks.length - 1 &&  (
-                    <div className="my-4 border-t pt-2">
+                    <div className="my-2 border-t pt-2">
                       {"links" in sidelinks[index + 1] && (
                       <p className="text-xs pl-4 md:pl-0 text-muted-foreground uppercase tracking-wide">
                         {sidelinks[index + 1]?.label ?? ""}
@@ -83,17 +83,20 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
               <div key={key}>
                 <Link
                   href={single.href}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-accent hover:text-accent-foreground transition"
+                  className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition"
                 >
                   <Icon className="h-5 w-5" />
                   <span className="font-semibold">{single.label}</span>
                 </Link>
 
                 {index < sidelinks.length - 1 && (
-                  <div className="my-4 border-t pt-2">
+                  <div className="my-2 border-t pt-2">
+                    {"links" in sidelinks[index + 1] && sidelinks[index + 1].label !== "Settings" && (
+
                     <p className="text-xs pl-4 md:pl-0 text-muted-foreground uppercase tracking-wide">
                       {sidelinks[index + 1]?.label ?? ""}
                     </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -105,8 +108,8 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
   return (
     <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
-      <div className="hidden sm:flex w-56 flex-col border-r bg-background p-4">
-        <Link href="/" className="font-bold mb-4">Asva</Link>
+      <div className="hidden sm:flex w-56 flex-col border-r border-border/80 bg-background p-4">
+        <Link href="/dashboard" className="font-bold mb-4">Asva</Link>
         {desktopview()}
       </div>
 
@@ -122,12 +125,12 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-64">
-          <Link href="/" className="font-bold mb-4 pl-6 pt-4">Asva</Link>
+          <Link href="/dashboard" className="font-bold mb-4 pl-6 pt-4">Asva</Link>
           {desktopview()}
         </SheetContent>
       </Sheet>
       {/* Main content */}
-      <main className="flex-1 p-6">{children}</main>
+      <main className="flex-1 ">{children}</main>
     </div>
   )
 }
