@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useState, useEffect } from "react"
 import axios from "axios"
+import { auth } from "@/lib/firebaseClient"
 
 
 type User = {
@@ -31,8 +32,20 @@ const Loginnav = () => {
     const { setTheme } = useTheme()
     const [user, setUser] = useState<User | null>(null)
 
-    useEffect(() => {
-        const fetchUser = async () => {
+    const refreshToken = async () => {
+      try{
+        const currentUser = auth.currentUser;
+        if (!currentUser) return
+
+        const idToken = await currentUser.getIdToken(true);
+
+        await axios.post('/api/refresh', {idToken})
+      } catch (error) {
+        console.error("Error refreshing token:", error);
+      }
+    }
+
+    const fetchUser = async () => {
           try {
             const res = await axios.get('/api/me');
             setUser(res.data.user);
@@ -40,7 +53,16 @@ const Loginnav = () => {
             console.error("Error fetching user data:", error);
           }
     }
-    fetchUser();
+
+    useEffect(() => {
+      const init = async () => {
+        await refreshToken();
+        await fetchUser();
+      }
+      init();
+      
+      const interval = setInterval(refreshToken, 55 * 60 * 1000); // Refresh every 55 minutes
+      return () => clearInterval(interval);
     }, []);
 
     const initials = getInitials(user?.name || user?.email);

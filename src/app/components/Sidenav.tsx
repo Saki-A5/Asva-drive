@@ -1,7 +1,7 @@
 'use client'
 import React from "react"
 import Link from "next/link"
-import { HomeIcon, ShareIcon } from "lucide-react"
+import { HomeIcon, ShareIcon, Star, Clock } from "lucide-react"
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Menu } from "lucide-react"
@@ -18,20 +18,20 @@ const sidelinks: SideItem[] = [
   {
     label: "File manager",
     links: [
-      { href: '#', label: "Recent", icon: HomeIcon },
-      { href: '#', label: "Starred", icon: HomeIcon },
-      { href: '#', label: "Files", icon: HomeIcon },
-      { href: '#', label: "Trash", icon: HomeIcon },
+      { href: '/recent', label: "Recent", icon: Clock },
+      { href: '/starred', label: "Starred", icon: Star },
+      { href: '/files', label: "Files", icon: HomeIcon },
+      { href: '/trash', label: "Trash", icon: HomeIcon },
     ],
   },
   {
     label: "Shared",
     links: [
-      { href: "#", label: "Shared with me", icon: ShareIcon },
+      { href: "/share", label: "Shared with me", icon: ShareIcon },
     ],
   },
   { href: "#", label: "AI", icon: ShareIcon },
-  { href: "#", label: "settings", icon: ShareIcon },
+  { href: "/settings", label: "settings", icon: ShareIcon },
 ]
 
 const Sidenav = ({ children }: { children: React.ReactNode })  => {
