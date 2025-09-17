@@ -27,7 +27,7 @@ const sidelinks: SideItem[] = [
   {
     label: "Shared",
     links: [
-      { href: "/share", label: "Shared with me", icon: ShareIcon },
+      { href: "/shared", label: "Shared with me", icon: ShareIcon },
     ],
   },
   { href: "#", label: "AI", icon: ShareIcon },

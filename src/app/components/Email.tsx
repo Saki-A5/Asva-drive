@@ -44,7 +44,7 @@ const Emailstep = ({email, setEmail, nextStep}: Emailprops) => {
           // Send token to backend
           await axios.post("/api/auth", { idToken: token });
         //   alert("Google sign-in successful!");
-          router.push("/"); 
+          router.push("/dashboard"); 
         } catch (error:any) {
           console.error("Google Sign-in Error: ", error.response?.data || error.message || error);
           alert("Google sign-in failed. Please try again" );

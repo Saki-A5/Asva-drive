@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input"
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { auth } from "@/lib/firebaseClient"
+import { useRouter } from "next/navigation"
+import { getAuth, signOut } from "firebase/auth"
 
 
 type User = {
@@ -31,6 +33,18 @@ const getInitials = (name: string | null | undefined) => {
 const Loginnav = () => {
     const { setTheme } = useTheme()
     const [user, setUser] = useState<User | null>(null)
+    const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      const auth = getAuth();
+      await signOut(auth);
+      await axios.post('/api/logout');
+      router.push('/login');
+    } catch (error) {
+      console.error("Logout Error:", error);
+    }
+  }
 
     const refreshToken = async () => {
       try{
@@ -95,7 +109,7 @@ const Loginnav = () => {
                     <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4 text-red-500" />
                     <span className="text-red-500">Logout</span>
                 </DropdownMenuItem>

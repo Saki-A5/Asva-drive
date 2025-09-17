@@ -30,6 +30,7 @@ const Loginpage = () => {
             const result = await signInWithPopup(auth, provider);
             const token = await result.user.getIdToken();
         
+            console.log("Google ID Token:", token);
             // Send token to backend
             await axios.post("/api/loginauth", { idToken: token });
             router.push("/dashboard"); 

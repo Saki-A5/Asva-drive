@@ -42,7 +42,7 @@ const Dashboard = () => {
     <Sidenav>
       <Loginnav />
       <div>
-        <h1 className="p-6">My Dashboard</h1>
+        <h1 className="p-6 font-bold text-xl">My Dashboard</h1>
         <div className="p-6 space-y-8">
           {/* starred */}
           <section>
