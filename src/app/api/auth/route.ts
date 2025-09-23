@@ -26,7 +26,6 @@ export const POST = async(req: Request) => {
         uid,
         email,
         name: name || (email? email.split("@")[0]: "User")
-        // picture: picture || "",
       });
     }
 
@@ -36,7 +35,8 @@ export const POST = async(req: Request) => {
           httpOnly: true, 
           secure: process.env.NODE_ENV === "production",  
           path: '/',
-          maxAge: 60 * 60 * 24 
+          maxAge: 60 * 60 * 24 * 30,
+          sameSite: 'lax'
         });
 
     return res;

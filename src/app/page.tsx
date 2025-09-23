@@ -3,11 +3,13 @@ import Image from "next/image"
 import Navbar from "./components/Navbar"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import Footer from "./components/Footer"
 
 
 const Home = () => {
   return (
-    <div>      <Navbar />
+    <div>
+      <Navbar />
       <div className="md:grid md:grid-cols-2">
         <div className="w-4/5 mx-auto mb-8 md:order-2 lg:mr-100">
           <h2 className="font-bold text-2xl mb-2">Asva Drive - Your Smart Hub for Learning, Organizing, and Sharing</h2>
@@ -27,9 +29,12 @@ const Home = () => {
 
       {/* learning made easy */}
       <div className="mb-45 mt-34">
-        <div className="flex justify-center items-center border rounded-lg w-60 mx-auto mb-4">
+        <div className="flex flex-col items-center w-70 mx-auto mb-4">
+          <div className="flex items-center">
           <Image src="/reading.png" alt="learning made easy" width={26} height={26}/>
-          <h3 className="pl-2 font-semibold">learning made easy</h3>
+          <h3 className="pl-2 font-bold text-center leading-tight">learning made easy</h3>
+          </div>
+          <Image src="/liness.png" alt="lines" width={340} height={26} className="-mt-4"/>
         </div>
         <div className="mx-auto w-3/5">
         <p className="text-center text mb-8">Asva  Drive makes learning easy with its intuitive interface and powerful features. Access your learning materials anytime, anywhere, and stay organized with smart content management.</p>
@@ -63,9 +68,12 @@ const Home = () => {
 
       {/* Seamless file sharing */}
       <div className="mb-24 md:mb-52 lg:mb-68">
-        <div className="flex justify-center items-center border rounded-lg w-80 sm:w-100 mx-auto mb-4">
-          <Image src="/reading.png" alt="content management" width={26} height={26}/>
-          <h3 className="pl-2 font-semibold text-center sm:text-left">Seamless file sharing</h3>
+        <div className="flex flex-col items-center w-70 mx-auto mb-4">
+          <div className="flex items-center">
+          <Image src="/reading.png" alt="learning made easy" width={26} height={26}/>
+          <h3 className="pl-2 font-bold text-center leading-tight">Seamless file sharing</h3>
+          </div>
+          <Image src="/liness.png" alt="lines" width={340} height={26} className="-mt-4"/>
         </div>
         <div className="md:grid md:grid-cols-2">
           <div className="mx-auto w-4/5 text-center md:mr-0 md:my-auto">
@@ -96,7 +104,7 @@ const Home = () => {
         </div>
       </div>
 
-      
+      <Footer />
     </div>
     )
 }

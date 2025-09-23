@@ -25,13 +25,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User not found. Please sign up first" }, { status: 404 });
     }
 
+    // firebase session cookie
+    const expiresIn = 60 * 60 * 24 * 28 * 1000; // 5 days
+    const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+
     // cookie
     const res = NextResponse.json({ message: "Login successful", user });
     res.cookies.set("token", idToken, { 
       httpOnly: true, 
       secure: process.env.NODE_ENV === "production",  
       path: '/',
-      maxAge: 60 * 60 * 24 * 28
+      maxAge: 60 * 60 * 24 * 28,
+      sameSite: 'lax'
     });
 
     return res;
