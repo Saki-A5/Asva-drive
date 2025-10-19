@@ -7,7 +7,7 @@ import Cookies from "js-cookie"
 import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { ArrowUpDown, ChevronDown, Grid, List } from "lucide-react"
-import { DropdownMenuContent } from "@radix-ui/react-dropdown-menu"
+
 
 
 
@@ -116,7 +116,7 @@ const Recent = ({files=[] }: {files: File[]}) => {
                 </div>
               ))}
             </div>
-          ) : (
+            ) : (
             <div className="overflow-hidden border rounded-lg">
               <div className="grid grid-cols-4 bg-muted/40 p-3 font-medium text-sm">
               <Button variant="ghost" className="flex items-center gap-1" onClick={() => handleSort("name")}>Name{SortIcon("name")}</Button>

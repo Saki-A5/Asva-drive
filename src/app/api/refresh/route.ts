@@ -18,7 +18,7 @@ export const POST = async (req: Request) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60, // 1 hour
+      maxAge: 60 * 60 * 24 * 30,
     })
 
     return res
