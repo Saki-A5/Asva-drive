@@ -370,6 +370,51 @@ const trashPage = () => {
                       />
                     </div>
                   </div>
+
+                  {/* Deleted by */}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Deleted by</p>
+                    <Input
+                      placeholder="Search by user email..."
+                      value={deletedByFilter}
+                      onChange={(e) => setDeletedByFilter(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Type */}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Type</p>
+                    <div className="flex flex-col gap-2 max-h-40 overflow-auto">
+                      {typesAvailable.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No types</p>
+                      ) : (
+                        typesAvailable.map((t) => (
+                          <label key={t} className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={!!typeFilter[t]}
+                              onChange={(e) => setTypeFilter((prev) => ({ ...prev, [t]: e.target.checked }))}
+                              className="w-4 h-4"
+                            />
+                            <span className="text-sm">{t}</span>
+                          </label>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-center gap-2">
+                    <Button variant="outline" onClick={() => {
+                      setPresetRange("all");
+                      setCustomStart("");
+                      setCustomEnd("");
+                      setDeletedByFilter("");
+                      setTypeFilter({});
+                    }}>
+                      Reset
+                    </Button>
+                    <Button onClick={() => setSheetOpen(false)}>Apply</Button>
+                  </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
