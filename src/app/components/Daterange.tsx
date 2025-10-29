@@ -7,10 +7,11 @@ import { useState } from "react"
 import { DateRange } from "react-day-picker"
 
 
+
 interface DateRangePickerProps {
   dateRange: DateRange | undefined
   setDateRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>
-  setPresetRange: React.Dispatch<React.SetStateAction<string>><string>>
+  setPresetRange: React.Dispatch<React.SetStateAction<"all" | "today" | "7" | "30">>
 }
 
 export function DateRangePicker({ dateRange, setDateRange, setPresetRange }: DateRangePickerProps) {
@@ -19,11 +20,11 @@ export function DateRangePicker({ dateRange, setDateRange, setPresetRange }: Dat
 
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="justify-start text-left font-normal w-full sm:w-auto"
+          className="justify-start text-left font-normal w-full sm:w-auto pointer-events-auto overflow-visible"
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {dateRange?.from && dateRange?.to ? (
@@ -35,7 +36,9 @@ export function DateRangePicker({ dateRange, setDateRange, setPresetRange }: Dat
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+
+    
+      <PopoverContent className="z-[10000] w-auto p-0 overflow-visible" align="start">
         <Calendar
           mode="range"
           selected={dateRange}

@@ -12,6 +12,7 @@ import { DateRangePicker } from "../components/Daterange"
 import { DateRange } from "react-day-picker"
 
 
+
 type FileItem = {
     id: string
     name: string
@@ -103,7 +104,6 @@ const trashPage = () => {
   const [deletedByFilter, setDeletedByFilter] = useState<string>("");
   const [typeFilter, setTypeFilter] = useState<Record<string, boolean>>({});
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
-  const [otherRange, setOtherRange] = useState("all")
   
 
   // derived types list for filter UI
@@ -132,12 +132,12 @@ const trashPage = () => {
       }
 
       // custom
-      if (customStart) {
-        const s = new Date(customStart);
+      if (dateRange?.from) {
+        const s = new Date(dateRange.from);
         if (f.deletedAt < s) return false;
       }
-      if (customEnd) {
-        const e = new Date(customEnd);
+      if (dateRange?.to) {
+        const e = new Date(dateRange.to);
         // include end date (set end to end of day)
         e.setHours(23, 59, 59, 999);
         if (f.deletedAt > e) return false;
@@ -155,7 +155,7 @@ const trashPage = () => {
 
       return true;
     });
-  }, [trashed, presetRange, customStart, customEnd, deletedByFilter, typeFilter]);
+  }, [trashed, presetRange, deletedByFilter, typeFilter]);
 
   /* ---------- Selection helpers ---------- */
   const toggleRow = (id: string) => {
@@ -361,7 +361,7 @@ const trashPage = () => {
                       <DateRangePicker
                         dateRange={dateRange}
                         setDateRange={setDateRange}
-                        setPresetRange={setOtherRange}
+                        setPresetRange={setPresetRange}
                       />
                     </div>
 
