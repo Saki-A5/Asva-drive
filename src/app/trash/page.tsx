@@ -8,6 +8,9 @@ import { Filter, MoreVertical, Repeat, Trash2 } from "lucide-react"
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem,  DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
 import {Sheet, SheetTrigger, SheetContent} from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
+import { DateRangePicker } from "../components/Daterange"
+import { DateRange } from "react-day-picker"
+
 
 type FileItem = {
     id: string
@@ -77,7 +80,7 @@ const formatFileSize = (size : number | string): string => {
     }
 
 const daysBetween = (d1: Date, d2 = new Date()) => 
-    Math.floor(Math.abs((d2.getTime() - d1.getTime() / (1000 * 60 * 60 * 24))))
+    Math.floor(Math.abs((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)))
 
 const trashPage = () => {
     const [files, setFiles] = useState<FileItem[]>(MOCK)
@@ -85,13 +88,13 @@ const trashPage = () => {
     // remove files older than 30 days 
     useEffect(() => {
         const now = new Date();
-        setFiles((prev) => prev.filter((f) => !f.isTrashed || daysBetween(f.deletedAt, now) >= 30))
+        setFiles((prev) => prev.filter((f) => !f.isTrashed || daysBetween(f.deletedAt, now) <= 30))
     }, [])
 
     // ui state
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [screenIsSmall, setScreenIsSmall] = useState(false);
+
 
   // filters
   const [presetRange, setPresetRange] = useState<"all" | "today" | "7" | "30">("all");
@@ -99,6 +102,9 @@ const trashPage = () => {
   const [customEnd, setCustomEnd] = useState<string>("");
   const [deletedByFilter, setDeletedByFilter] = useState<string>("");
   const [typeFilter, setTypeFilter] = useState<Record<string, boolean>>({});
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
+  const [otherRange, setOtherRange] = useState("all")
+  
 
   // derived types list for filter UI
   const typesAvailable = useMemo(() => {
@@ -107,15 +113,7 @@ const trashPage = () => {
     return Array.from(set);
   }, [files]);
 
-  // // persist sheet open small-screen preference? (optional)
-  // useEffect(() => {
-  //   const onResize = () => setScreenIsSmall(window.innerWidth < 768);
-  //   onResize();
-  //   window.addEventListener("resize", onResize);
-  //   return () => window.removeEventListener("resize", onResize);
-  // }, []);
-
-  // filtered trashed files (applies all filters)
+//  trashed files
   const trashed = useMemo(() => files.filter((f) => f.isTrashed), [files]);
 
   const filtered = useMemo(() => {
@@ -329,81 +327,80 @@ const trashPage = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-92">
               
-               <div>
-                    <p className="text-sm text-muted-foreground mb-2">Date range</p>
+               <div className="w-9/10 justify-center item-center mx-auto">
+                 <h3 className="text-lg font-semibold">Filters</h3>
+                    <p className="text-sm text-muted-foreground mt-2 mb-2">Date range</p>
                     <div className="flex flex-wrap gap-2">
-                      <Button
-                        variant={presetRange === "all" ? "default" : "outline"}
-                        size="sm"
+                      {[
+                        { key: "all", label: "All" },
+                        { key: "today", label: "Today" },
+                        { key: "7", label: "Last 7 days" },
+                        { key: "30", label: "Last 30 days" },
+                      ].map(({ key, label }) => (
+                        <DropdownMenuItem
+                        key={key}
                         onClick={() => {
-                          setPresetRange("all");
-                          setCustomStart("");
-                          setCustomEnd("");
-                        }}
+                        setPresetRange(key as "all" | "today" | "7" | "30");
+                        if (key === "all") {
+                        setCustomStart("");
+                        setCustomEnd("");
+                        }
+                      }}
+                      className={`cursor-pointer ${
+                      presetRange === key
+                        ? "bg-primary text-primary-foreground font-medium"
+                          : "hover:bg-muted"
+                      }`}
                       >
-                        All
-                      </Button>
-                      
-                      <DropdownMenuItem onClick={() => setPresetRange("today")}>Today</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setPresetRange("7")}>Last 7 days</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setPresetRange("30")}>Last 30 days</DropdownMenuItem>
+                        {label}
+                      </DropdownMenuItem>
+                      ))}
                     </div>
 
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      <Input
-                        type="date"
-                        value={customStart}
-                        onChange={(e) => {
-                          setCustomStart(e.target.value);
-                          setPresetRange("all");
-                        }}
-                        aria-label="Start date"
-                      />
-                      <Input
-                        type="date"
-                        value={customEnd}
-                        onChange={(e) => {
-                          setCustomEnd(e.target.value);
-                          setPresetRange("all");
-                        }}
-                        aria-label="End date"
+                    <div className="mt-3 flex items-center gap-2">
+                      <DateRangePicker
+                        dateRange={dateRange}
+                        setDateRange={setDateRange}
+                        setPresetRange={setOtherRange}
                       />
                     </div>
-                  </div>
 
                   {/* Deleted by */}
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Deleted by</p>
+                    <p className="text-sm text-muted-foreground mb-2 mt-4">Deleted by</p>
                     <Input
                       placeholder="Search by user email..."
                       value={deletedByFilter}
                       onChange={(e) => setDeletedByFilter(e.target.value)}
-                    />
+                      />
                   </div>
 
                   {/* Type */}
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Type</p>
-                    <div className="flex flex-col gap-2 max-h-40 overflow-auto">
-                      {typesAvailable.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">No types</p>
-                      ) : (
-                        typesAvailable.map((t) => (
-                          <label key={t} className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={!!typeFilter[t]}
-                              onChange={(e) => setTypeFilter((prev) => ({ ...prev, [t]: e.target.checked }))}
-                              className="w-4 h-4"
-                            />
-                            <span className="text-sm">{t}</span>
-                          </label>
-                        ))
-                      )}
-                    </div>
+                    <p className="text-sm text-muted-foreground mb-2 mt-4">Type</p>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between">
+                          {Object.keys(typeFilter).some((f) => typeFilter[f]) ? Object.keys(typeFilter).find((f) => typeFilter[f]) : "All types"}
+                        </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-full">
+                          <DropdownMenuItem onClick={() => setTypeFilter({})} className={`cursor-pointer`}>
+                            All types
+                          </DropdownMenuItem>
+
+                          {typesAvailable.map((t) => (
+                            <DropdownMenuItem
+                              key={t}
+                              onClick={() => setTypeFilter({[t]: true})} className={`cursor-pointer`}>
+                              {t}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
 
-                  <div className="flex justify-center gap-2">
+                  <div className="flex justify-center gap-2 mt-4 mb-2">
                     <Button variant="outline" onClick={() => {
                       setPresetRange("all");
                       setCustomStart("");
@@ -415,6 +412,7 @@ const trashPage = () => {
                     </Button>
                     <Button onClick={() => setSheetOpen(false)}>Apply</Button>
                   </div>
+          </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
