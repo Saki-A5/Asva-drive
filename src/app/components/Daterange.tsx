@@ -5,6 +5,7 @@ import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { useState } from "react"
 import { DateRange } from "react-day-picker"
+import { Portal } from "@radix-ui/react-portal"
 
 
 
@@ -20,7 +21,7 @@ export function DateRangePicker({ dateRange, setDateRange, setPresetRange }: Dat
 
 
   return (
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover modal>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -37,8 +38,7 @@ export function DateRangePicker({ dateRange, setDateRange, setPresetRange }: Dat
         </Button>
       </PopoverTrigger>
 
-    
-      <PopoverContent className="z-[10000] w-auto p-0 overflow-visible" align="start">
+      <PopoverContent className="w-auto p-0 overflow-visible" align="start">
         <Calendar
           mode="range"
           selected={dateRange}
@@ -48,7 +48,7 @@ export function DateRangePicker({ dateRange, setDateRange, setPresetRange }: Dat
           }}
           numberOfMonths={2}
           initialFocus
-        />
+          />
       </PopoverContent>
     </Popover>
   )

@@ -104,6 +104,9 @@ const trashPage = () => {
   const [deletedByFilter, setDeletedByFilter] = useState<string>("");
   const [typeFilter, setTypeFilter] = useState<Record<string, boolean>>({});
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
+  const [sortField, setSortField] = useState<keyof FileItem | null>(null);
+const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
   
 
   // derived types list for filter UI
@@ -325,7 +328,7 @@ const trashPage = () => {
                 <Filter className = 'w-4 h-4 mr-2'/>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-92">
+            <DropdownMenuContent align="end" className="w-92 ">
               
                <div className="w-9/10 justify-center item-center mx-auto">
                  <h3 className="text-lg font-semibold">Filters</h3>
@@ -357,6 +360,7 @@ const trashPage = () => {
                       ))}
                     </div>
 
+                    
                     <div className="mt-3 flex items-center gap-2">
                       <DateRangePicker
                         dateRange={dateRange}
