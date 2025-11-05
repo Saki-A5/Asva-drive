@@ -105,7 +105,7 @@ const trashPage = () => {
   const [typeFilter, setTypeFilter] = useState<Record<string, boolean>>({});
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
   const [sortField, setSortField] = useState<keyof FileItem | null>(null);
-const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   
 

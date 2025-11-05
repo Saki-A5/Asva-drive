@@ -7,6 +7,7 @@ import Loginnav from "../components/Loginnav";
 import { Button } from "@/components/ui/button";
 import { Grid, List, ArrowUpDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useFileSorting } from "../components/FileSorting";
 
 type File = {
     id: string;
@@ -43,8 +44,7 @@ const mocckFiles: File[] = [
 const Files = () => {
     const [files, setFiles] = useState<File[]>(mocckFiles)
     const [view, setView] = useState<"grid" | "list">("grid")
-    const [sortBy, setSortBy] = useState<keyof File>("name")
-    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
+     const { sortBy, sortOrder, handleSort, sortedFiles, SortIcon } = useFileSorting(files)
 
 
     // load preferences
@@ -54,8 +54,8 @@ const Files = () => {
         const savedSortOrder = Cookies.get("filesSortOrder") as "asc"|"desc"
 
         if (savedView) setView(savedView)
-        if (savedSortBy) setSortBy(savedSortBy)
-        if (savedSortOrder) setSortOrder(savedSortOrder)
+        if (savedSortBy) handleSort(savedSortBy)
+        if (savedSortOrder && savedSortOrder != sortOrder) handleSort(savedSortBy || "name")
     }, [])
 
     // persist preferences
@@ -78,50 +78,50 @@ const Files = () => {
       return `${tb.toFixed(2)} TB`
     }
 
-    // sorting logic
-    const handleSort = (key: keyof File) => {
-        if (key === sortBy) {
-            // toggle ascending and descending
-            setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-        } else {
-            setSortBy(key)
-            setSortOrder("asc")
-        }
-    }
+    // // sorting logic
+    // const handleSort = (key: keyof File) => {
+    //     if (key === sortBy) {
+    //         // toggle ascending and descending
+    //         setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    //     } else {
+    //         setSortBy(key)
+    //         setSortOrder("asc")
+    //     }
+    // }
 
-    const sortedFiles = [...files].sort((a, b) => {
-        const aSize = typeof a.size === "string" ? parseFloat(a.size) : a.size
-        const bSize = typeof b.size === "string" ? parseFloat(b.size) : b.size
+    // const sortedFiles = [...files].sort((a, b) => {
+    //     const aSize = typeof a.size === "string" ? parseFloat(a.size) : a.size
+    //     const bSize = typeof b.size === "string" ? parseFloat(b.size) : b.size
        
-        switch(sortBy) {
-          case "name":
-            return sortOrder === "asc"
-            ? a.name.localeCompare(b.name)
-            : b.name.localeCompare(a.name)
-          case "type":
-            return sortOrder === "asc"
-            ? a.type.localeCompare(b.type)
-            : b.type.localeCompare(a.type)
-          case "size":
-            return sortOrder === 'asc' ? aSize - bSize : bSize - aSize
-          case "modified":
-          default:
-            return sortOrder === "asc"
-            ? a.modified.getTime() - b.modified.getTime()
-            : b.modified.getTime() - a.modified.getTime()
-        }
-    })
+    //     switch(sortBy) {
+    //       case "name":
+    //         return sortOrder === "asc"
+    //         ? a.name.localeCompare(b.name)
+    //         : b.name.localeCompare(a.name)
+    //       case "type":
+    //         return sortOrder === "asc"
+    //         ? a.type.localeCompare(b.type)
+    //         : b.type.localeCompare(a.type)
+    //       case "size":
+    //         return sortOrder === 'asc' ? aSize - bSize : bSize - aSize
+    //       case "modified":
+    //       default:
+    //         return sortOrder === "asc"
+    //         ? a.modified.getTime() - b.modified.getTime()
+    //         : b.modified.getTime() - a.modified.getTime()
+    //     }
+    // })
 
-    const SortIcon = (key: typeof sortBy) => {
-      if (sortBy === key) {
-        return <ArrowUpDown className="w-4 h-4" />
-        return sortOrder === "asc" ? (
-          <ArrowUpDown className="w-4 h-4" />
-        ) : (
-          <ArrowUpDown className="w-4 h-4" />
-        )
-      }
-    }
+    // const SortIcon = (key: typeof sortBy) => {
+    //   if (sortBy === key) {
+    //     return <ArrowUpDown className="w-4 h-4" />
+    //     return sortOrder === "asc" ? (
+    //       <ArrowUpDown className="w-4 h-4" />
+    //     ) : (
+    //       <ArrowUpDown className="w-4 h-4" />
+    //     )
+    //   }
+    // }
 
     return (
         <Sidenav>
