@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Grid, List, ArrowUpDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useFileSorting } from "../components/FileSorting";
+import { parseSizeToBytes, formatFileSize } from "@/utils/Filesize";
 
 type File = {
     id: string;
@@ -22,27 +23,27 @@ const mocckFiles: File[] = [
         id: "1",
         name: "report.pdf",
         type: "PDF",
-        size: 2048,
+        size: 2048 * 1024,
         modified: new Date("2025-10-10")
     },
     {
         id: "2",
         name: "asva logo.jpg",
         type: "Image",
-        size: 1536,
+        size: 1536 * 1024,
         modified: new Date("2025-10-15")
     },
     {
         id: "3",
         name: "presentation.pptx",
         type: "Text",
-        size: 512,
+        size: 512 * 1024,
         modified: new Date("2025-09-10")
     },
 ]
 
 const Files = () => {
-    const [files, setFiles] = useState<File[]>(mocckFiles)
+    const [files] = useState<File[]>(mocckFiles)
     const [view, setView] = useState<"grid" | "list">("grid")
      const { sortBy, sortOrder, handleSort, sortedFiles, SortIcon } = useFileSorting(files)
 
@@ -66,61 +67,16 @@ const Files = () => {
     }, [view, sortBy, sortOrder])
 
     // format file size dynamically
-    const formatFileSize = (size : number | string): string => {
-      const bytes = typeof size === "string" ? parseFloat(size) : size
-      if (isNaN(bytes)) return "0 KB"
-      if (bytes < 1024) return `${bytes} KB`
-      const mb = bytes / 1024
-      if (mb < 1024 ) return `${mb.toFixed(2)} MB`
-      const gb = mb / 1024
-      if (gb < 1024 ) return `${gb.toFixed(2)} GB`
-      const tb = gb / 1024
-      return `${tb.toFixed(2)} TB`
-    }
-
-    // // sorting logic
-    // const handleSort = (key: keyof File) => {
-    //     if (key === sortBy) {
-    //         // toggle ascending and descending
-    //         setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-    //     } else {
-    //         setSortBy(key)
-    //         setSortOrder("asc")
-    //     }
-    // }
-
-    // const sortedFiles = [...files].sort((a, b) => {
-    //     const aSize = typeof a.size === "string" ? parseFloat(a.size) : a.size
-    //     const bSize = typeof b.size === "string" ? parseFloat(b.size) : b.size
-       
-    //     switch(sortBy) {
-    //       case "name":
-    //         return sortOrder === "asc"
-    //         ? a.name.localeCompare(b.name)
-    //         : b.name.localeCompare(a.name)
-    //       case "type":
-    //         return sortOrder === "asc"
-    //         ? a.type.localeCompare(b.type)
-    //         : b.type.localeCompare(a.type)
-    //       case "size":
-    //         return sortOrder === 'asc' ? aSize - bSize : bSize - aSize
-    //       case "modified":
-    //       default:
-    //         return sortOrder === "asc"
-    //         ? a.modified.getTime() - b.modified.getTime()
-    //         : b.modified.getTime() - a.modified.getTime()
-    //     }
-    // })
-
-    // const SortIcon = (key: typeof sortBy) => {
-    //   if (sortBy === key) {
-    //     return <ArrowUpDown className="w-4 h-4" />
-    //     return sortOrder === "asc" ? (
-    //       <ArrowUpDown className="w-4 h-4" />
-    //     ) : (
-    //       <ArrowUpDown className="w-4 h-4" />
-    //     )
-    //   }
+    // const formatFileSize = (size : number | string): string => {
+    //   const bytes = typeof size === "string" ? parseFloat(size) : size
+    //   if (isNaN(bytes)) return "0 KB"
+    //   if (bytes < 1024) return `${bytes} KB`
+    //   const mb = bytes / 1024
+    //   if (mb < 1024 ) return `${mb.toFixed(2)} MB`
+    //   const gb = mb / 1024
+    //   if (gb < 1024 ) return `${gb.toFixed(2)} GB`
+    //   const tb = gb / 1024
+    //   return `${tb.toFixed(2)} TB`
     // }
 
     return (
@@ -153,7 +109,7 @@ const Files = () => {
                 <div key={file.id} className="border p-4 rounded-lg shadow-sm hover:shadow-md transition">
                   <p className="font-medium">{file.name}</p>
                   <p className="text-sm text-muted-foreground">{file.type}</p>
-                  <p className="text-sm text-muted-foreground">{formatFileSize(file.size)}</p>
+                  <p className="text-sm text-muted-foreground">{formatFileSize(parseSizeToBytes(file.size))}</p>
                 </div>
               ))}
             </div>

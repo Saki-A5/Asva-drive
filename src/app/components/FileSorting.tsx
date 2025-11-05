@@ -1,6 +1,7 @@
 "use client"
 import { useState, useMemo } from "react"
 import { ArrowUpDown } from "lucide-react"
+import { parseSizeToBytes } from "@/utils/Filesize"
 
 export type SortOrder = "asc" | "desc"
 
@@ -40,7 +41,11 @@ export function useFileSorting<File extends FileItem>(files: File[]) {
             ? a.type.localeCompare(b.type)
             : b.type.localeCompare(a.type)
         case "sizeKB":
-          return sortOrder === "asc" ? aSize - bSize : bSize - aSize
+          {
+            const aBytes = parseSizeToBytes(a.size)    // returns bytes
+            const bBytes = parseSizeToBytes(b.size)
+            return sortOrder === "asc" ? aBytes - bBytes : bBytes - aBytes
+          }
         case "modified":
         default:
             return sortOrder === "asc"
