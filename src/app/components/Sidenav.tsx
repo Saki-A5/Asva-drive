@@ -57,7 +57,7 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
                         <Link
                           key={link.href}
                           href={link.href}
-                          className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition"
+                          className="flex items-center gap-2 font-semibold rounded-lg text-[10px]  px-2 py-1 hover:bg-accent hover:text-accent-foreground transition"
                         >
                           <Icon className="h-4 w-4" />
                           <span className="text-sm">{link.label}</span>
@@ -76,7 +76,7 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
               <div key={key}>
               <Link
                   href={single.href}
-                  className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition"
+                  className="flex items-center gap-2 rounded-lg text-[10px] px-2 py-1 hover:bg-accent hover:text-accent-foreground transition"
                 >
                   <Icon className="h-4 w-4" />
                   <span className="text-sm">{single.label}</span>
@@ -91,14 +91,14 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
     <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
       <div className="hidden sm:flex w-56 flex-col border-r border-border/80 bg-gradient-to-br from-[#001f3f] to-[#0088ff] p-4 text-white">
-      <div className="flex">
+      <div className="flex  mb-4">
         <Image src="/asva logo1.jpg" alt="ASVA Logo" width={40} height={20} />
-        <Link href="/dashboard" className="font-bold mb-2 pl-2 text-xl tracking-wide">ASVA HUB</Link>
+        <Link href="/dashboard" className="font-bold mb-4 pl-2 text-xl tracking-wide">ASVA HUB</Link>
       </div>
         {desktopview()}
 
         {/* Bottom section */}
-        <div className="mt-auto border-t border-white/20 pt-4">
+        <div className="mt-auto pt-4">
         {/* trash */}
           <Link
             href="/trash"
