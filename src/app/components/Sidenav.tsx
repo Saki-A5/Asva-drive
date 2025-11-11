@@ -1,10 +1,11 @@
 'use client'
 import React from "react"
 import Link from "next/link"
-import { HomeIcon, ShareIcon, Star, Clock } from "lucide-react"
+import { HomeIcon, Share2, Star, Clock, Folder, Trash2, HardDrive, Cloud } from "lucide-react"
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Menu } from "lucide-react"
+import Image from "next/image"
 
 // Icon type for lucide-react components
 type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>
@@ -14,39 +15,41 @@ type SectionItem = { label: string; links: LinkItem[] }
 type SideItem = LinkItem | SectionItem
 
 const sidelinks: SideItem[] = [
-  { href: '/dashboard', label: "Home", icon: HomeIcon },
+  { href: '/dashboard', label: "Dashboard", icon: HomeIcon },
+  { href: '/files', label: "My Files", icon: Folder },
+  { href: '/recent', label: "Recent", icon: Clock },
+  { href: '/starred', label: "Starred", icon: Star },
+  { href: "/shared", label: "Shared with me", icon: Share2 },
+  
   {
-    label: "File manager",
+    label: "Folders",
     links: [
-      { href: '/recent', label: "Recent", icon: Clock },
-      { href: '/starred', label: "Starred", icon: Star },
-      { href: '/files', label: "Files", icon: HomeIcon },
-      { href: '/trash', label: "Trash", icon: HomeIcon },
+      { href: "#", label: "Engineering", icon: Folder },
+      { href: "#", label: "Law", icon: Folder },
+      { href: "#", label: "SMS", icon: Folder },
+      { href: "#", label: "Pharmacy", icon: Folder },
+      { href: "#", label: "Sciences", icon: Folder },
     ],
   },
-  {
-    label: "Shared",
-    links: [
-      { href: "/shared", label: "Shared with me", icon: ShareIcon },
-    ],
-  },
-  { href: "#", label: "AI", icon: ShareIcon },
-  { href: "/settings", label: "settings", icon: ShareIcon },
 ]
 
 const Sidenav = ({ children }: { children: React.ReactNode })  => {
   const desktopview = () => {
     return (
-      <nav className="flex flex-col space-y-1">
-          {sidelinks.map((section, index) => {
+      <nav className="flex flex-col space-y-1  ">
+          {sidelinks.map((section) => {
             // Narrow: is this a grouped section (has links) or a single link?
-            const isGroup = 'links' in section && Array.isArray(section.links)
+            const isGroup = 'links' in section
             // both LinkItem and SectionItem have `label`, so safe to use as key
             const key = section.label
 
             if (isGroup) {
               return (
-                <div key={key}>
+                <div key={key} className="pt-2 border-t border-border/20">
+                
+                  <p className="text-xs font-bold pl-4 md:pl-0 text-muted-foreground tracking-wide mb-1">
+                    {section.label}
+                  </p>
                   <div className="space-y-2">
                     {section.links.map((link) => {
                       const Icon = link.icon
@@ -56,22 +59,12 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
                           href={link.href}
                           className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition"
                         >
-                          <Icon className="h-5 w-5" />
-                          <span className="font-semibold ">{link.label}</span>
+                          <Icon className="h-4 w-4" />
+                          <span className="text-sm">{link.label}</span>
                         </Link>
                       )
                     })}
                   </div>
-
-                  {index < sidelinks.length - 1 &&  (
-                    <div className="my-2 border-t pt-2">
-                      {"links" in sidelinks[index + 1] && (
-                      <p className="text-xs pl-4 md:pl-0 text-muted-foreground uppercase tracking-wide">
-                        {sidelinks[index + 1]?.label ?? ""}
-                      </p>
-                      )}
-                    </div>
-                  )}
                 </div>
               )
             }
@@ -81,24 +74,13 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
             const Icon = single.icon
             return (
               <div key={key}>
-                <Link
+              <Link
                   href={single.href}
                   className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition"
                 >
-                  <Icon className="h-5 w-5" />
-                  <span className="font-semibold">{single.label}</span>
+                  <Icon className="h-4 w-4" />
+                  <span className="text-sm">{single.label}</span>
                 </Link>
-
-                {index < sidelinks.length - 1 && (
-                  <div className="my-2 border-t pt-2">
-                    {"links" in sidelinks[index + 1] && sidelinks[index + 1].label !== "Settings" && (
-
-                    <p className="text-xs pl-4 md:pl-0 text-muted-foreground uppercase tracking-wide">
-                      {sidelinks[index + 1]?.label ?? ""}
-                    </p>
-                    )}
-                  </div>
-                )}
               </div>
             )
           })}
@@ -108,9 +90,35 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
   return (
     <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
-      <div className="hidden sm:flex w-56 flex-col border-r border-border/80 bg-background p-4">
-        <Link href="/dashboard" className="font-bold mb-4">Asva</Link>
+      <div className="hidden sm:flex w-56 flex-col border-r border-border/80 bg-gradient-to-br from-[#001f3f] to-[#0088ff] p-4 text-white">
+      <div className="flex">
+        <Image src="/asva logo1.jpg" alt="ASVA Logo" width={40} height={20} />
+        <Link href="/dashboard" className="font-bold mb-2 pl-2 text-xl tracking-wide">ASVA HUB</Link>
+      </div>
         {desktopview()}
+
+        {/* Bottom section */}
+        <div className="mt-auto border-t border-white/20 pt-4">
+        {/* trash */}
+          <Link
+            href="/trash"
+            className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition"> 
+            <Trash2 className="h-5 w-5"/>
+            <span className="font-semibold">Trash</span>
+          </Link>
+        </div>
+
+        {/* storage box */}
+        <div className="mt-4 bg-white/10 p-3 rounded-xl">
+          <div className="flex items-center gap mb-2 text-sm">
+            <Cloud className="h-4 w-4 text-white/80"/>
+            <span className="pl-2 font-semibold">Storage</span>
+          </div>
+          <div className="w-full bg-white/20 h-2 rounded-full overflow-hidden">
+            <div className="bg-white h-2 w-[30%] rounded-full"></div>
+          </div>
+          <p className="text-xs mt-1 text-white/80">5.0 GB of 20 GB used</p>
+        </div>
       </div>
 
 
@@ -124,13 +132,13 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-64">
-          <Link href="/dashboard" className="font-bold mb-4 pl-6 pt-4">Asva</Link>
+        <SheetContent side="left" className="w-64  bg-gradient-to-b from-[#002f5f] to-[#0088ff] p-4 text-white">
+          <Link href="/dashboard" className="font-bold mb-4 pl-6 pt-4">ASVA HUB</Link>
           {desktopview()}
         </SheetContent>
       </Sheet>
       {/* Main content */}
-      <main className="flex-1 ">{children}</main>
+      <main className="flex-1 bg-background">{children}</main>
     </div>
   )
 }
