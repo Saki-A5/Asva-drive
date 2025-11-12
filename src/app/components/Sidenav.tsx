@@ -88,9 +88,9 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
     )
   }
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gradient-to-br from-[#02427E] to-[#05081A]">
       {/* Desktop Sidebar */}
-      <div className="hidden sm:flex w-56 flex-col border-r border-border/80 bg-gradient-to-br from-[#001f3f] to-[#0088ff] p-4 text-white">
+      <div className="hidden sm:flex w-56 flex-col border-r border-border/80 bg-gradient-to-br from-[#02427E] to-[#05081A] p-4 text-white">
       <div className="flex  mb-4">
         <Image src="/asva logo1.jpg" alt="ASVA Logo" width={40} height={20} />
         <Link href="/dashboard" className="font-bold mb-4 pl-2 text-xl tracking-wide">ASVA HUB</Link>
@@ -132,13 +132,13 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-64  bg-gradient-to-b from-[#002f5f] to-[#0088ff] p-4 text-white">
+        <SheetContent side="left" className="w-64  bg-gradient-to-b from-[#02427E] to-[#05081A] p-4 text-white">
           <Link href="/dashboard" className="font-bold mb-4 pl-6 pt-4">ASVA HUB</Link>
           {desktopview()}
         </SheetContent>
       </Sheet>
       {/* Main content */}
-      <main className="flex-1 bg-background">{children}</main>
+      <main className="flex-1 bg-background text-foreground my-2 mr-2 rounded-2xl shadow-lg px-4 overflow-y-auto">{children}</main>
     </div>
   )
 }
