@@ -52,8 +52,8 @@ const Dashboard = () => {
           </div>
           {/* recent */}
           <section>
-            <h2 className="flex items-center gap-2 text-lg font-semibold mb-3 border rounded-lg p-2 w-fit">
-              <Clock className="h-5 w-5" />Recent
+            <h2 className="text-lg font-bold mb-3 px-2">
+              Recent Files
             </h2>
             {recentFiles.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -72,8 +72,8 @@ const Dashboard = () => {
 
           {/* starred */}
           <section>
-            <h2 className="flex items-center gap-2 text-lg font-semibold mb-3 border rounded-lg p-2 w-fit">
-              <Star className="h-5 w-5" />Starred
+            <h2 className="text-lg font-bold mb-3 p-2">
+              Shared
             </h2>
             {starredFiles.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
