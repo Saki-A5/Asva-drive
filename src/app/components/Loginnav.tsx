@@ -1,6 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { LogOut, Settings, Search, Moon, Sun } from "lucide-react"
+import { LogOut, Settings, Search, Moon, Sun, Bell } from "lucide-react"
 import { useTheme } from "next-themes"
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import axios from "axios"
 import { auth } from "@/lib/firebaseClient"
 import { useRouter } from "next/navigation"
 import { getAuth, signOut } from "firebase/auth"
+import Link from "next/link"
 
 
 type User = {
@@ -84,18 +85,22 @@ const Loginnav = () => {
 
   return (
     <>
-      <div className="flex h-20 sm:p-5 pl-16 pt-4">
+      <div className="flex h-20 sm:p-0 pl-12 mt-4">
         <div className="flex-1 max-w-xl ml-2 mr-4">
             <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white" />
           <Input
             type="search"
-            placeholder="Search..."
-            className="w-full pl-12 mr-3 h-11"
+            placeholder="Search for anything"
+            className="w-7/10 pl-12 h-11 bg-secondary rounded-4xl"
           />
             </div>
         </div>
         <div className="flex ml-auto mr-4 gap-x-4">
+          {/* settings */}
+          <Link href="/settings"><Settings className="h-6 w-6 mt-2 text-foreground cursor-pointer"/></Link>
+          {/* notifications */}
+          <Bell className="h-6 w-6 mt-2 text-foreground cursor-pointer"/>
             {/* User Menu */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
