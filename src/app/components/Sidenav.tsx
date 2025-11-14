@@ -1,11 +1,12 @@
 'use client'
 import React from "react"
 import Link from "next/link"
-import { HomeIcon, Share2, Star, Clock, Folder, Trash2, HardDrive, Cloud } from "lucide-react"
+import { HomeIcon, Share2, Star, Clock, Folder, Trash2, HardDrive, Cloud, PanelLeftOpen, PanelLeftClose } from "lucide-react"
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Menu } from "lucide-react"
 import Image from "next/image"
+import { useState } from "react"
 
 // Icon type for lucide-react components
 type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>
@@ -34,6 +35,8 @@ const sidelinks: SideItem[] = [
 ]
 
 const Sidenav = ({ children }: { children: React.ReactNode })  => {
+
+  const [collapsed, setCollapsed] = useState(false);
   const desktopview = () => {
     return (
       <nav className="flex flex-col space-y-1  ">
@@ -46,10 +49,11 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
             if (isGroup) {
               return (
                 <div key={key} className="pt-2 border-t border-border/20">
-                
+                {!collapsed && (
                   <p className="text-xs font-bold pl-4 md:pl-0 text-muted-foreground tracking-wide mb-1">
                     {section.label}
                   </p>
+                  )}
                   <div className="space-y-2">
                     {section.links.map((link) => {
                       const Icon = link.icon
@@ -60,7 +64,7 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
                           className="flex items-center gap-2 font-semibold rounded-lg text-[10px]  px-2 py-1 hover:bg-accent hover:text-accent-foreground transition"
                         >
                           <Icon className="h-4 w-4" />
-                          <span className="text-sm">{link.label}</span>
+                          {!collapsed && (<span className="text-sm">{link.label}</span>)}
                         </Link>
                       )
                     })}
@@ -79,7 +83,7 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
                   className="flex items-center gap-2 rounded-lg text-[10px] px-2 py-1 hover:bg-accent hover:text-accent-foreground transition"
                 >
                   <Icon className="h-4 w-4" />
-                  <span className="text-sm">{single.label}</span>
+                  {!collapsed && (<span className="text-sm">{single.label}</span>)}
                 </Link>
               </div>
             )
@@ -90,11 +94,25 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-[#02427E] to-[#05081A]">
       {/* Desktop Sidebar */}
-      <div className="hidden sm:flex w-56 flex-col border-r border-border/80 bg-gradient-to-br from-[#02427E] to-[#05081A] p-4 text-white">
-      <div className="flex  mb-4">
-        <Image src="/asva logo1.jpg" alt="ASVA Logo" width={40} height={20} />
-        <Link href="/dashboard" className="font-bold mb-4 pl-2 text-xl tracking-wide">ASVA HUB</Link>
-      </div>
+      <div className={`hidden lg:flex w-56 flex-col border-r border-border/80 bg-gradient-to-br from-[#02427E] to-[#05081A] p-4 text-white ${collapsed ? 'w-16' : 'w-56'} transition-all duration-300`}>
+      <Link href="/dashboard" className="flex  mb-4">
+        <Image src="/asva logo.png" alt="ASVA Logo" width={0} height={0} className='h-6 w-6 mt-1'/>
+        {!collapsed && (
+        <div className="font-semibold mb-4 pl-2 text-xl tracking-wide">ASVA HUB</div>
+        )} 
+        </Link>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="mb-4"
+          onClick={() => setCollapsed(!collapsed)}
+        >
+          {collapsed ? (
+            <PanelLeftOpen className="h-6 w-6" />
+          ) : (
+            <PanelLeftClose className="h-6 w-6" />
+          )}
+        </Button>
         {desktopview()}
 
         {/* Bottom section */}
@@ -127,7 +145,7 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
           <Button
             variant="outline"
             size="icon"
-            className="absolute top-4 left-4 sm:hidden"
+            className="absolute top-7 left-4 lg:hidden"
           >
             <Menu className="h-6 w-6" />
           </Button>
@@ -138,7 +156,7 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
         </SheetContent>
       </Sheet>
       {/* Main content */}
-      <main className="flex-1 bg-background text-foreground my-2 mr-2 rounded-2xl shadow-lg px-4 overflow-y-auto">{children}</main>
+      <main className="flex-1 bg-background text-foreground my-2 mr-2 rounded-2xl shadow-lg lg:px-4 pl-12 overflow-y-auto">{children}</main>
     </div>
   )
 }
