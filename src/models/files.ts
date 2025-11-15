@@ -4,10 +4,7 @@ import { required } from "node_modules/zod/v4/core/util.cjs";
 const fileSchema = new Schema({
     filename: {type: String, required:true},
     cloudinaryPublicId: {type: String},
-    fileLocation:{
-        humanReadable: {type: String, required: true}, 
-        cloudinaryPath: {type: String}  // set to NULL by default because cloudinary doesn't have a path for files by default
-    },
+    fileLocation:{type: String},
     isFolder: {type: Boolean, default: false}, 
     parentFolderId: {type: Types.ObjectId, ref: 'File', default:null},
     ownerId: {type: Types.ObjectId, ref: 'User', required: true}, 

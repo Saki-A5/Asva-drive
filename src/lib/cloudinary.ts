@@ -1,5 +1,5 @@
-import { v2 as cloudinary, UploadApiOptions } from 'cloudinary';
-import {Types} from 'mongoose';
+import { v2 as cloudinary, UploadApiOptions, UploadApiResponse } from 'cloudinary';
+import { Types } from 'mongoose';
 import File from '@/models/files';
 
 const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
@@ -20,39 +20,75 @@ export type UploadResult = {
     raw?: any;
 };
 
-export async function uploadFile(file: string, folderId: Types.ObjectId, ownerId: Types.ObjectId): Promise<UploadResult | null> {
-    if (/^data:.*;base64,/.test(file)) {
+export async function uploadFile(filename: string, file: Buffer, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadResult|null>
+
+export async function uploadFile(filename: string, file: string, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadResult|null>
+
+export async function uploadFile(filename: string, file: string | Buffer, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags: string[] = [], destFolder: string = ''): Promise<UploadResult | null> {
+
+    if (typeof file === 'string' && /^data:.*;base64,/.test(file)) {
         throw new Error('Base64 files are not allowed');
     }
 
     const folder = await File.findOne({
-        _id: new Types.ObjectId(folderId.toString()), 
-        ownerId: new Types.ObjectId(ownerId.toString()), 
+        _id: new Types.ObjectId(folderId.toString()),
+        ownerId: new Types.ObjectId(ownerId.toString()),
         isFolder: true
     });
 
-    if(!folder) throw new Error(`Folder not found: ${folderId}`)
-    
-    const folderPath = (folder.fileLocation.cloudinaryPath || folder.fileLocation.humanReadable) as string; // if this is the first file to be passed to the folder, the cloudinaryPath will be empty
+    if (!folder) throw new Error(`Folder not found: ${folderId}`)
+
+    const folderLocation = `${ownerId.toString()}/${destFolder}`
 
     const options: UploadApiOptions = {
         overwrite: true,
-        folderPath,
+        folder: folderLocation,
         use_filename: true,
         unique_filename: false,
-        resource_type: 'auto'
+        resource_type: 'auto', 
+        public_id: filename
     };
 
     try {
-        const result = await cloudinary.uploader.upload(file, options);
-        
-        const cloudinaryFolderPath = result.public_id.substring(0, result.public_id.lastIndexOf('/'));
+        let result;
 
-        // update the parent folder cloudinary path if not set
-        if(!folder.fileLocation.cloudinaryPath){
-            await File.updateOne({_id: folderId}, {'fileLocation.cloudinaryPath': cloudinaryFolderPath} )
+        if (Buffer.isBuffer(file)) {
+            // Upload binary data using upload_stream
+            result = await new Promise<UploadApiResponse>((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    options,
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result!);
+                    }
+                );
+                
+                // Create a readable stream from the buffer
+                const Readable = require('stream').Readable;
+                const bufferStream = new Readable();
+                bufferStream.push(file);
+                bufferStream.push(null);
+                
+                bufferStream.pipe(uploadStream);
+            });
+        } else {
+            // Upload from HTTPS URL directly
+            result = await cloudinary.uploader.upload(file, options);
         }
         
+        const cFile = await File.create({
+            filename: filename, // generate a better way to store the filename
+            cloudinaryPublicId: result.public_id,
+            fileLocation: `${folder.fileLocation}/${file}`,
+            ownerId: ownerId,
+            resourceType: result.resource_type, // default for now
+            mimeType: result.format,
+            sizeBytes: result.bytes,
+            tags: tags
+        });
+
+        await cFile.save();
+
         return {
             publicId: result.public_id,
             url: result.secure_url,
@@ -96,7 +132,7 @@ export async function getFolderWithContents(folderId: string | Types.ObjectId, o
             throw new Error(`Folder not found: ${folderId}`);
         }
 
-        
+
         const contents = await File.find({
             parentFolderId: new Types.ObjectId(folderId as string),
             ownerId: new Types.ObjectId(ownerId as string)
@@ -118,7 +154,7 @@ export async function createFolder(
     ownerId: Types.ObjectId
 ) {
     let parentFilepath = '';
-    
+
     // If there's a parent, get its filepath
     if (parentFolderId) {
         const parentFolder = await File.findOne({
@@ -126,27 +162,24 @@ export async function createFolder(
             ownerId,
             isFolder: true
         });
-        
+
         if (!parentFolder) {
             throw new Error('Parent folder not found');
         }
-        
-        parentFilepath = parentFolder.filepath;
+
+        parentFilepath = parentFolder.fileLocation;
     }
-    
-    // Compute the new folder's filepath (slugify folder name)
-    const sluggedName = folderName.toLowerCase().replace(/\s+/g, '-');
-    const newFilepath = `${parentFilepath}${sluggedName}/`;
-    
+
+    const newFilepath = `${parentFilepath}${folderName}/`;
+
     // Create folder document in MongoDB
     const folder = await File.create({
         filename: folderName,
-        filepath: newFilepath,
+        fileLocation: newFilepath,
         isFolder: true,
         parentFolderId: parentFolderId || null,
         ownerId,
-        // No cloudinaryPublicId for folders
     });
-    
+
     return folder;
 }
