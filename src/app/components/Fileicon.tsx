@@ -8,7 +8,7 @@ type FileiconProps = {
 const Fileicon = ({type}: FileiconProps) => {
     switch (type) {
         case "folder":
-            return <Folder className="h-8 w-8 text-blue-800" fill="#001f3f"/>
+            return <Folder className="h-8 w-8 fill-current dark:text-white text-[#001f3f]"/>
         case "pdf":
             return <FileText className="h-8 w-8 text-red-600" fill="#ef4444"/>
         case "word":

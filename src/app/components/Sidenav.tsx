@@ -95,7 +95,7 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
     <div className="flex min-h-screen bg-gradient-to-br from-[#02427E] to-[#05081A]">
       {/* Desktop Sidebar */}
       <div className={`hidden lg:flex w-56 flex-col border-r border-border/80 bg-gradient-to-br from-[#02427E] to-[#05081A] p-4 text-white ${collapsed ? 'w-16' : 'w-56'} transition-all duration-300`}>
-      <Link href="/dashboard" className="flex  mb-4">
+      <Link href="/dashboard" className="flex items-center  mb-4">
         <Image src="/asva logo.png" alt="ASVA Logo" width={0} height={0} className='h-6 w-6 mt-1'/>
         {!collapsed && (
         <div className="font-semibold mb-4 pl-2 text-xl tracking-wide">ASVA HUB</div>
