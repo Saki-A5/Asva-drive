@@ -1,15 +1,20 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { ArrowBigDownIcon } from "lucide-react"
+import { Plus, ChevronDown } from "lucide-react"
 
 const Create = () => {
 
     return (
         <>
         <Button variant="outline">
-            <span className="flex">
-                <span >Create</span>
-                <ArrowBigDownIcon className="ml-2"/>
+            <span className="flex gap-2">
+                <span className="flex items-center">
+                    <Plus className="h-7 w-7" />
+                    <span className="pl-1">Create</span>
+                </span>
+                <span className="flex items-center">
+                    <ChevronDown className="h-6 w-6" />
+                </span>
             </span>
         </Button>
         </>
