@@ -5,7 +5,8 @@ import { adminAuth } from "@/lib/firebaseAdmin";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/users";
 
-export const POST = async(req: Request) => {
+// Create user (POST)
+export async function POST(req: Request) {
   try {
     const { idToken } = await req.json();
 
@@ -15,7 +16,11 @@ export const POST = async(req: Request) => {
 
     // Verify Firebase ID token
     const decodedToken = await adminAuth.verifyIdToken(idToken);
-    const { uid, email, name} = decodedToken;
+    const { uid, email, name } = decodedToken;
+
+    if (!email) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
 
     await dbConnect();
 
@@ -25,19 +30,22 @@ export const POST = async(req: Request) => {
       user = await User.create({
         uid,
         email,
-        name: name || (email? email.split("@")[0]: "User")
+        name: name || (email ? email.split("@")[0] : "User")
       });
     }
 
-    // cookie
-        const res = NextResponse.json({ message: "Signup successful", user });
-        res.cookies.set("token", idToken, { 
-          httpOnly: true, 
-          secure: process.env.NODE_ENV === "production",  
-          path: '/',
-          maxAge: 60 * 60 * 24 * 30,
-          sameSite: 'lax'
-        });
+    // Set authentication cookie
+    const res = NextResponse.json({ 
+      message: "Signup successful", 
+      user 
+    });
+    res.cookies.set("token", idToken, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production",  
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30,
+      sameSite: 'lax'
+    });
 
     return res;
   } catch (error: any) {
