@@ -50,7 +50,7 @@ const Details = ({email} : Detailsprop) => {
                 idToken,
                 name: values.name,
             })
-            router.push("/");
+            router.push("/dashboard");
             } catch (error:any) {
                 if (axios.isAxiosError(error)) {
                 console.error("Axios error: ", error.response?.data || error.message);

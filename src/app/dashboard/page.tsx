@@ -4,50 +4,87 @@ import Sidenav from "../components/Sidenav";
 import { Star, Clock } from "lucide-react";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Upload from "../components/Upload";
+import Create from "../components/Create";
+import Fileicon from "../components/Fileicon";
 
 type File = {
-  id: string;
   name: string;
   type: string;
-  starred: boolean;
-  lastModified: string;
+  size: string;
+  items: string;
 }
 
+const recentFiles: File[] = [
+  {name: "Python", size: "3.2GB", items: "12 items", type:"folder"},
+  {name: "AutoCAD Workbook", size: "320MB", items: "PDF", type:"pdf"},
+  {name: "AutoCAD Workbook", size: "320MB", items: "PDF", type:"pdf"},
+  {name: "AutoCAD Workbook", size: "320MB", items: "PDF", type:"pdf"},
+]
+
+
 const Dashboard = () => {
-  const [starredFiles, setStarredFiles] = useState<File[]>([]);
-  const [recentFiles, setRecentFiles] = useState<File[]>([]);
+  // const [starredFiles, setStarredFiles] = useState<File[]>([]);
+  // const [recentFiles, setRecentFiles] = useState<File[]>([]);
 
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const res = await axios.get('/api/files');
-        const files: File[] = res.data.files;
+  // useEffect(() => {
+  //   const fetchFiles = async () => {
+  //     try {
+  //       const res = await axios.get('/api/files');
+  //       const files: File[] = res.data.files;
 
-        setStarredFiles(files.filter((file) => file.starred));
-        setRecentFiles(
-          files
-            .sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
-            .slice(0, 10)
-        );
-      } catch (error) {
-        console.error('Error fetching files:', error);
-      }  
-    };
+  //       setStarredFiles(files.filter((file) => file.starred));
+  //       setRecentFiles(
+  //         files
+  //           .sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
+  //           .slice(0, 10)
+  //       );
+  //     } catch (error) {
+  //       console.error('Error fetching files:', error);
+  //     }  
+  //   };
 
-    fetchFiles()
-  }, [])
+  //   fetchFiles()
+  // }, [])
 
   return (
     <>
     <Sidenav>
       <Loginnav />
       <div>
-        <h1 className="p-6 font-bold text-xl">My Dashboard</h1>
-        <div className="p-6 space-y-8">
-          {/* starred */}
+        <h1 className="px-6 pb-6 font-bold text-xl">Welcome to the hub</h1>
+        <div className="px-6 space-y-8">
+          <div className="flex space-x-2">
+            <Upload />
+            <Create />
+          </div>
+          {/* recent */}
+          <section className="border p-4 rounded-xl border-border/100 bg-card">
+            <h2 className="text-lg font-bold mb-3 px-2">
+              Recent Files
+            </h2>
+            {recentFiles.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {recentFiles.map((file, index) => (
+                <div
+                key={index}
+                className="flex flex-col items-start p-4 border  rounded-xl bg-white dark:bg-neutral-900 shadow-sm hover:shadow-md transition">
+                  <div>
+                    <Fileicon type={file.type}/>
+                  </div>
+                  <h3 className="font-semibold text-sm truncate w-full">{file.name}</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{file.size}<span className="mx-1">.</span>{file.items}</p>
+                </div>
+                ))}
+                </div>):(
+                  <p className="text-sm text-muted-foreground">Recent files show here</p>
+                )}
+            </section>
+
+          {/* starred
           <section>
-            <h2 className="flex items-center gap-2 text-lg font-semibold mb-3 border rounded-lg p-2 w-fit">
-              <Star className="h-5 w-5" />Starred
+            <h2 className="text-lg font-bold mb-3 p-2">
+              Shared
             </h2>
             {starredFiles.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -64,27 +101,7 @@ const Dashboard = () => {
             ) : (
               <p className="text-sm text-muted-foreground">Starred files show here</p>
             )}
-          </section> 
-               
-          {/* recent */}
-          <section>
-            <h2 className="flex items-center gap-2 text-lg font-semibold mb-3 border rounded-lg p-2 w-fit">
-              <Clock className="h-5 w-5" />Recent
-            </h2>
-            {recentFiles.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {recentFiles.map((file) => (
-                <div
-                key={file.id}
-                className="p-4 border rounded-lg bg-card shadow-sm hover:shadow-md transition">
-                  <p className="font-medium">{file.name}</p>
-                  <p className="text-xs text-muted-foreground">{file.type}</p>
-                </div>
-                ))}
-                </div>):(
-                  <p className="text-sm text-muted-foreground">Recent files show here</p>
-                )}
-            </section>
+          </section>  */}
         </div>
       </div>
     </Sidenav>
