@@ -4,7 +4,7 @@ import Sidenav from '../components/Sidenav';
 import Loginnav from '../components/Loginnav';
 import Upload from '../components/Upload';
 import Create from '../components/Create';
-import FileTable from './FileTable';
+import FileTable from '../components/FileTable';
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
 
