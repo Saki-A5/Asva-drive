@@ -1,5 +1,4 @@
 'use client'
-'use client'
 import React from "react"
 import Link from "next/link"
 import { HomeIcon, Share2, Star, Clock, Folder, Trash2, HardDrive, Cloud, PanelLeftOpen, PanelLeftClose } from "lucide-react"
