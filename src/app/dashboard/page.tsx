@@ -52,12 +52,12 @@ const Dashboard = () => {
     <Sidenav>
       <Loginnav />
       <div>
-        <h1 className="px-6 pb-6 font-bold text-xl">Welcome to the hub</h1>
-        <div className="px-6 space-y-8">
-          <div className="flex space-x-2">
+        <h1 className="px-2 lg:px-6 pb-6 font-bold text-xl">Welcome to the hub</h1>
+        <div className="flex space-x-2 px-2 lg:px-6 mb-6">
             <Upload />
             <Create />
           </div>
+        <div className="pr-6 lg:px-6 space-y-8 mx-auto">
           {/* recent */}
           <section className="border p-4 rounded-xl border-border/100 bg-card">
             <h2 className="text-lg font-bold mb-3 px-2">
