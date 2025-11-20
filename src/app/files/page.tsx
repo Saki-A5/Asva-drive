@@ -1,47 +1,55 @@
-"use client"
+'use client';
 
-import Sidenav from "../components/Sidenav";
-import Loginnav from "../components/Loginnav";
-
-type File = {
-    id: string;
-    name: string;
-    type: string;
-    size: number | string;
-    modified: Date;
-}
-
-const mocckFiles: File[] = [
-    {
-        id: "1",
-        name: "report.pdf",
-        type: "PDF",
-        size: 2048 * 1024,
-        modified: new Date("2025-10-10")
-    },
-    {
-        id: "2",
-        name: "asva logo.jpg",
-        type: "Image",
-        size: 1536 * 1024,
-        modified: new Date("2025-10-15")
-    },
-    {
-        id: "3",
-        name: "presentation.pptx",
-        type: "Text",
-        size: 512 * 1024,
-        modified: new Date("2025-09-10")
-    },
-]
+import Sidenav from '../components/Sidenav';
+import Loginnav from '../components/Loginnav';
+import Upload from '../components/Upload';
+import Create from '../components/Create';
+import FileTable from './FileTable';
+import { Button } from '@/components/ui/button';
+import { ChevronDown } from 'lucide-react';
 
 const Files = () => {
-   
-    return (
-        <Sidenav>
-            <Loginnav />
-            
-        </Sidenav>
-    )
-}
-export default Files
+  return (
+    <Sidenav>
+      <Loginnav />
+      <div>
+        <div className="flex-between">
+          <h1 className="px-6 font-bold text-xl">My Files</h1>
+          <div className="flex space-x-2">
+            <Upload />
+            <Create />
+          </div>
+        </div>
+        <SortFilters />
+        <div className="px-6 space-y-8">
+          <div>
+            <FileTable />
+          </div>
+        </div>
+      </div>
+    </Sidenav>
+  );
+};
+export default Files;
+
+const SortFilters = () => {
+  const sortType: string[] = ['Type', 'Modified', 'Source', 'Shared'];
+
+  return (
+    <div className="px-6 my-6 flex gap-2">
+      {sortType.map((type) => (
+        <Button
+          variant="outline"
+          key={type}
+          className="cursor-pointer">
+          <span className="flex gap-2">
+            <span className="pl-1">{type}</span>
+            <span className="flex items-center">
+              <ChevronDown className="h-6 w-6" />
+            </span>
+          </span>
+        </Button>
+      ))}
+    </div>
+  );
+};
