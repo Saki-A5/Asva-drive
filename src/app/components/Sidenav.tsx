@@ -9,30 +9,30 @@ import Image from "next/image"
 import { useState } from "react"
 
 // Icon type for lucide-react components
-type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>
+type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
-type LinkItem = { href: string; label: string; icon: IconType }
-type SectionItem = { label: string; links: LinkItem[] }
-type SideItem = LinkItem | SectionItem
+type LinkItem = { href: string; label: string; icon: IconType };
+type SectionItem = { label: string; links: LinkItem[] };
+type SideItem = LinkItem | SectionItem;
 
 const sidelinks: SideItem[] = [
-  { href: '/dashboard', label: "Dashboard", icon: HomeIcon },
-  { href: '/files', label: "My Files", icon: Folder },
-  { href: '/recent', label: "Recent", icon: Clock },
-  { href: '/starred', label: "Starred", icon: Star },
-  { href: "/shared", label: "Shared with me", icon: Share2 },
-  
+  { href: '/dashboard', label: 'Dashboard', icon: HomeIcon },
+  { href: '/files', label: 'My Files', icon: Folder },
+  { href: '/recent', label: 'Recent', icon: Clock },
+  { href: '/starred', label: 'Starred', icon: Star },
+  { href: '/shared', label: 'Shared with me', icon: Share2 },
+
   {
-    label: "Folders",
+    label: 'Folders',
     links: [
-      { href: "#", label: "Engineering", icon: Folder },
-      { href: "#", label: "Law", icon: Folder },
-      { href: "#", label: "SMS", icon: Folder },
-      { href: "#", label: "Pharmacy", icon: Folder },
-      { href: "#", label: "Sciences", icon: Folder },
+      { href: '#', label: 'Engineering', icon: Folder },
+      { href: '#', label: 'Law', icon: Folder },
+      { href: '#', label: 'SMS', icon: Folder },
+      { href: '#', label: 'Pharmacy', icon: Folder },
+      { href: '#', label: 'Sciences', icon: Folder },
     ],
   },
-]
+];
 
 const Sidenav = ({ children }: { children: React.ReactNode })  => {
   // sidebar can be 'open' (full), 'collapsed' (icons only), or 'hidden' (logo + trigger only)
@@ -191,8 +191,10 @@ const Sidenav = ({ children }: { children: React.ReactNode })  => {
         </SheetContent>
       </Sheet>
       {/* Main content */}
-      <main className="flex-1 bg-background text-foreground my-2 mr-2 rounded-2xl shadow-lg lg:px-4 pl-12 overflow-y-auto">{children}</main>
+      <main className="flex-1 bg-background text-foreground my-2 mr-2 rounded-2xl shadow-lg lg:px-4 pl-12 overflow-y-auto">
+        {children}
+      </main>
     </div>
-  )
-}
-export default Sidenav
+  );
+};
+export default Sidenav;
