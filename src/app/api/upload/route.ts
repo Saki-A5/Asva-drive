@@ -12,25 +12,28 @@ import { NextResponse } from 'next/server';
 
 export const POST = async (req: Request) => {
     try {
-        const cookieStore = await cookies();
-        const token = cookieStore.get('token')?.value;
+        // const cookieStore = await cookies();
+        // const token = cookieStore.get('token')?.value;
         
-        if(!token) return NextResponse.json({error: "Not Authenticated"}, {status: 401});
+        // if(!token) return NextResponse.json({error: "Not Authenticated"}, {status: 401});
 
-        const decodedToken = await adminAuth.verifyIdToken(token);
-        const {email} = decodedToken;
+        // const decodedToken = await adminAuth.verifyIdToken(token);
+        // const {email} = decodedToken;
 
         await dbConnect();
-
-        const user = await User.findOne({email: email});
-        if(!user) return NextResponse.json({error: "User not found"}, {status: 404});
+        
 
         const formData = await req.formData();
         const folderId = formData.get("folderId") as string;
+        const email = formData.get("email") as string;
         const file = formData.get("file") as File | null;
         const filename = formData.get("filename") as string;
         const fileUrl = formData.get("fileUrl") as string | null;
         const tags = (formData.get("tags") as string)?.split(",") || [];
+
+        const user = await User.findOne({email: email});
+        if(!user) return NextResponse.json({error: "User not found"}, {status: 404});
+        console.log(file);
 
         // Validation
         if (!folderId) {
@@ -75,6 +78,9 @@ export const POST = async (req: Request) => {
         }, { status: 200 });
     }
     catch (e) {
-
+        console.log(e);
+        return NextResponse.json({
+            message: "Error"
+        },{status: 500})
     }
 }

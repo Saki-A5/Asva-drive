@@ -30,6 +30,8 @@ export async function uploadFile(filename: string, file: string | Buffer, folder
         throw new Error('Base64 files are not allowed');
     }
 
+
+
     const folder = await File.findOne({
         _id: new Types.ObjectId(folderId.toString()),
         ownerId: new Types.ObjectId(ownerId.toString()),
@@ -79,7 +81,7 @@ export async function uploadFile(filename: string, file: string | Buffer, folder
         const cFile = await File.create({
             filename: filename, // generate a better way to store the filename
             cloudinaryPublicId: result.public_id,
-            fileLocation: `${folder.fileLocation}/${file}`,
+            fileLocation: `${folder.fileLocation}${filename}`,
             ownerId: ownerId,
             resourceType: result.resource_type, // default for now
             mimeType: result.format,
@@ -150,7 +152,7 @@ export async function getFolderWithContents(folderId: string | Types.ObjectId, o
 
 export async function createFolder(
     folderName: string,
-    parentFolderId: Types.ObjectId | null,
+    parentFolderId: Types.ObjectId,
     ownerId: Types.ObjectId
 ) {
     let parentFilepath = '';
@@ -158,8 +160,8 @@ export async function createFolder(
     // If there's a parent, get its filepath
     if (parentFolderId) {
         const parentFolder = await File.findOne({
-            _id: parentFolderId,
-            ownerId,
+            _id: new Types.ObjectId(parentFolderId),
+            ownerId: new Types.ObjectId(ownerId),
             isFolder: true
         });
 
