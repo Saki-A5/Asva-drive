@@ -105,20 +105,23 @@ export async function uploadFile(filename: string, file: string | Buffer, folder
 export async function getAsset(publicId: string): Promise<any | null> {
     try {
         const result = await cloudinary.api.resource(publicId);
+        console.log(result)
         return result;
     } catch (err: any) {
-        const status = err && (err.http_code || err.status_code || err.status);
-        const msg = err && err.message ? String(err.message) : '';
+        const status = err.error.http_code as number;
+        const message = err.error.message as string;
 
-        const isNotFound = status === 404 || /not found|does not exist|resource\s+not\s+found/i.test(msg);
+        const isNotFound = status === 404 || /not found|does not exist|resource\s+not\s+found/i.test(message);
 
         if (isNotFound) {
             console.warn(`Cloudinary getAsset: asset not found: ${publicId}`);
-            return null;
+        }
+        else{
+            console.error('Cloudinary getAsset error:', err);
         }
 
-        console.error('Cloudinary getAsset error:', err);
-        return null;
+        throw new Error(message);   // let the route handler catch this error
+
     }
 }
 
