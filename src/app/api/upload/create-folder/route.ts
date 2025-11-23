@@ -1,7 +1,7 @@
 export const runtime = 'nodejs';
 
 import { createFolder } from "@/lib/cloudinary";
-import File from "@/models/files";
+import FileModel from "@/models/files";
 import User from "@/models/users";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
@@ -11,7 +11,7 @@ export const POST = async (req: Request) => {
     if(!folderName || !parentFolderId || !ownerId) return NextResponse.json({message: "folder name, parentFolderId and ownerId are compulsory"}, {status: 400});
 
     try{
-        const parentFolder = await File.findOne({
+        const parentFolder = await FileModel.findOne({
             _id: new Types.ObjectId(parentFolderId)
         });
         if(!parentFolder) return NextResponse.json({

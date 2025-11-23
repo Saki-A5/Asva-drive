@@ -1,29 +1,16 @@
 'use client';
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  MoreHorizontal,
-  Folder,
-  FileText,
-  LayoutGrid,
-  ChevronDown,
-} from 'lucide-react';
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Table, TableBody } from '@/components/ui/table';
+import { MoreHorizontal, LayoutGrid } from 'lucide-react';
+
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import Fileicon from '../components/Fileicon';
+import FileTableRow from './FileTableRow';
+import FileTableHeader from './FileTableHeader';
 
 // type File = {
 //   id: string;
@@ -81,7 +68,7 @@ export default function FileTable() {
     {
       id: '222333',
       name: 'C#/C++',
-      type: 'pdf',
+      type: 'folder',
       sharing: 'Public',
       size: '2.7GB',
       modified: 'Oct 12, 2025',
@@ -90,7 +77,7 @@ export default function FileTable() {
     {
       id: '333444',
       name: 'MATLAB',
-      type: 'word',
+      type: 'folder',
       sharing: 'Public',
       size: '5.2GB',
       modified: 'Jan 12, 2026',
@@ -99,29 +86,30 @@ export default function FileTable() {
     {
       id: '444555',
       name: 'Previous Work',
-      type: 'zip',
+      type: 'pdf',
       sharing: 'Public',
       size: '1.0GB',
       modified: 'Nov 8, 2025',
       sharedUsers: [],
     },
+
     {
       id: '555666',
+      name: 'AutoCAD Workbook',
+      type: 'folder',
+      sharing: 'Public',
+      size: '320MB',
+      modified: 'Yesterday',
+      sharedUsers: [],
+    },
+    {
+      id: '666777',
       name: 'Python',
       type: 'folder',
       sharing: 'Shared',
       size: '1.2GB',
       modified: 'Apr 27, 2025',
       sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
-    },
-    {
-      id: '666777',
-      name: 'AutoCAD Workbook',
-      type: 'excel',
-      sharing: 'Public',
-      size: '320MB',
-      modified: 'Yesterday',
-      sharedUsers: [],
     },
   ];
 
@@ -164,96 +152,6 @@ export default function FileTable() {
           ))}
         </TableBody>
       </Table>
-    </div>
-  );
-}
-
-function FileTableHeader() {
-  return (
-    <TableHeader>
-      <TableRow className="border-gray-200 hover:bg-transparent text-white opacity-45">
-        <TableHead className="w-[40%] flex items-center">
-          <span>Name</span>
-          <ChevronDown className="h-6 w-6" />
-        </TableHead>
-        <TableHead>Sharing</TableHead>
-        <TableHead>Size</TableHead>
-        <TableHead>Modified</TableHead>
-        <TableHead className="text-right"></TableHead>
-      </TableRow>
-      {/* addedd fro extra space before the body */}
-      <div className="h-12"></div>
-    </TableHeader>
-  );
-}
-
-function FileTableRow({ file }: { file: FileItem }) {
-  return (
-    <TableRow className="hover:bg-muted/40 transition !border-b-0 cursor-pointer">
-      <TableCell>
-        <div className="flex items-center gap-3">
-          <FileIcon type={file.type} />
-          <span className="font-medium">{file.name}</span>
-        </div>
-      </TableCell>
-
-      <TableCell>
-        <SharingCell
-          sharing={file.sharing}
-          sharedUsers={file.sharedUsers}
-        />
-      </TableCell>
-
-      <TableCell className="text-muted-foreground">{file.size}</TableCell>
-      <TableCell className="text-muted-foreground">{file.modified}</TableCell>
-
-      <TableCell className="text-right">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon">
-                <MoreHorizontal className="w-4 h-4 dark:text-[#0AFEF2]" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>File Actions Menu</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </TableCell>
-    </TableRow>
-  );
-}
-
-function FileIcon({ type }: { type: 'folder' | 'file' }) {
-  return <Fileicon type={type} />;
-}
-
-function SharingCell({
-  sharing,
-  sharedUsers,
-}: {
-  sharing: string;
-  sharedUsers: string[];
-}) {
-  if (sharedUsers.length === 0) {
-    return <span className="text-muted-foreground">{sharing}</span>;
-  }
-
-  return (
-    <div className="flex -space-x-2">
-      {sharedUsers.map((img, i) => (
-        <Avatar
-          key={i}
-          className="w-9.5 h-9.5 bg-[#D9D9D9]">
-          <AvatarImage
-            src={img}
-            alt="user"
-          />
-        </Avatar>
-      ))}
     </div>
   );
 }

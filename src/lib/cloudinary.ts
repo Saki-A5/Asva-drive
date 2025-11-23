@@ -1,6 +1,6 @@
-import { v2 as cloudinary, UploadApiOptions, UploadApiResponse } from 'cloudinary';
+import {v2 as cloudinary, UploadApiOptions, UploadApiResponse} from 'cloudinary'
 import { Types } from 'mongoose';
-import File from '@/models/files';
+import FileModel from '@/models/files';
 
 const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
 if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
@@ -15,6 +15,7 @@ cloudinary.config({
 
 
 export type UploadResult = {
+    fileId: any;
     publicId: string;
     url: string;
     raw?: any;
@@ -32,7 +33,7 @@ export async function uploadFile(filename: string, file: string | Buffer, folder
 
 
 
-    const folder = await File.findOne({
+    const folder = await FileModel.findOne({
         _id: new Types.ObjectId(folderId.toString()),
         ownerId: new Types.ObjectId(ownerId.toString()),
         isFolder: true
@@ -78,9 +79,9 @@ export async function uploadFile(filename: string, file: string | Buffer, folder
             result = await cloudinary.uploader.upload(file, options);
         }
         
-        const cFile = await File.create({
+        const cFile = await FileModel.create({
             filename: filename, // generate a better way to store the filename
-            cloudinaryPublicId: result.public_id,
+            cloudinaryUrl: result.public_id,
             fileLocation: `${folder.fileLocation}${filename}`,
             ownerId: ownerId,
             resourceType: result.resource_type, // default for now
@@ -92,6 +93,7 @@ export async function uploadFile(filename: string, file: string | Buffer, folder
         await cFile.save();
 
         return {
+            fileId: cFile._id,
             publicId: result.public_id,
             url: result.secure_url,
             raw: result
@@ -127,7 +129,7 @@ export async function getAsset(publicId: string): Promise<any | null> {
 
 export async function getFolderWithContents(folderId: string | Types.ObjectId, ownerId: string | Types.ObjectId) {
     try {
-        const folder = await File.findOne({
+        const folder = await FileModel.findOne({
             _id: new Types.ObjectId(folderId as string),
             ownerId: new Types.ObjectId(ownerId as string),
             isFolder: true
@@ -138,7 +140,7 @@ export async function getFolderWithContents(folderId: string | Types.ObjectId, o
         }
 
 
-        const contents = await File.find({
+        const contents = await FileModel.find({
             parentFolderId: new Types.ObjectId(folderId as string),
             ownerId: new Types.ObjectId(ownerId as string)
         });
@@ -162,7 +164,7 @@ export async function createFolder(
 
     // If there's a parent, get its filepath
     if (parentFolderId) {
-        const parentFolder = await File.findOne({
+        const parentFolder = await FileModel.findOne({
             _id: new Types.ObjectId(parentFolderId),
             ownerId: new Types.ObjectId(ownerId),
             isFolder: true
@@ -178,7 +180,7 @@ export async function createFolder(
     const newFilepath = `${parentFilepath}${folderName}/`;
 
     // Create folder document in MongoDB
-    const folder = await File.create({
+    const folder = await FileModel.create({
         filename: folderName,
         fileLocation: newFilepath,
         isFolder: true,
