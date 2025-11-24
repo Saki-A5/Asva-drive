@@ -1,21 +1,29 @@
-import { Schema, model, models } from 'mongoose'
+import { model, models, Schema, Types } from "mongoose";
+import { required } from "node_modules/zod/v4/core/util.cjs";
 
-const fileSchema = new Schema(
-  {
-    name: { type: String, required: true },
-    ownerEmail: { type: String, required: true },
-    mimeType: { type: String },
-    size: { type: Number },
-    tags: { type: [String], default: [] },
-    cloudinaryUrl: { type: String },
-    extractedText: { type: String, default: '' },
-    // store whether the item has been indexed (optional)
-    indexed: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
-  },
-  { timestamps: true }
-)
+const fileSchema = new Schema({
+    filename: {type: String, required:true},
+    clouindaryUrl: {type: String},
+    fileLocation:{type: String},
+    isFolder: {type: Boolean, default: false}, 
+    parentFolderId: {type: Types.ObjectId, ref: 'File', default:null},
+    ownerId: {type: Types.ObjectId, ref: 'User', required: true}, 
+    extractedText: {type: String, default: ''},
+    indexed: {type: Boolean,  default: false},
+    resourceType: {type: String}, 
+    mimeType: {type: String}, 
+    sizeBytes: {type: Number}, 
+    tags: {type: [String], default:[]}, 
 
-const FileModel = models.File || model('File', fileSchema)
+}, {timestamps: true});
 
-export default FileModel
+fileSchema.path('cloudinaryUrl').validate(function(v){
+    if(!this.isFolder && !v){
+        return false;
+    }
+    return true;
+}, 'Files must have a Cloudinary Public Id'); // should throw an error if a file doesn't have a cloudinary Id 
+
+const FileModel = models.File || model("File", fileSchema);
+
+export default FileModel;
