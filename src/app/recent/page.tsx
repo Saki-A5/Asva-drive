@@ -11,19 +11,20 @@ const Recent = () => {
   return (
     <Sidenav>
       <Loginnav />
-      <div className="px-6 ">
-        <h1 className="font-bold text-xl mb-4">Recent</h1>
-
-        {/* Row: left = sort controls, right = actions */}
-        <div className="flex items-center justify-between mb-4">
-          <SortFilters />
-          <div className="flex items-center gap-2">
+      <div>
+        <div className="flex-between">
+          <h1 className="px-6 font-bold text-xl">Recent</h1>
+          <div className="flex space-x-2">
             <Upload />
             <Create />
           </div>
         </div>
-
-        <FileTable />
+        <SortFilters />
+        <div className="px-6 space-y-8">
+          <div>
+            <FileTable />
+          </div>
+        </div>
       </div>
     </Sidenav>
   );
