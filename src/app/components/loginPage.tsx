@@ -107,6 +107,11 @@ const Loginpage = () => {
                 )}
                 />
                 <Button className="mx-auto block mt-4 w-4/5">Login</Button>
+                <p className="text-center mt-2 mb-2">
+                  <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                    Forgot Password?
+                  </Link>
+                </p>
                 <p className="text-center mt-4 mb-4">Don't have an account? <span><Link href="/signup" className="underline">Signup</Link></span></p>
                 </form>
             </Form>
