@@ -1,9 +1,8 @@
 import { model, models, Schema, Types } from "mongoose";
-import { required } from "node_modules/zod/v4/core/util.cjs";
 
 const fileSchema = new Schema({
     filename: {type: String, required:true},
-    clouindaryUrl: {type: String},
+    cloudinaryUrl: {type: String},
     fileLocation:{type: String},
     isFolder: {type: Boolean, default: false}, 
     parentFolderId: {type: Types.ObjectId, ref: 'File', default:null},

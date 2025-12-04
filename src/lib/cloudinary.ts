@@ -1,4 +1,4 @@
-import {v2 as cloudinary, UploadApiOptions, UploadApiResponse} from 'cloudinary'
+import { v2 as cloudinary, UploadApiOptions, UploadApiResponse } from 'cloudinary'
 import { Types } from 'mongoose';
 import FileModel from '@/models/files';
 
@@ -21,35 +21,38 @@ export type UploadResult = {
     raw?: any;
 };
 
-export async function uploadFile(filename: string, file: Buffer, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadResult|null>
+function formatFilename(filename: string): string {
+    const ext = filename.split('.').pop()?.toLowerCase() || '';
+    const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+    const videoExts = ['mp4', 'webm', 'mov', 'avi', 'mkv'];
 
-export async function uploadFile(filename: string, file: string, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadResult|null>
+    if (imageExts.includes(ext) || videoExts.includes(ext)) {
+        return filename.replace(/\.[^/.]+$/, '');
+    }
 
-export async function uploadFile(filename: string, file: string | Buffer, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags: string[] = [], destFolder: string = ''): Promise<UploadResult | null> {
+    return filename;
+}
+
+export async function uploadFile(filename: string, file: Buffer, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
+
+export async function uploadFile(filename: string, file: string, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
+
+export async function uploadFile(filename: string, file: string | Buffer, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags: string[] = [], destFolder: string = ''): Promise<UploadApiResponse | null> {
 
     if (typeof file === 'string' && /^data:.*;base64,/.test(file)) {
         throw new Error('Base64 files are not allowed');
     }
 
+    const folderLocation = `${ownerId.toString()}/${destFolder}`;
 
-
-    const folder = await FileModel.findOne({
-        _id: new Types.ObjectId(folderId.toString()),
-        ownerId: new Types.ObjectId(ownerId.toString()),
-        isFolder: true
-    });
-
-    if (!folder) throw new Error(`Folder not found: ${folderId}`)
-
-    const folderLocation = `${ownerId.toString()}/${destFolder}`
-
+    const formattedFilename = formatFilename(filename);
     const options: UploadApiOptions = {
         overwrite: true,
-        folder: folderLocation,
+        asset_folder: folderLocation,
+        public_id: formattedFilename,
         use_filename: true,
         unique_filename: false,
-        resource_type: 'auto', 
-        public_id: filename
+        resource_type: 'auto',
     };
 
     try {
@@ -65,39 +68,14 @@ export async function uploadFile(filename: string, file: string | Buffer, folder
                         else resolve(result!);
                     }
                 );
-                
-                // Create a readable stream from the buffer
-                const Readable = require('stream').Readable;
-                const bufferStream = new Readable();
-                bufferStream.push(file);
-                bufferStream.push(null);
-                
-                bufferStream.pipe(uploadStream);
+                uploadStream.end(file);
             });
         } else {
             // Upload from HTTPS URL directly
             result = await cloudinary.uploader.upload(file, options);
         }
-        
-        const cFile = await FileModel.create({
-            filename: filename, // generate a better way to store the filename
-            cloudinaryUrl: result.public_id,
-            fileLocation: `${folder.fileLocation}${filename}`,
-            ownerId: ownerId,
-            resourceType: result.resource_type, // default for now
-            mimeType: result.format,
-            sizeBytes: result.bytes,
-            tags: tags
-        });
 
-        await cFile.save();
-
-        return {
-            fileId: cFile._id,
-            publicId: result.public_id,
-            url: result.secure_url,
-            raw: result
-        };
+        return result;
     } catch (error) {
         console.error('Cloudinary upload error:', error);
         return null;
@@ -118,7 +96,7 @@ export async function getAsset(publicId: string): Promise<any | null> {
         if (isNotFound) {
             console.warn(`Cloudinary getAsset: asset not found: ${publicId}`);
         }
-        else{
+        else {
             console.error('Cloudinary getAsset error:', err);
         }
 
@@ -184,7 +162,7 @@ export async function createFolder(
         filename: folderName,
         fileLocation: newFilepath,
         isFolder: true,
-        parentFolderId: parentFolderId || null,
+        parentFolderId: parentFolderId,
         ownerId,
     });
 

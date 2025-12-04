@@ -23,3 +23,8 @@ export const GET = async(req: Request, {params}: any) => {
     }
 
 }
+
+// delete a file
+export const DELETE = async(req: Request, {params}: any) => {
+
+}
