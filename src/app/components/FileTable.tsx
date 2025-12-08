@@ -45,6 +45,7 @@ import Fileicon from "./Fileicon";
 //     modified: new Date('2025-09-10'),
 //   },
 // ];
+
 type FileItem = {
   id: string;
   name: string;
@@ -119,6 +120,7 @@ export default function FileTable() {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  // useState to control the layout onClick
   const [layout, setLayout] = useState("flex");
 
   return (
