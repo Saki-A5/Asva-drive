@@ -10,9 +10,13 @@ import { File } from 'buffer';
 import { Types } from 'mongoose';
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server';
+import { requireRole } from '@/lib/roles';
 
 // upload a file
 export const POST = async (req: Request) => {
+  const { user, error, status } = await requireRole(req, ["admin"]);
+  if (error) return NextResponse.json({ error }, { status });
+
   try {
     // const cookieStore = await cookies();
     // const token = cookieStore.get('token')?.value;
@@ -31,8 +35,8 @@ export const POST = async (req: Request) => {
     const file = formData.get("file") as File || null;
     const tags = (formData.get("tags") as string)?.split(",") || [];
 
-    const user = await User.findOne({ email: email });
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const owner = await User.findOne({ email: email });
+    if (!owner) return NextResponse.json({ error: "User not found" }, { status: 404 });
     console.log(file);
 
     // Validation
