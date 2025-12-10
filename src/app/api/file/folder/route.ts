@@ -1,6 +1,5 @@
 export const runtime = 'nodejs';
 
-import { createFolder } from "@/lib/cloudinary";
 import FileModel from "@/models/files";
 import User from "@/models/users";
 import { Types } from "mongoose";
@@ -15,7 +14,7 @@ export const POST = async (req: Request) => {
             _id: new Types.ObjectId(parentFolderId)
         });
         if(!parentFolder) return NextResponse.json({
-            message: 'No Folder with that ID'
+            message: 'Parent Folder not Found'
         }, {status: 404});
 
         const owner = await User.findOne({
@@ -25,7 +24,11 @@ export const POST = async (req: Request) => {
             message: "No user with that ID"
         }, {status: 404});
 
-        const folder = await createFolder(folderName, parentFolder._id, owner._id);
+        const folder = await FileModel.create({
+            filename: folderName, 
+            parentFolderId: parentFolderId, 
+            ownerId,
+        })
 
         return NextResponse.json({
             message: 'Folder successfully created', 
