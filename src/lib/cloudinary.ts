@@ -21,23 +21,24 @@ export type UploadResult = {
     raw?: any;
 };
 
-function formatFilename(filename: string): string {
+function formatFilename(filename: string, parentFolderId: string): string {
     const ext = filename.split('.').pop()?.toLowerCase() || '';
     const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
     const videoExts = ['mp4', 'webm', 'mov', 'avi', 'mkv'];
 
-    if (imageExts.includes(ext) || videoExts.includes(ext)) {
-        return filename.replace(/\.[^/.]+$/, '');
-    }
+    const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
 
-    return filename;
+    if (imageExts.includes(ext) || videoExts.includes(ext)) {
+        return `${nameWithoutExt}-${parentFolderId}`;   // remove the extension from videos and images (cloudinary requirements)
+    }
+    return `${nameWithoutExt}-${parentFolderId}.${ext}`;
 }
 
 export async function uploadFile(filename: string, file: Buffer, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
 
 export async function uploadFile(filename: string, file: string, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
 
-export async function uploadFile(filename: string, file: string | Buffer, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags: string[] = [], destFolder: string = ''): Promise<UploadApiResponse | null> {
+export async function uploadFile(filename: string, file: string | Buffer, parentFolderId: Types.ObjectId, ownerId: Types.ObjectId, tags: string[] = [], destFolder: string = ''): Promise<UploadApiResponse | null> {
 
     if (typeof file === 'string' && /^data:.*;base64,/.test(file)) {
         throw new Error('Base64 files are not allowed');
@@ -45,7 +46,7 @@ export async function uploadFile(filename: string, file: string | Buffer, folder
 
     const folderLocation = `${ownerId.toString()}/${destFolder}`;
 
-    const formattedFilename = formatFilename(filename);
+    const formattedFilename = formatFilename(filename, parentFolderId.toString());
     const options: UploadApiOptions = {
         overwrite: true,
         asset_folder: folderLocation,
@@ -105,66 +106,4 @@ export async function getAsset(publicId: string): Promise<any | null> {
     }
 }
 
-export async function getFolderWithContents(folderId: string | Types.ObjectId, ownerId: string | Types.ObjectId) {
-    try {
-        const folder = await FileModel.findOne({
-            _id: new Types.ObjectId(folderId as string),
-            ownerId: new Types.ObjectId(ownerId as string),
-            isFolder: true
-        });
 
-        if (!folder) {
-            throw new Error(`Folder not found: ${folderId}`);
-        }
-
-
-        const contents = await FileModel.find({
-            parentFolderId: new Types.ObjectId(folderId as string),
-            ownerId: new Types.ObjectId(ownerId as string)
-        });
-
-        return {
-            folder,
-            contents
-        };
-    } catch (error) {
-        console.error('Error fetching folder:', error);
-        throw error;
-    }
-}
-
-export async function createFolder(
-    folderName: string,
-    parentFolderId: Types.ObjectId,
-    ownerId: Types.ObjectId
-) {
-    let parentFilepath = '';
-
-    // If there's a parent, get its filepath
-    if (parentFolderId) {
-        const parentFolder = await FileModel.findOne({
-            _id: new Types.ObjectId(parentFolderId),
-            ownerId: new Types.ObjectId(ownerId),
-            isFolder: true
-        });
-
-        if (!parentFolder) {
-            throw new Error('Parent folder not found');
-        }
-
-        parentFilepath = parentFolder.fileLocation;
-    }
-
-    const newFilepath = `${parentFilepath}${folderName}/`;
-
-    // Create folder document in MongoDB
-    const folder = await FileModel.create({
-        filename: folderName,
-        fileLocation: newFilepath,
-        isFolder: true,
-        parentFolderId: parentFolderId,
-        ownerId,
-    });
-
-    return folder;
-}

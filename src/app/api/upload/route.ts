@@ -40,11 +40,11 @@ export const POST = async (req: Request) => {
       return NextResponse.json({ error: "Missing folderId" }, { status: 400 });
     }
     const folder = await FileModel.findOne({
-        _id: new Types.ObjectId(folderId.toString()),
-        ownerId: new Types.ObjectId(user._id.toString()),
-        isFolder: true
+      _id: new Types.ObjectId(folderId.toString()),
+      ownerId: new Types.ObjectId(user._id.toString()),
+      isFolder: true
     });
-    if(!folder) return NextResponse.json({error: "Folder does not exist"}, {status: 404});
+    if (!folder) return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
 
     if (!file) {
       return NextResponse.json({ error: "Missing file" }, { status: 400 });
@@ -60,23 +60,22 @@ export const POST = async (req: Request) => {
       fileBuffer,
       new Types.ObjectId(folderId),
       user._id,
-      tags
+      tags,
     );
 
-    if(!result) return NextResponse.json({message: "Error uploading file"}, {status: 500})
+    if (!result) return NextResponse.json({ message: "Error uploading file" }, { status: 500 })
 
-      const cFile = await FileModel.create({
-            filename: file.name,
-            cloudinaryUrl: result.public_id,
-            fileLocation: `${folder.fileLocation}${file.name}`,
-            ownerId: new Types.ObjectId(user._id),
-            resourceType: result.resource_type, // default for now
-            mimeType: result.format,
-            sizeBytes: result.bytes,
-            tags: tags
-        });
+    const cFile = await FileModel.create({
+      filename: file.name,
+      cloudinaryUrl: result.public_id,
+      ownerId: new Types.ObjectId(user._id),
+      resourceType: result.resource_type, // default for now
+      mimeType: result.format,
+      sizeBytes: result.bytes,
+      tags: tags
+    });
 
-        await cFile.save();
+    await cFile.save();
 
     // Enqueue indexing job (worker will fetch document by id and index)
     await indexQueue.add(
@@ -89,10 +88,6 @@ export const POST = async (req: Request) => {
         jobId: `file-${cFile._id.toString()}`,
       }
     )
-
-    if (!result) {
-      return NextResponse.json({ error: "Upload failed" }, { status: 500 });
-    }
 
     return NextResponse.json({
       message: "File uploaded successfully",

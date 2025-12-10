@@ -3,6 +3,7 @@ import dbConnect from "@/lib/dbConnect";
 import FileModel  from "@/models/files";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
+import User from "@/models/users";
 
 export const runtime = 'nodejs';
 
@@ -26,5 +27,26 @@ export const GET = async(req: Request, {params}: any) => {
 
 // delete a file
 export const DELETE = async(req: Request, {params}: any) => {
+    try {
+        const email = "demo@gmail.com";
+        const user = await User.findOne({email});
 
+        await dbConnect();
+
+        const {id} = await params;
+        const fileId = new Types.ObjectId(id);
+        
+        const file = await FileModel.findOne({_id: fileId, ownerId: user._id});
+        if(!file) return NextResponse.json({message: "No File Found"}, {status: 404});
+
+        await FileModel.findByIdAndUpdate(fileId, {
+            isDeleted: true,
+            deletedAt: new Date()
+        });
+
+        return NextResponse.json({message: "Successfully Deleted File"}, {status: 200});
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({message: (error as Error).message || "Internal Server Error"}, {status: 500});
+    }
 }

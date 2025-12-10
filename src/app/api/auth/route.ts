@@ -40,15 +40,16 @@ export async function POST(req: Request) {
     let rootFolder = await FileModel.findOne({
       ownerId: new Types.ObjectId(user._id.toString()), 
       filename: '/', 
-      isFolder: true
+      isFolder: true,
+      isRoot: true,
     });
     if(!rootFolder){
       rootFolder = await FileModel.create({
         ownerId: new Types.ObjectId(user._id.toString()), 
         filename: '/', 
         isFolder: true, 
-        fileLocation: '/', 
-        parentFolder: null
+        parentFolder: null,
+        isRoot: true
       })
     }
 
