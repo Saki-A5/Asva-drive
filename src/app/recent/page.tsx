@@ -1,51 +1,106 @@
-"use client";
-import Loginnav from "../components/Loginnav";
-import Sidenav from "../components/Sidenav";
-import FileTable from "../components/FileTable";
-import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
-import Create from "../components/Create";
-import Upload from "../components/Upload";
+'use client';
 
-const Recent = () => {
+import { useEffect, useState } from 'react';
+import Sidenav from '../components/Sidenav';
+import Loginnav from '../components/Loginnav';
+import Upload from '../components/Upload';
+import Create from '../components/Create';
+import FileTable from '../components/FileTable';
+import { Button } from '@/components/ui/button';
+import { ChevronDown } from 'lucide-react';
+import { FileItem } from '../components/FileTable';
+
+interface FileType {
+  _id: string;
+  name: string;
+  url: string;
+  size: number;
+  mimetype: string;
+  updatedAt: string;
+}
+
+const Files = () => {
+  const [myFiles, setMyFiles] = useState<FileItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const userId = '67a93bc9f92a5b14e25c5123'; // replace later
+
+  useEffect(() => {
+    const getFiles = async () => {
+      try {
+        const res = await fetch(`/api/files?ownerId=${userId}`);
+        const data = await res.json();
+
+        if (data?.data) {
+          const mapped: FileItem[] = data.data.map((f: FileType) => ({
+            id: f._id,
+            name: f.name,
+            type: f.mimetype.split('/')[0], // "image", "pdf", "video"
+            sharing: 'Private',
+            size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
+            modified: new Date(f.updatedAt).toDateString(),
+            sharedUsers: [],
+          }));
+
+          setMyFiles(mapped);
+        }
+      } catch (error) {
+        console.error('Error fetching files:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getFiles();
+  }, [userId]);
+
   return (
     <Sidenav>
       <Loginnav />
-      <div className="px-6 ">
-        <h1 className="font-bold text-xl mb-4">Recent</h1>
+      <div className="px-6">
+        <div className="flex-between gap-2">
+          <h1 className="font-bold text-xl whitespace-nowrap">Recent</h1>
 
-        {/* Row: left = sort controls, right = actions */}
-        <div className="flex items-center justify-between mb-4">
-          <SortFilters />
-          <div className="flex items-center gap-2">
+          <div className="flex space-x-2 gap-y-2">
             <Upload />
             <Create />
           </div>
         </div>
 
-        <FileTable />
+        <SortFilters />
+
+        <div className="space-y-8">
+          {loading ? (
+            <div className="text-gray-500">Loading files...</div>
+          ) : (
+            <div className="flex-1 overflow-y-auto mt-6">
+              <FileTable files={myFiles} />
+            </div>
+          )}
+        </div>
       </div>
     </Sidenav>
   );
 };
 
+export default Files;
+
 const SortFilters = () => {
-  const sortType: string[] = ["Type", "Modified", "Source", "Shared"];
+  const sortType: string[] = ['Type', 'Modified', 'Source', 'Shared'];
 
   return (
-    <div className="px-2 my-6 flex gap-2">
+    <div className="my-6 flex flex-wrap gap-x-2 gap-y-3">
       {sortType.map((type) => (
-        <Button variant="outline" key={type} className="cursor-pointer">
-          <span className="flex gap-2">
-            <span className="pl-1">{type}</span>
-            <span className="flex items-center">
-              <ChevronDown className="h-6 w-6" />
-            </span>
+        <Button
+          key={type}
+          variant="outline"
+          className="cursor-pointer">
+          <span className="flex gap-2 items-center">
+            <span>{type}</span>
+            <ChevronDown className="h-5 w-5" />
           </span>
         </Button>
       ))}
     </div>
   );
 };
-
-export default Recent;

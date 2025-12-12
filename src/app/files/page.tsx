@@ -47,6 +47,63 @@ const Files = () => {
       } catch (error) {
         console.error('Error fetching files:', error);
       } finally {
+        // Change this when the cloudhinary from Daniel data has been resolved
+        setMyFiles([
+          {
+            id: '111222',
+            name: 'Past Questions',
+            type: 'folder',
+            sharing: 'Public',
+            size: '1.2GB',
+            modified: 'Jun 12, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '222333',
+            name: 'C#/C++',
+            type: 'folder',
+            sharing: 'Public',
+            size: '2.7GB',
+            modified: 'Oct 12, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '333444',
+            name: 'MATLAB',
+            type: 'folder',
+            sharing: 'Public',
+            size: '5.2GB',
+            modified: 'Jan 12, 2026',
+            sharedUsers: [],
+          },
+          {
+            id: '444555',
+            name: 'Previous Work',
+            type: 'pdf',
+            sharing: 'Public',
+            size: '1.0GB',
+            modified: 'Nov 8, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '555666',
+            name: 'AutoCAD Workbook',
+            type: 'folder',
+            sharing: 'Public',
+            size: '320MB',
+            modified: 'Yesterday',
+            sharedUsers: [],
+          },
+          {
+            id: '666777',
+            name: 'Python',
+            type: 'folder',
+            sharing: 'Shared',
+            size: '1.2GB',
+            modified: 'Apr 27, 2025',
+            sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
+          },
+        ]);
         setLoading(false);
       }
     };
@@ -57,11 +114,11 @@ const Files = () => {
   return (
     <Sidenav>
       <Loginnav />
-      <div>
-        <div className="flex-between">
-          <h1 className="px-6 font-bold text-xl">My Files</h1>
+      <div className="px-6">
+        <div className="flex-between gap-2">
+          <h1 className="font-bold text-xl whitespace-nowrap">My Files</h1>
 
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 gap-y-2">
             <Upload />
             <Create />
           </div>
@@ -69,11 +126,13 @@ const Files = () => {
 
         <SortFilters />
 
-        <div className="px-6 space-y-8">
+        <div className="space-y-8">
           {loading ? (
             <div className="text-gray-500">Loading files...</div>
           ) : (
-            <FileTable files={myFiles} />
+            <div className="flex-1 overflow-y-auto mt-6">
+              <FileTable files={myFiles} />
+            </div>
           )}
         </div>
       </div>
@@ -87,7 +146,7 @@ const SortFilters = () => {
   const sortType: string[] = ['Type', 'Modified', 'Source', 'Shared'];
 
   return (
-    <div className="px-6 my-6 flex gap-2">
+    <div className="my-6 flex flex-wrap gap-x-2 gap-y-3">
       {sortType.map((type) => (
         <Button
           key={type}

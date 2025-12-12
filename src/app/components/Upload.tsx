@@ -45,7 +45,9 @@ const Upload = () => {
         disabled={loading}>
         <span className="flex items-center">
           <UploadIcon />
-          <span className="pl-2">{loading ? 'Uploading...' : 'Uploads'}</span>
+          <span className="pl-2 hidden [@media(min-width:500px)]:inline-block">
+            Uploads
+          </span>
         </span>
       </Button>
     </>
