@@ -1,7 +1,12 @@
 import FileModel from '@/models/files';
 import { NextResponse } from 'next/server';
+import { requireRole } from '@/lib/roles';
 
 export const GET = async (req: Request) => {
+  // Protect the route — only allow admins
+  const { user, error, status } = await requireRole(req, ['admin']);
+  if (error) return NextResponse.json({ message: error }, { status });
+
   const { searchParams } = new URL(req.url);
   const ownerId = searchParams.get('ownerId');
 

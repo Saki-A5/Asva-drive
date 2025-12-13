@@ -11,7 +11,7 @@ const Create = () => {
         <span className="flex gap-2">
           <span className="flex items-center">
             <Plus className="h-7 w-7" />
-            <span className="pl-1 hidden [@media(min-width:500px)]:inline-block">
+            <span className="pl-1 hidden [@media(min-width:440px)]:inline-block">
               Create
             </span>
           </span>

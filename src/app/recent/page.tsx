@@ -47,6 +47,143 @@ const Files = () => {
       } catch (error) {
         console.error('Error fetching files:', error);
       } finally {
+        setMyFiles([
+          {
+            id: '111222',
+            name: 'Past Questions',
+            type: 'folder',
+            sharing: 'Public',
+            size: '1.2GB',
+            modified: 'Jun 12, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '222333',
+            name: 'C#/C++',
+            type: 'folder',
+            sharing: 'Public',
+            size: '2.7GB',
+            modified: 'Oct 12, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '333444',
+            name: 'MATLAB',
+            type: 'folder',
+            sharing: 'Public',
+            size: '5.2GB',
+            modified: 'Jan 12, 2026',
+            sharedUsers: [],
+          },
+          {
+            id: '444555',
+            name: 'Previous Work',
+            type: 'pdf',
+            sharing: 'Public',
+            size: '1.0GB',
+            modified: 'Nov 8, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '555666',
+            name: 'AutoCAD Workbook',
+            type: 'folder',
+            sharing: 'Public',
+            size: '320MB',
+            modified: 'Yesterday',
+            sharedUsers: [],
+          },
+          {
+            id: '666777',
+            name: 'Python',
+            type: 'folder',
+            sharing: 'Shared',
+            size: '1.2GB',
+            modified: 'Apr 27, 2025',
+            sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
+          },
+          {
+            id: '777888',
+            name: 'Past Questions',
+            type: 'folder',
+            sharing: 'Public',
+            size: '1.2GB',
+            modified: 'Jun 12, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '888999',
+            name: 'C#/C++',
+            type: 'folder',
+            sharing: 'Public',
+            size: '2.7GB',
+            modified: 'Oct 12, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '999000',
+            name: 'MATLAB',
+            type: 'folder',
+            sharing: 'Public',
+            size: '5.2GB',
+            modified: 'Jan 12, 2026',
+            sharedUsers: [],
+          },
+          {
+            id: '112233',
+            name: 'Previous Work',
+            type: 'pdf',
+            sharing: 'Public',
+            size: '1.0GB',
+            modified: 'Nov 8, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '223344',
+            name: 'AutoCAD Workbook',
+            type: 'folder',
+            sharing: 'Public',
+            size: '320MB',
+            modified: 'Yesterday',
+            sharedUsers: [],
+          },
+          {
+            id: '445566',
+            name: 'Python',
+            type: 'folder',
+            sharing: 'Shared',
+            size: '1.2GB',
+            modified: 'Apr 27, 2025',
+            sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
+          },
+          {
+            id: '1122330',
+            name: 'Previous Work',
+            type: 'pdf',
+            sharing: 'Public',
+            size: '1.0GB',
+            modified: 'Nov 8, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '2233440',
+            name: 'AutoCAD Workbook2',
+            type: 'folder',
+            sharing: 'Public',
+            size: '320MB',
+            modified: 'Yesterday',
+            sharedUsers: [],
+          },
+          {
+            id: '4455660',
+            name: 'Python',
+            type: 'folder',
+            sharing: 'Shared',
+            size: '1.2GB',
+            modified: 'Apr 27, 2025',
+            sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
+          },
+        ]);
         setLoading(false);
       }
     };
@@ -57,7 +194,7 @@ const Files = () => {
   return (
     <Sidenav>
       <Loginnav />
-      <div className="px-6">
+      <div className="px-6 flex flex-col flex-1 min-h-0">
         <div className="flex-between gap-2">
           <h1 className="font-bold text-xl whitespace-nowrap">Recent</h1>
 
@@ -69,11 +206,11 @@ const Files = () => {
 
         <SortFilters />
 
-        <div className="space-y-8">
+        <div className="space-y-8 flex-1 min-h-0 mt-6">
           {loading ? (
             <div className="text-gray-500">Loading files...</div>
           ) : (
-            <div className="flex-1 overflow-y-auto mt-6">
+            <div className="flex-1 h-full">
               <FileTable files={myFiles} />
             </div>
           )}

@@ -4,7 +4,7 @@ import { ChevronDown } from 'lucide-react';
 
 export default function FileTableHeader() {
   return (
-    <TableHeader>
+    <TableHeader className="sticky top-0 bg-background z-10">
       <TableRow className="border-gray-200 hover:bg-transparent text-white opacity-45">
         <TableHead className="w-[40%] flex items-center">
           <span>Name</span>
@@ -15,8 +15,6 @@ export default function FileTableHeader() {
         <TableHead>Modified</TableHead>
         <TableHead className="text-right"></TableHead>
       </TableRow>
-      {/* added for extra space before the body */}
-      <div className="h-12"></div>
     </TableHeader>
   );
 }

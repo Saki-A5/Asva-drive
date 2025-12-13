@@ -15,11 +15,12 @@ const Upload = () => {
 
     setLoading(true);
 
+    // DEV/JIKA: CHANGE THIS SECTION AFTER UPLOAD FORM IS CREATED
+    // TODO: Replace 'folderId' and 'email' with actual values as needed
     const response = await uploadToServer({
       file,
-      folderId: '67a93bc9f92a5b14e25c5123', // change later
-      email: 'jika@gmail.com',
-      tags: ['school', 'pdf'],
+      folderId: 'default-folder-id',
+      email: 'user@example.com',
     });
 
     console.log('Upload response:', response);
@@ -45,7 +46,7 @@ const Upload = () => {
         disabled={loading}>
         <span className="flex items-center">
           <UploadIcon />
-          <span className="pl-2 hidden [@media(min-width:500px)]:inline-block">
+          <span className="pl-2 hidden [@media(min-width:440px)]:inline-block">
             Uploads
           </span>
         </span>
