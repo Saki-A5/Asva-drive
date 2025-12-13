@@ -10,6 +10,9 @@ import { Types } from 'mongoose';
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server';
 import { requireRole } from '@/lib/roles';
+import Notification from '@/models/notificationSchema';
+import { sendPush } from '@/lib/sendPush';
+import Token from '@/models/notificationToken';
 
 export const POST = async (req: Request) => {
   const { user, error, status } = await requireRole(req, ["admin"]);
@@ -80,6 +83,36 @@ export const POST = async (req: Request) => {
     if(!result) return NextResponse.json({message: "Error uploading file"}, {status: 500})
 
     const {fileId: cFileId} = result;
+    // in app notifications
+    await Notification.create({
+      userId: owner._id,
+      title: "New File Uploaded",
+      body: `${filename} has been uploaded to your folder`,
+      type: "FILE_UPLOAD",
+      metadata: {
+        fileId: cFileId,
+        folderId,
+      },
+      read: false,
+    });
+
+    // push notifications
+    const recipientTokens = await Token.find({ userId: owner._id }).distinct("token");
+
+    try {
+      await sendPush({
+        tokens: recipientTokens,
+        title: "New File Uploaded",
+        body: `${filename} has been uploaded to your folder`,
+        data: {
+          fileId: cFileId.toString(),
+          folderId,
+        },
+      });
+     } catch (e) {
+      console.log("Error sending push notification:", e);
+     }
+
 
     // Enqueue indexing job (worker will fetch document by id and index)
     await indexQueue.add(
