@@ -17,13 +17,13 @@ const Upload = () => {
 
     // DEV/JIKA: CHANGE THIS SECTION AFTER UPLOAD FORM IS CREATED
     // TODO: Replace 'folderId' and 'email' with actual values as needed
-    const response = await uploadToServer({
-      file,
-      folderId: 'default-folder-id',
-      email: 'user@example.com',
-    });
+    // const response = await uploadToServer({
+    //   file,
+    //   folderId: 'default-folder-id',
+    //   email: 'user@example.com',
+    // });
 
-    console.log('Upload response:', response);
+    // console.log('Upload response:', response);
     setLoading(false);
   };
 
