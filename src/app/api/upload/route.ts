@@ -11,6 +11,9 @@ import { Types } from 'mongoose';
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server';
 import { requireRole } from '@/lib/roles';
+import Notification from '@/models/notificationSchema';
+import { sendPush } from '@/lib/sendPush';
+import Token from '@/models/notificationToken';
 
 // upload a file
 export const POST = async (req: Request) => {
@@ -80,6 +83,37 @@ export const POST = async (req: Request) => {
     });
 
     await cFile.save();
+   
+    // in app notifications
+    await Notification.create({
+      userId: owner._id,
+      title: "New File Uploaded",
+      body: `${file.name} has been uploaded to your folder`,
+      type: "FILE_UPLOAD",
+      metadata: {
+        fileId: cFile._id,
+        folderId,
+      },
+      read: false,
+    });
+
+    // push notifications
+    const recipientTokens = await Token.find({ userId: owner._id }).distinct("token");
+
+    try {
+      await sendPush({
+        tokens: recipientTokens,
+        title: "New File Uploaded",
+        body: `${file.name} has been uploaded to your folder`,
+        data: {
+          fileId: cFile._id.toString(),
+          folderId,
+        },
+      });
+     } catch (e) {
+      console.log("Error sending push notification:", e);
+     }
+
 
     // Enqueue indexing job (worker will fetch document by id and index)
     await indexQueue.add(
