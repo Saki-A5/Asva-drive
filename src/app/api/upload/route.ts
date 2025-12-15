@@ -6,7 +6,7 @@ import { adminAuth } from '@/lib/firebaseAdmin';
 import { indexQueue } from '@/lib/queue';
 import FileModel from '@/models/files';
 import User from '@/models/users';
-import { File } from 'buffer';
+// import { File } from 'buffer';
 import { Types } from 'mongoose';
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server';
