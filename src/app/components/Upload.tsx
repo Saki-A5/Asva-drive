@@ -47,7 +47,7 @@ const Upload = () => {
         <span className="flex items-center">
           <UploadIcon />
           <span className="pl-2 hidden [@media(min-width:440px)]:inline-block">
-            Uploads
+            Upload
           </span>
         </span>
       </Button>
