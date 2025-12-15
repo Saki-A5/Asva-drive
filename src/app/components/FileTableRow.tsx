@@ -36,7 +36,7 @@ export default function FileTableRow({ file }: { file: FileItem }) {
       >
         <TableCell className="rounded-l-lg">
           <div className="flex items-center gap-3">
-            <Fileicon type={file.type} />
+            <Fileicon type={file.type} isSheetPage={false}/>
             <span className="font-medium">{file.name}</span>
           </div>
         </TableCell>
