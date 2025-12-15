@@ -58,7 +58,7 @@ const FileGridItem: React.FC<FileGridItemProps> = ({ file }) => {
         </TooltipProvider>
 
         <div className="flex flex-col items-center text-sm font-bold">
-          <Fileicon type={file.type} />
+          <Fileicon type={file.type} isSheetPage={false}/>
           {capitalizeFirstLetter(file.type)}
         </div>
       </div>
