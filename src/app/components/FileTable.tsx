@@ -29,13 +29,13 @@ interface FileTableProps {
 }
 
 export default function FileTable({ files }: FileTableProps) {
+  // useState to control the layout onClick
+  const [layout, setLayout] = useState('flex');
+
   function capitalizeFirstLetter(str: string): string {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
-
-  // useState to control the layout onClick
-  const [layout, setLayout] = useState('flex');
 
   return (
     <div className="border border-gray-200 rounded-2xl p-2 md:p-5 flex flex-col h-full min-h-0 text-base font-semibold">
@@ -77,7 +77,7 @@ export default function FileTable({ files }: FileTableProps) {
 
       {/* conditional here */}
       {layout == 'grid' ? (
-        <section className="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-card">
+        <section className="flex-1 min-h-0 overflow-y-auto p-4 mt-10 rounded-xl bg-card">
           {files.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {files.map((file, index) => (
