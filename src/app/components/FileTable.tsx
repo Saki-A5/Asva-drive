@@ -1,4 +1,4 @@
-// 
+//
 
 //
 
@@ -6,7 +6,19 @@
 
 import { useState, useEffect } from "react";
 import { Table, TableBody } from "@/components/ui/table";
-import { MoreHorizontal, LayoutGrid, Columns, X } from "lucide-react";
+import {
+  MoreHorizontal,
+  LayoutGrid,
+  Columns,
+  X,
+  Download,
+  Star,
+  Trash2,
+  UserPlus2,
+  Link2,
+  FolderSymlinkIcon,
+  MoreVertical,
+} from "lucide-react";
 import { SelectionProvider, useSelection } from "@/context/SelectionContext";
 
 import {
@@ -25,9 +37,18 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import FileTableRow from "./FileTableRow";
 import FileTableHeader from "./FileTableHeader";
 import FileGrid from "./FileGrid";
+import Fileicon from "./Fileicon";
+import SharingCell from "./SharingCell";
 
 export type FileItem = {
   id: string;
@@ -121,12 +142,46 @@ function FileTableContent({
       {layout === "grid" ? (
         <section className="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-card">
           {selectedItems.length > 1 ? (
-            <div className="w-full h-9 bg-[#0AFEF236] rounded-lg flex px-2 items-center mb-3 mt-3">
+            <div className="w-full min-h-[44px] py-2 bg-[#0AFEF236] rounded-lg flex px-2 items-center mb-3 mt-3 gap-4 flex-wrap">
               <X
                 className="text-[#00000080] w-5 h-5 cursor-pointer"
                 onClick={() => clearSelection()}
               />
-              <p>{selectedItems.length} selected</p>
+              <p className="font-semibold text-[#050E3F] text-sm sm:text-base whitespace-nowrap">
+                {selectedItems.length} selected
+              </p>
+              <Trash2 className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+              <Download className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+              <div className="hidden sm:flex gap-3">
+                <UserPlus2 className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+                <Link2 className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+                <FolderSymlinkIcon className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+              </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="sm:hidden">
+                    <MoreVertical className="text-[#050E3F] w-5 h-5" />
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuItem>
+                    <UserPlus2 className="mr-2 h-4 w-4" />
+                    Share
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem>
+                    <Link2 className="mr-2 h-4 w-4" />
+                    Get link
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem>
+                    <FolderSymlinkIcon className="mr-2 h-4 w-4" />
+                    Move to folder
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ) : null}
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -138,12 +193,46 @@ function FileTableContent({
       ) : (
         <>
           {selectedItems.length > 1 ? (
-            <div className="w-full h-9 bg-[#0AFEF236] rounded-lg flex px-2 items-center mb-3 mt-3">
+            <div className="w-full min-h-[44px] py-2 bg-[#0AFEF236] rounded-lg flex px-2 items-center mb-3 mt-3 gap-4 flex-wrap">
               <X
                 className="text-[#00000080] w-5 h-5 cursor-pointer"
                 onClick={() => clearSelection()}
               />
-              <p>{selectedItems.length} selected</p>
+              <p className="font-semibold text-[#050E3F] text-sm sm:text-base whitespace-nowrap">
+                {selectedItems.length} selected
+              </p>
+              <Trash2 className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+              <Download className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+              <div className="hidden sm:flex gap-3">
+                <UserPlus2 className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+                <Link2 className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+                <FolderSymlinkIcon className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+              </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="sm:hidden">
+                    <MoreVertical className="text-[#050E3F] w-5 h-5" />
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuItem>
+                    <UserPlus2 className="mr-2 h-4 w-4" />
+                    Share
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem>
+                    <Link2 className="mr-2 h-4 w-4" />
+                    Get link
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem>
+                    <FolderSymlinkIcon className="mr-2 h-4 w-4" />
+                    Move to folder
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ) : null}
           <div className="relative flex flex-col flex-1 min-h-0">
@@ -168,7 +257,59 @@ function FileTableContent({
         (file) =>
           selectedItems.includes(file.id) && (
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen} key={file.id}>
-              <SheetContent></SheetContent>
+              <SheetContent
+                side="right"
+                className="w-[80vw] max-w-[360px] sm:w-[360px] md:w-[480px] overflow-y-auto"
+              >
+                <div className="mt-6 flex flex-col items-center w-full px-4 sm:px-6">
+                  <div className="w-full max-w-[224px] aspect-square flex flex-col border rounded-[15px] justify-center items-center">
+                    <Fileicon type={file.type} isSheetPage={sheetOpen} />
+                    <p className="text-[24px] font-semibold">{file.name}</p>
+                  </div>
+                  <div className="mt-5 flex gap-4">
+                    <div className="bg-[#D9D9D961] p-2 rounded-[3px] cursor-pointer">
+                      <Download className="text-[#050E3F]" />
+                    </div>
+                    <div className="bg-[#D9D9D961] p-2 rounded-[3px] cursor-pointer">
+                      {" "}
+                      <Star fill="#050E3F" />
+                    </div>
+                    <div className="bg-[#D9D9D961] p-2 rounded-[3px] cursor-pointer">
+                      <Trash2 className="text-[#050E3F]" />
+                    </div>
+                  </div>
+
+                  <div className="w-full max-w-[320px] mt-6">
+                    <h3 className="font-bold text-[20px]">Description</h3>
+                    <p className="font-[400] text-sm">
+                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                      Voluptates nostrum tempora dicta maxime non id eos
+                      exercitationem cumque minima. Eaque odio sunt voluptate
+                      aspernatur eos!
+                    </p>
+                  </div>
+
+                  <div className="w-full max-w-[320px] mt-6">
+                    <h3 className="font-bold text-[20px]">Info</h3>
+                    <div className="flex justify-between mb-5">
+                      <p>Size</p>
+                      <p>{file.size}</p>
+                    </div>
+                    <div className="flex justify-between">
+                      <p>Items</p>
+                      <p>{file.id}</p>
+                    </div>
+                  </div>
+
+                  <div className="w-full max-w-[320px] mt-6">
+                    <h3 className="font-bold text-[20px]">Shared by</h3>
+                    <SharingCell
+                      sharing={file.sharing}
+                      sharedUsers={file.sharedUsers}
+                    />
+                  </div>
+                </div>
+              </SheetContent>
             </Sheet>
           )
       )}
