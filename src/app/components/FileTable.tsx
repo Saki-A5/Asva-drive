@@ -1,18 +1,34 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Table, TableBody } from '@/components/ui/table';
-import { MoreHorizontal, LayoutGrid, Columns } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Table, TableBody } from "@/components/ui/table";
+import {
+  MoreHorizontal,
+  LayoutGrid,
+  Columns,
+  Download,
+  Star,
+  Trash2,
+} from "lucide-react";
+import { SelectionProvider, useSelection } from "@/context/SelectionContext";
 
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from '@/components/ui/tooltip';
-import FileTableRow from './FileTableRow';
-import FileTableHeader from './FileTableHeader';
-import Fileicon from './Fileicon';
+} from "@/components/ui/tooltip";
+import {
+  Sheet,
+  SheetContent,
+} from "@/components/ui/sheet";
+
+import FileTableRow from "./FileTableRow";
+import FileTableHeader from "./FileTableHeader";
+import FileGrid from "./FileGrid";
+import Fileicon from "./Fileicon";
+import SharingCell from "./SharingCell";
+import SelectionActionBar from "./SelectionActionBar";
 
 export type FileItem = {
   id: string;
@@ -30,12 +46,37 @@ interface FileTableProps {
 
 export default function FileTable({ files }: FileTableProps) {
   // useState to control the layout onClick
-  const [layout, setLayout] = useState('flex');
+  const [layout, setLayout] = useState("flex");
 
-  function capitalizeFirstLetter(str: string): string {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
+  return (
+    <SelectionProvider>
+      <FileTableContent files={files} layout={layout} setLayout={setLayout} />
+    </SelectionProvider>
+  );
+}
+
+function FileTableContent({
+  files,
+  layout,
+  setLayout,
+}: {
+  files: FileItem[];
+  layout: string;
+  setLayout: React.Dispatch<React.SetStateAction<string>>;
+}) {
+  const { selectedItems, clearSelection } = useSelection();
+
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  useEffect(() => {
+    if (selectedItems.length === 1) {
+      setSheetOpen(true);
+    } else {
+      setSheetOpen(false);
+    }
+  }, [selectedItems.length]);
+
+  console.log(selectedItems);
 
   return (
     <div className="border border-gray-200 rounded-2xl p-2 md:p-5 flex flex-col h-full min-h-0 text-base font-semibold">
@@ -46,11 +87,12 @@ export default function FileTable({ files }: FileTableProps) {
               <button
                 className="p-2 hover:bg-muted rounded-md"
                 onClick={
-                  layout == 'flex'
-                    ? () => setLayout('grid')
-                    : () => setLayout('flex')
-                }>
-                {layout == 'flex' ? (
+                  layout == "flex"
+                    ? () => setLayout("grid")
+                    : () => setLayout("flex")
+                }
+              >
+                {layout == "flex" ? (
                   <LayoutGrid className="w-5 h-5" />
                 ) : (
                   <Columns className="w-5 h-5" />
@@ -58,7 +100,7 @@ export default function FileTable({ files }: FileTableProps) {
               </button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{layout == 'flex' ? 'Grid' : 'Flex'} View</p>
+              <p>{layout == "flex" ? "Grid" : "Flex"} View</p>
             </TooltipContent>
           </Tooltip>
 
@@ -76,70 +118,113 @@ export default function FileTable({ files }: FileTableProps) {
       </div>
 
       {/* conditional here */}
-      {layout == 'grid' ? (
-        <section className="flex-1 min-h-0 overflow-y-auto p-4 mt-10 rounded-xl bg-card">
-          {files.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {files.map((file, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col items-start p-4  rounded-xl bg-white dark:bg-neutral-900 shadow-sm hover:shadow-md transition h-[200px] gap-3  w-full">
-                  <div className="w-full bg-black/10 h-[80%] flex justify-center items-center rounded-md relative">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button className="p-2 rounded-md absolute top-0 right-2 cursor-pointer">
-                            <MoreHorizontal className="w-5 h-5" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>File actions menu</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    <div className="flex flex-col items-center text-sm font-bold">
-                      <Fileicon type={file.type} />
-                      {capitalizeFirstLetter(file.type)}
-                    </div>
-                  </div>
-                  <div className="flex gap-3 items-center flex-wrap justify-center">
-                    <div className="">
-                      <h3 className="font-semibold text-sm truncate w-full">
-                        {file.name}
-                      </h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {file.size}
-                        <span>, </span>
-                        {capitalizeFirstLetter(file.type)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">Files show here</p>
-          )}
+      {layout === "grid" ? (
+        <section className="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-card">
+          <SelectionActionBar
+            count={selectedItems.length}
+            onClear={clearSelection}
+            // onDelete={handleDelete}
+            // onDownload={handleDownload}
+            // onShare={handleShare}
+            // onGetLink={handleGetLink}
+            // onMove={handleMove}
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {files.map((file) => (
+              <FileGrid file={file} key={file.id} />
+            ))}
+          </div>
         </section>
       ) : (
-        <div className="relative flex flex-col flex-1 min-h-0">
-          <Table>
-            <FileTableHeader />
-          </Table>
-          {/* Scrollable body */}
-          <div className="flex-1 min-h-0 overflow-y-auto">
+        <>
+          <SelectionActionBar
+            count={selectedItems.length}
+            onClear={clearSelection}
+            // onDelete={handleDelete}
+            // onDownload={handleDownload}
+            // onShare={handleShare}
+            // onGetLink={handleGetLink}
+            // onMove={handleMove}
+          />
+          <div className="relative flex flex-col flex-1 min-h-0">
             <Table>
-              <TableBody>
-                {files.map((file) => (
-                  <FileTableRow
-                    key={file.id}
-                    file={file}
-                  />
-                ))}
-              </TableBody>
+              <FileTableHeader />
             </Table>
+            {/* Scrollable body */}
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <Table>
+                <TableBody>
+                  {files.map((file) => (
+                    <FileTableRow key={file.id} file={file} />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
-        </div>
+        </>
+      )}
+
+      {files.map(
+        (file) =>
+          selectedItems.includes(file.id) && (
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen} key={file.id}>
+              <SheetContent
+                side="right"
+                className="w-[80vw] max-w-[360px] sm:w-[360px] md:w-[480px] overflow-y-auto"
+              >
+                <div className="mt-6 flex flex-col items-center w-full px-4 sm:px-6">
+                  <div className="w-full max-w-[224px] aspect-square flex flex-col border rounded-[15px] justify-center items-center">
+                    <Fileicon type={file.type} isSheetPage={sheetOpen} />
+                    <p className="text-[24px] font-semibold">{file.name}</p>
+                  </div>
+                  <div className="mt-5 flex gap-4">
+                    <div className="bg-[#D9D9D961] p-2 rounded-[3px] cursor-pointer dark:bg-white">
+                      <Download className="text-[#050E3F]" />
+                    </div>
+                    <div className="bg-[#D9D9D961] p-2 rounded-[3px] cursor-pointer dark:bg-white">
+                      {" "}
+                      <Star fill="#050E3F" />
+                    </div>
+                    <div className="bg-[#D9D9D961] p-2 rounded-[3px] cursor-pointer dark:bg-white">
+                      <Trash2 className="text-[#050E3F]" />
+                    </div>
+                  </div>
+
+                  <div className="w-full max-w-[320px] mt-6">
+                    <h3 className="font-bold text-[20px] dark:text-white">
+                      Description
+                    </h3>
+                    <p className="font-[400] text-sm dark:text-[#FFFFFFB2]">
+                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                      Voluptates nostrum tempora dicta maxime non id eos
+                      exercitationem cumque minima. Eaque odio sunt voluptate
+                      aspernatur eos!
+                    </p>
+                  </div>
+
+                  <div className="w-full max-w-[320px] mt-6">
+                    <h3 className="font-bold text-[20px]">Info</h3>
+                    <div className="flex justify-between mb-5">
+                      <p className="dark:text-[#FFFFFF73]">Size</p>
+                      <p>{file.size}</p>
+                    </div>
+                    <div className="flex justify-between">
+                      <p className="dark:text-[#FFFFFF73]">Items</p>
+                      <p>{file.id}</p>
+                    </div>
+                  </div>
+
+                  <div className="w-full max-w-[320px] mt-6">
+                    <h3 className="font-bold text-[20px]">Shared by</h3>
+                    <SharingCell
+                      sharing={file.sharing}
+                      sharedUsers={file.sharedUsers}
+                    />
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          )
       )}
     </div>
   );
