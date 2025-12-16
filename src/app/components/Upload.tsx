@@ -1,5 +1,3 @@
-//
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -39,24 +37,6 @@ const Upload = () => {
   const [files, setFiles] = useState<UploadingFile[]>([]);
   const [description, setDescription] = useState("");
 
-  // const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (!file) return;
-
-  //   setFiles([{ name: file.name, progress: 20 }]);
-  //   setLoading(true);
-
-  //   const response = await uploadToServer({
-  //     file,
-  //     folderId: "default-folder-id",
-  //     email: "user@example.com",
-  //   });
-
-  //   console.log(response);
-
-  //   setFiles([{ name: file.name, progress: 100 }]);
-  //   setLoading(false);
-  // };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
@@ -65,14 +45,13 @@ const Upload = () => {
     // Convert FileList to array
     const newFiles = Array.from(selectedFiles).map((file) => ({
       name: file.name,
-      progress: 0, // start at 0%
-      file, // keep the actual file object for upload
+      progress: 0,
+      file,
     }));
 
     // Add new files to state (instead of replacing)
     setFiles((prev) => [...prev, ...newFiles]);
 
-    // Optional: upload all files sequentially
     for (const f of newFiles) {
       setLoading(true);
       const response = await uploadToServer({
@@ -103,16 +82,7 @@ const Upload = () => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent
-        className="
-    w-[95vw]
-    max-w-md
-    max-h-[90vh]
-    overflow-y-auto
-    rounded-xl
-    [&>button]:hidden
-    dark:bg-[#1A1E26]
-  "
+      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto rounded-xl [&>button]:hidden dark:bg-[#1A1E26]"
       >
         <DialogHeader className="flex flex-row items-center justify-between border-b-[#D9D9D961] border-b-[1px] pb-5 rounded-b-2xl dark:rounded-b-none dark:border-b-0">
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">

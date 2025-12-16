@@ -1,7 +1,3 @@
-//
-
-//
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,14 +6,9 @@ import {
   MoreHorizontal,
   LayoutGrid,
   Columns,
-  X,
   Download,
   Star,
   Trash2,
-  UserPlus2,
-  Link2,
-  FolderSymlinkIcon,
-  MoreVertical,
 } from "lucide-react";
 import { SelectionProvider, useSelection } from "@/context/SelectionContext";
 
@@ -29,26 +20,15 @@ import {
 } from "@/components/ui/tooltip";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 import FileTableRow from "./FileTableRow";
 import FileTableHeader from "./FileTableHeader";
 import FileGrid from "./FileGrid";
 import Fileicon from "./Fileicon";
 import SharingCell from "./SharingCell";
+import SelectionActionBar from "./SelectionActionBar";
 
 export type FileItem = {
   id: string;
@@ -75,7 +55,6 @@ export default function FileTable({ files }: FileTableProps) {
   );
 }
 
-// New child component that can safely use the context
 function FileTableContent({
   files,
   layout,
@@ -141,49 +120,15 @@ function FileTableContent({
       {/* conditional here */}
       {layout === "grid" ? (
         <section className="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-card">
-          {selectedItems.length > 1 ? (
-            <div className="w-full min-h-[44px] py-2 bg-[#0AFEF236] rounded-lg flex px-2 items-center mb-3 mt-3 gap-4 flex-wrap dark:bg-[#0AFEF236]">
-              <X
-                className="text-[#00000080] w-5 h-5 cursor-pointer dark:text-[#D9D9D999]"
-                onClick={() => clearSelection()}
-              />
-              <p className="font-semibold text-[#050E3F] text-sm sm:text-base whitespace-nowrap dark:text-white">
-                {selectedItems.length} selected
-              </p>
-              <Trash2 className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
-              <Download className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
-              <div className="hidden sm:flex gap-3">
-                <UserPlus2 className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
-                <Link2 className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
-                <FolderSymlinkIcon className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
-              </div>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="sm:hidden">
-                    <MoreVertical className="text-[#050E3F] w-5 h-5 dark:text-white" />
-                  </button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end" className="w-44">
-                  <DropdownMenuItem>
-                    <UserPlus2 className="mr-2 h-4 w-4 dark:text-white" />
-                    Share
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem>
-                    <Link2 className="mr-2 h-4 w-4 dark:text-white" />
-                    Get link
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem>
-                    <FolderSymlinkIcon className="mr-2 h-4 w-4 dark:text-white" />
-                    Move to folder
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ) : null}
+          <SelectionActionBar
+            count={selectedItems.length}
+            onClear={clearSelection}
+            // onDelete={handleDelete}
+            // onDownload={handleDownload}
+            // onShare={handleShare}
+            // onGetLink={handleGetLink}
+            // onMove={handleMove}
+          />
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {files.map((file) => (
               <FileGrid file={file} key={file.id} />
@@ -192,49 +137,15 @@ function FileTableContent({
         </section>
       ) : (
         <>
-          {selectedItems.length > 1 ? (
-            <div className="w-full min-h-[44px] py-2 bg-[#0AFEF236] rounded-lg flex px-2 items-center mb-3 mt-3 gap-4 flex-wrap dark:bg-[#0AFEF236]">
-              <X
-                className="text-[#00000080] w-5 h-5 cursor-pointer dark:text-[#D9D9D999]"
-                onClick={() => clearSelection()}
-              />
-              <p className="font-semibold text-[#050E3F] text-sm sm:text-base whitespace-nowrap dark:text-white">
-                {selectedItems.length} selected
-              </p>
-              <Trash2 className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
-              <Download className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
-              <div className="hidden sm:flex gap-3">
-                <UserPlus2 className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
-                <Link2 className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
-                <FolderSymlinkIcon className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
-              </div>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="sm:hidden">
-                    <MoreVertical className="text-[#050E3F] w-5 h-5 dark:text-white" />
-                  </button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end" className="w-44">
-                  <DropdownMenuItem>
-                    <UserPlus2 className="mr-2 h-4 w-4 dark:text-white" />
-                    Share
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem>
-                    <Link2 className="mr-2 h-4 w-4 dark:text-white" />
-                    Get link
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem>
-                    <FolderSymlinkIcon className="mr-2 h-4 w-4 dark:text-white" />
-                    Move to folder
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ) : null}
+          <SelectionActionBar
+            count={selectedItems.length}
+            onClear={clearSelection}
+            // onDelete={handleDelete}
+            // onDownload={handleDownload}
+            // onShare={handleShare}
+            // onGetLink={handleGetLink}
+            // onMove={handleMove}
+          />
           <div className="relative flex flex-col flex-1 min-h-0">
             <Table>
               <FileTableHeader />
