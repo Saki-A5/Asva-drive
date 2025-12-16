@@ -4,8 +4,9 @@ import { uploadFile } from '@/lib/cloudinary';
 import dbConnect from '@/lib/dbConnect';
 import { adminAuth } from '@/lib/firebaseAdmin';
 import { indexQueue } from '@/lib/queue';
+import FileModel from '@/models/files';
 import User from '@/models/users';
-import { File } from 'buffer';
+// import { File } from 'buffer';
 import { Types } from 'mongoose';
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server';
@@ -14,6 +15,7 @@ import Notification from '@/models/notificationSchema';
 import { sendPush } from '@/lib/sendPush';
 import Token from '@/models/notificationToken';
 
+// upload a file
 export const POST = async (req: Request) => {
   const { user, error, status } = await requireRole(req, ["admin"]);
   if (error) return NextResponse.json({ error }, { status });
@@ -33,10 +35,7 @@ export const POST = async (req: Request) => {
     const formData = await req.formData();
     const folderId = formData.get("folderId") as string;
     const email = formData.get("email") as string;
-    const file = formData.get("file") as File | null;
-    const filename = formData.get("filename") as string;
-    const mimeType = formData.get("mimetype") as string | null;
-    const fileUrl = formData.get("fileUrl") as string | null;
+    const file = formData.get("file") as File || null;
     const tags = (formData.get("tags") as string)?.split(",") || [];
 
     const owner = await User.findOne({ email: email });
@@ -47,50 +46,52 @@ export const POST = async (req: Request) => {
     if (!folderId) {
       return NextResponse.json({ error: "Missing folderId" }, { status: 400 });
     }
+    const folder = await FileModel.findOne({
+      _id: new Types.ObjectId(folderId.toString()),
+      ownerId: new Types.ObjectId(user._id.toString()),
+      isFolder: true
+    });
+    if (!folder) return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
 
-    if (!file && !fileUrl) {
-      return NextResponse.json({ error: "Missing file or fileUrl" }, { status: 400 });
+    if (!file) {
+      return NextResponse.json({ error: "Missing file" }, { status: 400 });
     }
 
-    if(!mimeType){
-      return NextResponse.json({error: "Missing File MimeType"}, {status: 400})
-    }
+    const fileArrayBuffer = await file.arrayBuffer();
+    const fileBuffer = Buffer.from(fileArrayBuffer);
 
-    let fileBuffer: any;
-
-    // Handle file upload (binary)
-    if (file) {
-      fileBuffer = await file.arrayBuffer();
-      // Convert to base64 for Cloudinary (Cloudinary accepts base64 or URLs)
-      fileBuffer = Buffer.from(fileBuffer);
-    }
-    // Handle URL upload
-    else if (fileUrl) {
-      fileBuffer = fileUrl;
-    } else {
-      return NextResponse.json({ error: "Invalid file data" }, { status: 400 });
-    }
 
     // Call uploadFile function
     const result = await uploadFile(
-      filename,
+      file.name,
       fileBuffer,
       new Types.ObjectId(folderId),
       user._id,
-      tags
+      tags,
     );
 
-    if(!result) return NextResponse.json({message: "Error uploading file"}, {status: 500})
+    if (!result) return NextResponse.json({ message: "Error uploading file" }, { status: 500 })
 
-    const {fileId: cFileId} = result;
+    const cFile = await FileModel.create({
+      filename: file.name,
+      cloudinaryUrl: result.public_id,
+      ownerId: new Types.ObjectId(user._id),
+      resourceType: result.resource_type, // default for now
+      mimeType: result.format,
+      sizeBytes: result.bytes,
+      tags: tags
+    });
+
+    await cFile.save();
+   
     // in app notifications
     await Notification.create({
       userId: owner._id,
       title: "New File Uploaded",
-      body: `${filename} has been uploaded to your folder`,
+      body: `${file.name} has been uploaded to your folder`,
       type: "FILE_UPLOAD",
       metadata: {
-        fileId: cFileId,
+        fileId: cFile._id,
         folderId,
       },
       read: false,
@@ -103,9 +104,9 @@ export const POST = async (req: Request) => {
       await sendPush({
         tokens: recipientTokens,
         title: "New File Uploaded",
-        body: `${filename} has been uploaded to your folder`,
+        body: `${file.name} has been uploaded to your folder`,
         data: {
-          fileId: cFileId.toString(),
+          fileId: cFile._id.toString(),
           folderId,
         },
       });
@@ -117,22 +118,18 @@ export const POST = async (req: Request) => {
     // Enqueue indexing job (worker will fetch document by id and index)
     await indexQueue.add(
       'index-file',
-      { id: cFileId.toString() },
+      { id: cFile._id.toString() },
       {
         attempts: 5,
         backoff: { type: 'exponential', delay: 1000 },
         removeOnComplete: true,
-        jobId: `file-${cFileId.toString()}`,
+        jobId: `file-${cFile._id.toString()}`,
       }
     )
 
-    if (!result) {
-      return NextResponse.json({ error: "Upload failed" }, { status: 500 });
-    }
-
     return NextResponse.json({
       message: "File uploaded successfully",
-      data: result
+      file: cFile
     }, { status: 200 });
   }
   catch (e) {

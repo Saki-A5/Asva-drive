@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Upload from "../components/Upload";
 import Create from "../components/Create";
 import Fileicon from "../components/Fileicon";
+import useCurrentUser from "@/hooks/useCurrentUser";
 
 type File = {
   name: string;
@@ -24,6 +25,9 @@ const recentFiles: File[] = [
 
 
 const Dashboard = () => {
+  const {user, loading} = useCurrentUser();
+
+  if (loading) return null
   // const [starredFiles, setStarredFiles] = useState<File[]>([]);
   // const [recentFiles, setRecentFiles] = useState<File[]>([]);
 
@@ -54,7 +58,7 @@ const Dashboard = () => {
       <div>
         <h1 className="px-2 lg:px-6 pb-6 font-bold text-xl">Welcome to the hub</h1>
         <div className="flex space-x-2 px-2 lg:px-6 mb-6">
-            <Upload />
+            {user.role === "admin" && <Upload />}
             <Create />
           </div>
         <div className="pr-6 lg:px-6 space-y-8 mx-auto">

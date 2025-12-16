@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/users";
+import FileModel from "@/models/files";
+import { Types } from "mongoose";
 
 // Create user (POST)
 export async function POST(req: Request) {
@@ -34,10 +36,28 @@ export async function POST(req: Request) {
       });
     }
 
+    // find or create the root folder
+    let rootFolder = await FileModel.findOne({
+      ownerId: new Types.ObjectId(user._id.toString()), 
+      filename: '/', 
+      isFolder: true,
+      isRoot: true,
+    });
+    if(!rootFolder){
+      rootFolder = await FileModel.create({
+        ownerId: new Types.ObjectId(user._id.toString()), 
+        filename: '/', 
+        isFolder: true, 
+        parentFolder: null,
+        isRoot: true
+      })
+    }
+
     // Set authentication cookie
     const res = NextResponse.json({ 
       message: "Signup successful", 
-      user 
+      user, 
+      rootFolder: rootFolder.id, 
     });
     res.cookies.set("token", idToken, { 
       httpOnly: true, 
