@@ -17,6 +17,7 @@ import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { useState } from 'react';
+import useCurrentUser from '@/hooks/useCurrentUser';
 
 // Icon type for lucide-react components
 type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>;
@@ -48,6 +49,9 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
   // sidebar can be 'open' (full), 'collapsed' (icons only), or 'hidden' (logo + trigger only)
   const [mode, setMode] = useState<'open' | 'collapsed' | 'hidden'>('open');
   const isCollapsed = mode === 'collapsed';
+  const { user, loading } = useCurrentUser();
+
+  if (loading) return null;
 
   const collapsedVisible = [
     '/dashboard',
@@ -129,7 +133,7 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-[#02427E] to-[#05081A]">
+    <div className="flex h-screen bg-gradient-to-br overflow-hidden from-[#02427E] to-[#05081A]">
       {/* Desktop Sidebar */}
       <div
         className={`hidden lg:flex flex-col border-r border-border/80 bg-gradient-to-br from-[#02427E] to-[#05081A] p-4 text-white transition-all duration-300 ${
@@ -181,7 +185,7 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
         {/* Bottom section */}
         <div className="mt-auto pt-4">
           {/* trash (only in open mode) */}
-          {mode === 'open' && (
+          {user?.role === "admin" && mode === 'open' && (
             <Link
               href="/trash"
               className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition">
@@ -237,7 +241,7 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
         </SheetContent>
       </Sheet>
       {/* Main content */}
-      <main className="flex-1 bg-background text-foreground mr-2 rounded-2xl shadow-lg lg:px-4 pl-12 pb-12 overflow-hidden flex flex-col">
+      <main className="flex-1 bg-background text-foreground mr-2 rounded-2xl shadow-lg lg:px-4 pl-12 pb-12 overflow-y-auto flex flex-col">
         {children}
       </main>
     </div>

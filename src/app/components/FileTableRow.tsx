@@ -1,15 +1,17 @@
-import React from 'react';
-import { TableCell, TableRow } from '@/components/ui/table';
+"use client"
+import React from "react";
+import { useHighlightable } from "@/hooks/useHighlightable";
+import { TableCell, TableRow } from "@/components/ui/table";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from '@/components/ui/tooltip';
-import SharingCell from './SharingCell';
-import { Button } from '@/components/ui/button';
-import { MoreHorizontal } from 'lucide-react';
-import Fileicon from './Fileicon';
+} from "@/components/ui/tooltip";
+import SharingCell from "./SharingCell";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react";
+import Fileicon from "./Fileicon";
 
 type FileItem = {
   id: string;
@@ -22,41 +24,50 @@ type FileItem = {
 };
 
 export default function FileTableRow({ file }: { file: FileItem }) {
+  const { isSelected, eventHandlers } = useHighlightable(file.id);
   return (
-    <TableRow className="hover:bg-muted/40 transition !border-b-0 cursor-pointer">
-      <TableCell>
-        <div className="flex items-center gap-3">
-          <Fileicon type={file.type} />
-          <span className="font-medium">{file.name}</span>
-        </div>
-      </TableCell>
+    <>
+      <TableRow
+        {...eventHandlers}
+        className={`
+          transition cursor-pointer !border-b-0
+          ${isSelected ? "bg-[#0AFEF236] !border-b-0 hover:bg-0" : "hover:bg-muted/40 transition !border-b-0 cursor-pointer"}
+        `}
+      >
+        <TableCell className="rounded-l-lg">
+          <div className="flex items-center gap-3">
+            <Fileicon type={file.type} isSheetPage={false}/>
+            <span className="font-medium">{file.name}</span>
+          </div>
+        </TableCell>
 
-      <TableCell>
-        <SharingCell
-          sharing={file.sharing}
-          sharedUsers={file.sharedUsers}
-        />
-      </TableCell>
+        <TableCell>
+          <SharingCell sharing={file.sharing} sharedUsers={file.sharedUsers} />
+        </TableCell>
 
-      <TableCell className="text-muted-foreground">{file.size}</TableCell>
-      <TableCell className="text-muted-foreground">{file.modified}</TableCell>
+        <TableCell className="text-muted-foreground">{file.size}</TableCell>
+        <TableCell className="text-muted-foreground">{file.modified}</TableCell>
 
-      <TableCell className="text-right">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon">
-                <MoreHorizontal className="w-4 h-4 dark:text-[#0AFEF2]" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>File Actions Menu</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </TableCell>
-    </TableRow>
+        <TableCell className="text-right rounded-r-lg">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="w-4 h-4 dark:text-[#0AFEF2] text-[#050E3F]" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>File Actions Menu</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </TableCell>
+      </TableRow>
+
+      {/* Spacer row */}
+      <TableRow className="pointer-events-none !border-b-0">
+        <TableCell colSpan={5} className="h-[2px]" />
+      </TableRow>
+    </>
   );
 }
