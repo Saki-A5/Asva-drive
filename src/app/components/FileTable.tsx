@@ -142,42 +142,42 @@ function FileTableContent({
       {layout === "grid" ? (
         <section className="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-card">
           {selectedItems.length > 1 ? (
-            <div className="w-full min-h-[44px] py-2 bg-[#0AFEF236] rounded-lg flex px-2 items-center mb-3 mt-3 gap-4 flex-wrap">
+            <div className="w-full min-h-[44px] py-2 bg-[#0AFEF236] rounded-lg flex px-2 items-center mb-3 mt-3 gap-4 flex-wrap dark:bg-[#0AFEF236]">
               <X
-                className="text-[#00000080] w-5 h-5 cursor-pointer"
+                className="text-[#00000080] w-5 h-5 cursor-pointer dark:text-[#D9D9D999]"
                 onClick={() => clearSelection()}
               />
-              <p className="font-semibold text-[#050E3F] text-sm sm:text-base whitespace-nowrap">
+              <p className="font-semibold text-[#050E3F] text-sm sm:text-base whitespace-nowrap dark:text-white">
                 {selectedItems.length} selected
               </p>
-              <Trash2 className="text-[#050E3F] w-5 h-5 cursor-pointer" />
-              <Download className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+              <Trash2 className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
+              <Download className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
               <div className="hidden sm:flex gap-3">
-                <UserPlus2 className="text-[#050E3F] w-5 h-5 cursor-pointer" />
-                <Link2 className="text-[#050E3F] w-5 h-5 cursor-pointer" />
-                <FolderSymlinkIcon className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+                <UserPlus2 className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
+                <Link2 className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
+                <FolderSymlinkIcon className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
               </div>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="sm:hidden">
-                    <MoreVertical className="text-[#050E3F] w-5 h-5" />
+                    <MoreVertical className="text-[#050E3F] w-5 h-5 dark:text-white" />
                   </button>
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-44">
                   <DropdownMenuItem>
-                    <UserPlus2 className="mr-2 h-4 w-4" />
+                    <UserPlus2 className="mr-2 h-4 w-4 dark:text-white" />
                     Share
                   </DropdownMenuItem>
 
                   <DropdownMenuItem>
-                    <Link2 className="mr-2 h-4 w-4" />
+                    <Link2 className="mr-2 h-4 w-4 dark:text-white" />
                     Get link
                   </DropdownMenuItem>
 
                   <DropdownMenuItem>
-                    <FolderSymlinkIcon className="mr-2 h-4 w-4" />
+                    <FolderSymlinkIcon className="mr-2 h-4 w-4 dark:text-white" />
                     Move to folder
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -193,42 +193,42 @@ function FileTableContent({
       ) : (
         <>
           {selectedItems.length > 1 ? (
-            <div className="w-full min-h-[44px] py-2 bg-[#0AFEF236] rounded-lg flex px-2 items-center mb-3 mt-3 gap-4 flex-wrap">
+            <div className="w-full min-h-[44px] py-2 bg-[#0AFEF236] rounded-lg flex px-2 items-center mb-3 mt-3 gap-4 flex-wrap dark:bg-[#0AFEF236]">
               <X
-                className="text-[#00000080] w-5 h-5 cursor-pointer"
+                className="text-[#00000080] w-5 h-5 cursor-pointer dark:text-[#D9D9D999]"
                 onClick={() => clearSelection()}
               />
-              <p className="font-semibold text-[#050E3F] text-sm sm:text-base whitespace-nowrap">
+              <p className="font-semibold text-[#050E3F] text-sm sm:text-base whitespace-nowrap dark:text-white">
                 {selectedItems.length} selected
               </p>
-              <Trash2 className="text-[#050E3F] w-5 h-5 cursor-pointer" />
-              <Download className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+              <Trash2 className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
+              <Download className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
               <div className="hidden sm:flex gap-3">
-                <UserPlus2 className="text-[#050E3F] w-5 h-5 cursor-pointer" />
-                <Link2 className="text-[#050E3F] w-5 h-5 cursor-pointer" />
-                <FolderSymlinkIcon className="text-[#050E3F] w-5 h-5 cursor-pointer" />
+                <UserPlus2 className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
+                <Link2 className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
+                <FolderSymlinkIcon className="text-[#050E3F] w-5 h-5 cursor-pointer dark:text-white" />
               </div>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="sm:hidden">
-                    <MoreVertical className="text-[#050E3F] w-5 h-5" />
+                    <MoreVertical className="text-[#050E3F] w-5 h-5 dark:text-white" />
                   </button>
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-44">
                   <DropdownMenuItem>
-                    <UserPlus2 className="mr-2 h-4 w-4" />
+                    <UserPlus2 className="mr-2 h-4 w-4 dark:text-white" />
                     Share
                   </DropdownMenuItem>
 
                   <DropdownMenuItem>
-                    <Link2 className="mr-2 h-4 w-4" />
+                    <Link2 className="mr-2 h-4 w-4 dark:text-white" />
                     Get link
                   </DropdownMenuItem>
 
                   <DropdownMenuItem>
-                    <FolderSymlinkIcon className="mr-2 h-4 w-4" />
+                    <FolderSymlinkIcon className="mr-2 h-4 w-4 dark:text-white" />
                     Move to folder
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -267,21 +267,23 @@ function FileTableContent({
                     <p className="text-[24px] font-semibold">{file.name}</p>
                   </div>
                   <div className="mt-5 flex gap-4">
-                    <div className="bg-[#D9D9D961] p-2 rounded-[3px] cursor-pointer">
+                    <div className="bg-[#D9D9D961] p-2 rounded-[3px] cursor-pointer dark:bg-white">
                       <Download className="text-[#050E3F]" />
                     </div>
-                    <div className="bg-[#D9D9D961] p-2 rounded-[3px] cursor-pointer">
+                    <div className="bg-[#D9D9D961] p-2 rounded-[3px] cursor-pointer dark:bg-white">
                       {" "}
                       <Star fill="#050E3F" />
                     </div>
-                    <div className="bg-[#D9D9D961] p-2 rounded-[3px] cursor-pointer">
+                    <div className="bg-[#D9D9D961] p-2 rounded-[3px] cursor-pointer dark:bg-white">
                       <Trash2 className="text-[#050E3F]" />
                     </div>
                   </div>
 
                   <div className="w-full max-w-[320px] mt-6">
-                    <h3 className="font-bold text-[20px]">Description</h3>
-                    <p className="font-[400] text-sm">
+                    <h3 className="font-bold text-[20px] dark:text-white">
+                      Description
+                    </h3>
+                    <p className="font-[400] text-sm dark:text-[#FFFFFFB2]">
                       Lorem ipsum dolor sit amet consectetur adipisicing elit.
                       Voluptates nostrum tempora dicta maxime non id eos
                       exercitationem cumque minima. Eaque odio sunt voluptate
@@ -292,11 +294,11 @@ function FileTableContent({
                   <div className="w-full max-w-[320px] mt-6">
                     <h3 className="font-bold text-[20px]">Info</h3>
                     <div className="flex justify-between mb-5">
-                      <p>Size</p>
+                      <p className="dark:text-[#FFFFFF73]">Size</p>
                       <p>{file.size}</p>
                     </div>
                     <div className="flex justify-between">
-                      <p>Items</p>
+                      <p className="dark:text-[#FFFFFF73]">Items</p>
                       <p>{file.id}</p>
                     </div>
                   </div>

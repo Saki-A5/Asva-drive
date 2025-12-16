@@ -3,7 +3,7 @@
 import { FileArchive, FileSpreadsheet, FileText, Folder } from 'lucide-react';
 
 type FileiconProps = {
-  type: string;
+  type: string | undefined;
   isSheetPage: boolean;
 };
 const Fileicon = ({ type, isSheetPage }: FileiconProps) => {
