@@ -1,28 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Sidenav from '../../components/Sidenav';
-import Loginnav from '../../components/Loginnav';
-import Upload from '../../components/Upload';
-import Create from '../../components/Create';
-import FileTable from '../../components/FileTable';
-import { Button } from '@/components/ui/button';
-import { ChevronDown } from 'lucide-react';
-import { FileItem } from '../../components/FileTable';
-import { Star, Clock } from 'lucide-react';
+import Sidenav from '../components/Sidenav';
+import Loginnav from '../components/Loginnav';
+import Upload from '../components/Upload';
+import Create from '../components/Create';
+import FileTable from '../components/FileTable';
+import { FileItem } from '../components/FileTable';
 import axios from 'axios';
 
-import Fileicon from '../../components/Fileicon';
+import Fileicon from '../components/Fileicon';
 import useCurrentUser from '@/hooks/useCurrentUser';
-
-interface FileType {
-  _id: string;
-  name: string;
-  url: string;
-  size: number;
-  mimetype: string;
-  updatedAt: string;
-}
 
 const recentFiles: FileItem[] = [
   {

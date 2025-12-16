@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Sidenav from '../../components/Sidenav';
-import Loginnav from '../../components/Loginnav';
-import Upload from '../../components/Upload';
-import Create from '../../components/Create';
-import FileTable from '../../components/FileTable';
+import Sidenav from '../components/Sidenav';
+import Loginnav from '../components/Loginnav';
+import Upload from '../components/Upload';
+import Create from '../components/Create';
+import FileTable from '../components/FileTable';
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
-import { FileItem } from '../../components/FileTable';
+import { FileItem } from '../components/FileTable';
 
 interface FileType {
   _id: string;
