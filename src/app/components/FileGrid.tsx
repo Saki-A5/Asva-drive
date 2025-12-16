@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { MoreHorizontal } from "lucide-react";
-import Fileicon from "./Fileicon";
-import { useSelection } from "@/context/SelectionContext";
-import { useHighlightable } from "@/hooks/useHighlightable";
+} from '@/components/ui/tooltip';
+import { MoreHorizontal } from 'lucide-react';
+import Fileicon from './Fileicon';
+import { useSelection } from '@/context/SelectionContext';
+import { useHighlightable } from '@/hooks/useHighlightable';
 
 export interface FileItem {
   id: string;
   name: string;
   type: string;
-  sharing?: string;
+  author?: string;
   size: string;
   modified?: string;
   sharedUsers?: string[];
@@ -27,7 +27,7 @@ interface FileGridItemProps {
 }
 
 export const capitalizeFirstLetter = (str: string) =>
-  str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
+  str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
 
 const FileGridItem: React.FC<FileGridItemProps> = ({ file }) => {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
@@ -39,9 +39,12 @@ const FileGridItem: React.FC<FileGridItemProps> = ({ file }) => {
     <div
       {...eventHandlers}
       className={`flex flex-col items-start p-4 rounded-xl shadow-sm transition h-[200px] gap-3 w-full cursor-pointer
-        ${selected ? "bg-[#0AFEF236] border border-blue-400" : "bg-white dark:bg-neutral-900 hover:shadow-md"}
-      `}
-    >
+        ${
+          selected
+            ? 'bg-[#0AFEF236] border border-blue-400'
+            : 'bg-white dark:bg-neutral-900 hover:shadow-md'
+        }
+      `}>
       {/* Top File Display */}
       <div className="w-full bg-black/10 h-[80%] flex justify-center items-center rounded-md relative">
         <TooltipProvider>
@@ -58,7 +61,10 @@ const FileGridItem: React.FC<FileGridItemProps> = ({ file }) => {
         </TooltipProvider>
 
         <div className="flex flex-col items-center text-sm font-bold">
-          <Fileicon type={file.type} isSheetPage={false}/>
+          <Fileicon
+            type={file.type}
+            isSheetPage={false}
+          />
           {capitalizeFirstLetter(file.type)}
         </div>
       </div>

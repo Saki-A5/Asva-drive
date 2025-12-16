@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Sidenav from '../components/Sidenav';
-import Loginnav from '../components/Loginnav';
-import Upload from '../components/Upload';
-import Create from '../components/Create';
-import FileTable from '../components/FileTable';
+import Sidenav from '../../components/Sidenav';
+import Loginnav from '../../components/Loginnav';
+import Upload from '../../components/Upload';
+import Create from '../../components/Create';
+import FileTable from '../../components/FileTable';
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
-import { FileItem } from '../components/FileTable';
+import { FileItem } from '../../components/FileTable';
 
 interface FileType {
   _id: string;
@@ -19,11 +19,11 @@ interface FileType {
   updatedAt: string;
 }
 
-const Files = () => {
+const Recent = () => {
   const [myFiles, setMyFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const userId = '67a93bc9f92a5b14e25c5123'; // replace later
+  const userId = '67a93bc9f92a5b14e25c5123'; // replace later with user object
 
   useEffect(() => {
     const getFiles = async () => {
@@ -36,7 +36,7 @@ const Files = () => {
             id: f._id,
             name: f.name,
             type: f.mimetype.split('/')[0], // "image", "pdf", "video"
-            sharing: 'Private',
+            author: 'SMS',
             size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
             modified: new Date(f.updatedAt).toDateString(),
             sharedUsers: [],
@@ -52,7 +52,7 @@ const Files = () => {
             id: '111222',
             name: 'Past Questions',
             type: 'folder',
-            sharing: 'Public',
+            author: 'Sciences',
             size: '1.2GB',
             modified: 'Jun 12, 2025',
             sharedUsers: [],
@@ -61,7 +61,7 @@ const Files = () => {
             id: '222333',
             name: 'C#/C++',
             type: 'folder',
-            sharing: 'Public',
+            author: 'Sciences',
             size: '2.7GB',
             modified: 'Oct 12, 2025',
             sharedUsers: [],
@@ -70,7 +70,7 @@ const Files = () => {
             id: '333444',
             name: 'MATLAB',
             type: 'folder',
-            sharing: 'Public',
+            author: 'Sciences',
             size: '5.2GB',
             modified: 'Jan 12, 2026',
             sharedUsers: [],
@@ -79,7 +79,7 @@ const Files = () => {
             id: '444555',
             name: 'Previous Work',
             type: 'pdf',
-            sharing: 'Public',
+            author: 'Sciences',
             size: '1.0GB',
             modified: 'Nov 8, 2025',
             sharedUsers: [],
@@ -88,7 +88,7 @@ const Files = () => {
             id: '555666',
             name: 'AutoCAD Workbook',
             type: 'folder',
-            sharing: 'Public',
+            author: 'Sciences',
             size: '320MB',
             modified: 'Yesterday',
             sharedUsers: [],
@@ -97,7 +97,7 @@ const Files = () => {
             id: '666777',
             name: 'Python',
             type: 'folder',
-            sharing: 'Shared',
+            author: 'Engineering',
             size: '1.2GB',
             modified: 'Apr 27, 2025',
             sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
@@ -106,7 +106,7 @@ const Files = () => {
             id: '777888',
             name: 'Past Questions',
             type: 'folder',
-            sharing: 'Public',
+            author: 'Sciences',
             size: '1.2GB',
             modified: 'Jun 12, 2025',
             sharedUsers: [],
@@ -115,7 +115,7 @@ const Files = () => {
             id: '888999',
             name: 'C#/C++',
             type: 'folder',
-            sharing: 'Public',
+            author: 'Sciences',
             size: '2.7GB',
             modified: 'Oct 12, 2025',
             sharedUsers: [],
@@ -124,7 +124,7 @@ const Files = () => {
             id: '999000',
             name: 'MATLAB',
             type: 'folder',
-            sharing: 'Public',
+            author: 'Sciences',
             size: '5.2GB',
             modified: 'Jan 12, 2026',
             sharedUsers: [],
@@ -133,7 +133,7 @@ const Files = () => {
             id: '112233',
             name: 'Previous Work',
             type: 'pdf',
-            sharing: 'Public',
+            author: 'Sciences',
             size: '1.0GB',
             modified: 'Nov 8, 2025',
             sharedUsers: [],
@@ -142,7 +142,7 @@ const Files = () => {
             id: '223344',
             name: 'AutoCAD Workbook',
             type: 'folder',
-            sharing: 'Public',
+            author: 'Sciences',
             size: '320MB',
             modified: 'Yesterday',
             sharedUsers: [],
@@ -151,7 +151,7 @@ const Files = () => {
             id: '445566',
             name: 'Python',
             type: 'folder',
-            sharing: 'Shared',
+            author: 'Engineering',
             size: '1.2GB',
             modified: 'Apr 27, 2025',
             sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
@@ -160,7 +160,7 @@ const Files = () => {
             id: '1122330',
             name: 'Previous Work',
             type: 'pdf',
-            sharing: 'Public',
+            author: 'Sciences',
             size: '1.0GB',
             modified: 'Nov 8, 2025',
             sharedUsers: [],
@@ -169,7 +169,7 @@ const Files = () => {
             id: '2233440',
             name: 'AutoCAD Workbook2',
             type: 'folder',
-            sharing: 'Public',
+            author: 'Sciences',
             size: '320MB',
             modified: 'Yesterday',
             sharedUsers: [],
@@ -178,7 +178,7 @@ const Files = () => {
             id: '4455660',
             name: 'Python',
             type: 'folder',
-            sharing: 'Shared',
+            author: 'Engineering',
             size: '1.2GB',
             modified: 'Apr 27, 2025',
             sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
@@ -220,7 +220,7 @@ const Files = () => {
   );
 };
 
-export default Files;
+export default Recent;
 
 const SortFilters = () => {
   const sortType: string[] = ['Type', 'Modified', 'Source', 'Shared'];
