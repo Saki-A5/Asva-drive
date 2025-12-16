@@ -16,6 +16,7 @@ import { auth } from "@/lib/firebaseClient"
 import { useRouter } from "next/navigation"
 import { getAuth, signOut } from "firebase/auth"
 import Link from "next/link"
+// import NotificationBell from "./NotificationBell"
 
 
 type User = {
@@ -101,6 +102,7 @@ const Loginnav = () => {
           <Link href="/settings"><Settings className="h-6 w-6 mt-2 text-foreground cursor-pointer"/></Link>
           {/* notifications */}
           <Bell className="h-6 w-6 mt-2 text-foreground cursor-pointer"/>
+          {/* <NotificationBell /> */}
             {/* User Menu */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
