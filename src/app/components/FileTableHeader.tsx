@@ -10,7 +10,7 @@ export default function FileTableHeader() {
           <span>Name</span>
           <ChevronDown className="h-6 w-6" />
         </TableHead>
-        <TableHead>Sharing</TableHead>
+        <TableHead>Author</TableHead>
         <TableHead>Size</TableHead>
         <TableHead>Modified</TableHead>
         <TableHead className="text-right"></TableHead>

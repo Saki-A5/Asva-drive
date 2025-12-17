@@ -7,11 +7,13 @@ type FileiconProps = {
   isSheetPage: boolean;
 };
 const Fileicon = ({ type, isSheetPage }: FileiconProps) => {
-  const sizeClass = isSheetPage ? "h-32 w-32" : "h-8 w-8";
+  const sizeClass = isSheetPage ? 'h-32 w-32' : 'h-8 w-8';
   switch (type) {
     case 'folder':
       return (
-        <Folder className={`${sizeClass} fill-current dark:text-[#0AFEF2] text-[#001f3f]`} />
+        <Folder
+          className={`${sizeClass} fill-current dark:text-[#0AFEF2] text-[#001f3f]`}
+        />
       );
     case 'pdf':
       return (
