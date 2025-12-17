@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { MoreHorizontal } from "lucide-react";
-import Fileicon from "./Fileicon";
-import { useSelection } from "@/context/SelectionContext";
-import { useHighlightable } from "@/hooks/useHighlightable";
+} from '@/components/ui/tooltip';
+import { MoreHorizontal } from 'lucide-react';
+import Fileicon from './Fileicon';
+import { useSelection } from '@/context/SelectionContext';
+import { useHighlightable } from '@/hooks/useHighlightable';
 
 export interface FileItem {
   id: string;
@@ -27,7 +27,7 @@ interface FileGridItemProps {
 }
 
 export const capitalizeFirstLetter = (str: string) =>
-  str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
+  str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
 
 const FileGridItem: React.FC<FileGridItemProps> = ({ file }) => {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
@@ -58,7 +58,10 @@ const FileGridItem: React.FC<FileGridItemProps> = ({ file }) => {
         </TooltipProvider>
 
         <div className="flex flex-col items-center text-sm font-bold">
-          <Fileicon type={file.type} isSheetPage={false}/>
+          <Fileicon
+            type={file.type}
+            isSheetPage={false}
+          />
           {capitalizeFirstLetter(file.type)}
         </div>
       </div>

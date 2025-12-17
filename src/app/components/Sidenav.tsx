@@ -36,11 +36,13 @@ const sidelinks: SideItem[] = [
   {
     label: 'Folders',
     links: [
-      { href: '#', label: 'Engineering', icon: Folder },
-      { href: '#', label: 'Law', icon: Folder },
-      { href: '#', label: 'SMS', icon: Folder },
-      { href: '#', label: 'Pharmacy', icon: Folder },
-      { href: '#', label: 'Sciences', icon: Folder },
+        { href: '#sciences', label: 'Sciences', icon: Folder },
+        { href: '#mhs', label: 'MHS', icon: Folder },
+        { href: '#law', label: 'Law', icon: Folder },
+        { href: '#sms', label: 'SMS', icon: Folder },
+        { href: '#engineering', label: 'Engineering', icon: Folder },
+        { href: '#pharamcy', label: 'Pharmacy', icon: Folder },
+
     ],
   },
 ];

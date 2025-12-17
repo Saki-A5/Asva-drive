@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef } from 'react';
 import {
   UploadIcon,
   X,
@@ -8,21 +8,21 @@ import {
   Dot,
   Loader,
   CircleCheck,
-} from "lucide-react";
-import Fileicon from "./Fileicon";
+} from 'lucide-react';
+import Fileicon from './Fileicon';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
 
-import { uploadToServer } from "@/utils/uploadToServer";
+import { uploadToServer } from '@/utils/uploadToServer';
 
 type UploadingFile = {
   name: string;
@@ -35,8 +35,7 @@ const Upload = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<UploadingFile[]>([]);
-  const [description, setDescription] = useState("");
-
+  const [description, setDescription] = useState('');
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
@@ -56,8 +55,8 @@ const Upload = () => {
       setLoading(true);
       const response = await uploadToServer({
         file: f.file,
-        folderId: "default-folder-id",
-        email: "user@example.com",
+        folderId: 'default-folder-id',
+        email: 'user@example.com',
       });
       console.log(response);
 
@@ -70,20 +69,22 @@ const Upload = () => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={setOpen}>
       {/* Trigger */}
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="bg-[#001f3f] text-white hover:bg-[#001f3f] dark:bg-white dark:text-black"
-        >
-          <UploadIcon className="mr-2 h-4 w-4" />
-          Upload
+          className="bg-[#001f3f] text-white hover:bg-[#001f3f] dark:bg-white dark:text-black">
+          <UploadIcon className="h-4 w-4" />
+          <span className="ml-2 hidden [@media(min-width:440px)]:inline-block">
+            Upload
+          </span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto rounded-xl [&>button]:hidden dark:bg-[#1A1E26]"
-      >
+      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto rounded-xl [&>button]:hidden dark:bg-[#1A1E26]">
         <DialogHeader className="flex flex-row items-center justify-between border-b-[#D9D9D961] border-b-[1px] pb-5 rounded-b-2xl dark:rounded-b-none dark:border-b-0">
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
             <div className="px-3 py-3 rounded-full border border-[#D9D9D999]">
@@ -99,8 +100,7 @@ const Upload = () => {
 
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="mt-4 flex flex-col items-center justify-center rounded-lg border border-dashed p-6 text-center cursor-pointer hover:bg-muted h-64"
-        >
+          className="mt-4 flex flex-col items-center justify-center rounded-lg border border-dashed p-6 text-center cursor-pointer hover:bg-muted h-64">
           <UploadIcon className="mb-2 h-6 w-6 text-muted-foreground" />
           <p className="font-medium">Choose a file or drag & drop it here</p>
           <p className="text-sm text-muted-foreground mt-1">
@@ -109,8 +109,7 @@ const Upload = () => {
 
           <Button
             variant="outline"
-            className="mt-3 dark:bg-white dark:text-black"
-          >
+            className="mt-3 dark:bg-white dark:text-black">
             Browse Files
           </Button>
 
@@ -138,16 +137,18 @@ const Upload = () => {
         {/* File progress */}
         <div className="mt-4 space-y-4 overflow-y-auto max-h-32">
           {files.map((file) => {
-            const extension = file.name.split(".").pop()?.toLowerCase();
+            const extension = file.name.split('.').pop()?.toLowerCase();
 
             return (
               <div
                 key={file.name}
-                className="mt-4 border py-3 px-3 rounded-xl border-[#E8E8E8] mb-5"
-              >
+                className="mt-4 border py-3 px-3 rounded-xl border-[#E8E8E8] mb-5">
                 <div className="flex justify-between text-sm mb-1">
                   <div className="flex items-center gap-1.5">
-                    <Fileicon isSheetPage={false} type={extension} />
+                    <Fileicon
+                      isSheetPage={false}
+                      type={extension}
+                    />
                     <span className="dark:text-[#0AFEF2] text-sm">
                       {file.name}
                     </span>
@@ -178,7 +179,10 @@ const Upload = () => {
                     </div>
                   )}
                 </div>
-                <Progress value={file.progress} className="" />
+                <Progress
+                  value={file.progress}
+                  className=""
+                />
               </div>
             );
           })}
