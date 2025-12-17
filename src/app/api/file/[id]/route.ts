@@ -1,52 +1,52 @@
 import { getAsset } from "@/lib/cloudinary";
 import dbConnect from "@/lib/dbConnect";
-import FileModel  from "@/models/files";
+import FileModel from "@/models/files";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 import User from "@/models/users";
+import { requireRole } from "@/lib/roles";
 
 export const runtime = 'nodejs';
 
-export const GET = async(req: Request, {params}: any) => {
-    const {id} = await params;
+export const GET = async (req: Request, { params }: any) => {
+    const { id } = await params;
     const fileId = new Types.ObjectId(id as string);
 
     await dbConnect();
-    const file = await FileModel.findOne({_id: fileId});
-    if(!file) return NextResponse.json({message: 'No Such File exists'}, {status: 404});
+    const file = await FileModel.findOne({ _id: fileId });
+    if (!file) return NextResponse.json({ message: 'No Such File exists' }, { status: 404 });
 
-    try{
+    try {
         await getAsset(file.cloudinaryUrl);
-        return NextResponse.json({message: "Successfully Retrieved Asset"});
+        return NextResponse.json({ message: "Successfully Retrieved Asset" });
     }
-    catch(e: any){
-        return NextResponse.json({message: e.message}, {status: 500})
+    catch (e: any) {
+        return NextResponse.json({ message: e.message }, { status: 500 })
     }
 
 }
 
 // delete a file
-export const DELETE = async(req: Request, {params}: any) => {
+export const DELETE = async (req: Request, { params }: any) => {
     try {
-        const email = "demo@gmail.com";
-        const user = await User.findOne({email});
-
         await dbConnect();
 
-        const {id} = await params;
+        const { user, error, status } = await requireRole(req, ['admin']);
+        if (error) return NextResponse.json({ error }, { status });
+        const { id } = await params;
         const fileId = new Types.ObjectId(id);
-        
-        const file = await FileModel.findOne({_id: fileId, ownerId: user._id});
-        if(!file) return NextResponse.json({message: "No File Found"}, {status: 404});
+
+        const file = await FileModel.findOne({ _id: fileId, ownerId: user._id });
+        if (!file) return NextResponse.json({ message: "No File Found" }, { status: 404 });
 
         await FileModel.findByIdAndUpdate(fileId, {
             isDeleted: true,
             deletedAt: new Date()
         });
 
-        return NextResponse.json({message: "Successfully Deleted File"}, {status: 200});
+        return NextResponse.json({ message: "Successfully Deleted File" }, { status: 200 });
     } catch (error) {
         console.error(error);
-        return NextResponse.json({message: (error as Error).message || "Internal Server Error"}, {status: 500});
+        return NextResponse.json({ message: (error as Error).message || "Internal Server Error" }, { status: 500 });
     }
 }
