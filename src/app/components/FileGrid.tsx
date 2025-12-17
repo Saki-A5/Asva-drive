@@ -16,7 +16,7 @@ export interface FileItem {
   id: string;
   name: string;
   type: string;
-  author?: string;
+  sharing?: string;
   size: string;
   modified?: string;
   sharedUsers?: string[];
@@ -39,12 +39,9 @@ const FileGridItem: React.FC<FileGridItemProps> = ({ file }) => {
     <div
       {...eventHandlers}
       className={`flex flex-col items-start p-4 rounded-xl shadow-sm transition h-[200px] gap-3 w-full cursor-pointer
-        ${
-          selected
-            ? 'bg-[#0AFEF236] border border-blue-400'
-            : 'bg-white dark:bg-neutral-900 hover:shadow-md'
-        }
-      `}>
+        ${selected ? "bg-[#0AFEF236] border border-blue-400" : "bg-white dark:bg-neutral-900 hover:shadow-md"}
+      `}
+    >
       {/* Top File Display */}
       <div className="w-full bg-black/10 h-[80%] flex justify-center items-center rounded-md relative">
         <TooltipProvider>
