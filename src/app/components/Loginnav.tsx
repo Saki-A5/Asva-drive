@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { auth } from "@/lib/firebaseClient"
