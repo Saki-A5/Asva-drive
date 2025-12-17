@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { Table, TableBody } from '@/components/ui/table';
-import { MoreHorizontal, LayoutGrid } from 'lucide-react';
+import { Table, TableBody } from "@/components/ui/table";
+import { MoreHorizontal, LayoutGrid } from "lucide-react";
 
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from '@/components/ui/tooltip';
-import FileTableRow from './FileTableRow';
-import FileTableHeader from './FileTableHeader';
+} from "@/components/ui/tooltip";
+import FileTableRow from "./FileTableRow";
+import FileTableHeader from "./FileTableHeader";
 
 // type File = {
 //   id: string;
@@ -54,64 +54,77 @@ type FileItem = {
   sharedUsers: string[];
 };
 
-export default function FileTable() {
-  const files: FileItem[] = [
+export default function FileTable({
+  files,
+  onSortClick,
+  sortKey,
+  ascending,
+}: {
+  files?: FileItem[];
+  onSortClick?: (key: "name" | "size" | "modified") => void;
+  sortKey?: "name" | "size" | "modified" | null;
+  ascending?: boolean;
+}) {
+  const initialFiles: FileItem[] = [
     {
-      id: '111222',
-      name: 'Past Questions',
-      type: 'folder',
-      sharing: 'Public',
-      size: '1.2GB',
-      modified: 'Jun 12, 2025',
+      id: "111222",
+      name: "Past Questions",
+      type: "folder",
+      sharing: "Public",
+      size: "1.2GB",
+      modified: "Jun 12, 2025",
       sharedUsers: [],
     },
     {
-      id: '222333',
-      name: 'C#/C++',
-      type: 'folder',
-      sharing: 'Public',
-      size: '2.7GB',
-      modified: 'Oct 12, 2025',
+      id: "222333",
+      name: "C#/C++",
+      type: "folder",
+      sharing: "Public",
+      size: "2.7GB",
+      modified: "Oct 12, 2025",
       sharedUsers: [],
     },
     {
-      id: '333444',
-      name: 'MATLAB',
-      type: 'folder',
-      sharing: 'Public',
-      size: '5.2GB',
-      modified: 'Jan 12, 2026',
+      id: "333444",
+      name: "MATLAB",
+      type: "folder",
+      sharing: "Public",
+      size: "5.2GB",
+      modified: "Jan 12, 2026",
       sharedUsers: [],
     },
     {
-      id: '444555',
-      name: 'Previous Work',
-      type: 'pdf',
-      sharing: 'Public',
-      size: '1.0GB',
-      modified: 'Nov 8, 2025',
+      id: "444555",
+      name: "Previous Work",
+      type: "pdf",
+      sharing: "Public",
+      size: "1.0GB",
+      modified: "Nov 8, 2025",
       sharedUsers: [],
     },
 
     {
-      id: '555666',
-      name: 'AutoCAD Workbook',
-      type: 'folder',
-      sharing: 'Public',
-      size: '320MB',
-      modified: 'Yesterday',
+      id: "555666",
+      name: "AutoCAD Workbook",
+      type: "folder",
+      sharing: "Public",
+      size: "320MB",
+      modified: "Yesterday",
       sharedUsers: [],
     },
     {
-      id: '666777',
-      name: 'Python',
-      type: 'folder',
-      sharing: 'Shared',
-      size: '1.2GB',
-      modified: 'Apr 27, 2025',
-      sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
+      id: "666777",
+      name: "Python",
+      type: "folder",
+      sharing: "Shared",
+      size: "1.2GB",
+      modified: "Apr 27, 2025",
+      sharedUsers: ["/avatars/user1.png", "/avatars/user2.png"],
     },
   ];
+
+  // prefer externally provided `files`; fallback to local initialFiles
+  const filesToRender = files ?? initialFiles;
 
   return (
     <div className="border border-gray-200 rounded-2xl p-5 h-auto text-base font-semibold">
@@ -142,13 +155,14 @@ export default function FileTable() {
       </div>
 
       <Table>
-        <FileTableHeader />
+        <FileTableHeader
+          onSortClick={onSortClick}
+          sortKey={sortKey}
+          ascending={ascending}
+        />
         <TableBody>
-          {files.map((file) => (
-            <FileTableRow
-              key={file.id}
-              file={file}
-            />
+          {filesToRender.map((file) => (
+            <FileTableRow key={file.id} file={file} />
           ))}
         </TableBody>
       </Table>
