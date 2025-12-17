@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { Table, TableBody } from '@/components/ui/table';
@@ -17,18 +17,15 @@ import {
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from "@/components/ui/tooltip";
-import {
-  Sheet,
-  SheetContent,
-} from "@/components/ui/sheet";
+} from '@/components/ui/tooltip';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 
-import FileTableRow from "./FileTableRow";
-import FileTableHeader from "./FileTableHeader";
-import FileGrid from "./FileGrid";
-import Fileicon from "./Fileicon";
-import SharingCell from "./SharingCell";
-import SelectionActionBar from "./SelectionActionBar";
+import FileTableRow from './FileTableRow';
+import FileTableHeader from './FileTableHeader';
+import FileGrid from './FileGrid';
+import Fileicon from './Fileicon';
+import SharingCell from './SharingCell';
+import SelectionActionBar from './SelectionActionBar';
 
 export type FileItem = {
   id: string;
@@ -48,37 +45,7 @@ interface FileTableProps {
 
 export default function FileTable({ files }: FileTableProps) {
   // useState to control the layout onClick
-  const [layout, setLayout] = useState("flex");
-
-  return (
-    <SelectionProvider>
-      <FileTableContent files={files} layout={layout} setLayout={setLayout} />
-    </SelectionProvider>
-  );
-}
-
-function FileTableContent({
-  files,
-  layout,
-  setLayout,
-}: {
-  files: FileItem[];
-  layout: string;
-  setLayout: React.Dispatch<React.SetStateAction<string>>;
-}) {
-  const { selectedItems, clearSelection } = useSelection();
-
-  const [sheetOpen, setSheetOpen] = useState(false);
-
-  useEffect(() => {
-    if (selectedItems.length === 1) {
-      setSheetOpen(true);
-    } else {
-      setSheetOpen(false);
-    }
-  }, [selectedItems.length]);
-
-  console.log(selectedItems);
+  const [layout, setLayout] = useState('flex');
 
   return (
     <SelectionProvider>
@@ -86,7 +53,6 @@ function FileTableContent({
         files={files}
         layout={layout}
         setLayout={setLayout}
-        header={header}
       />
     </SelectionProvider>
   );
