@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export const runtime = 'nodejs';
 
-export const POST = async (req: Request, { params }: any) => {
+export const GET = async (req: Request, { params }: any) => {
     try {
         const { id } = await params;
 
