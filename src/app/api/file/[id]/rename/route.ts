@@ -1,3 +1,4 @@
+import { renameAsset } from "@/lib/cloudinary";
 import dbConnect from "@/lib/dbConnect";
 import { requireRole } from "@/lib/roles";
 import FileModel from "@/models/files";
@@ -11,17 +12,19 @@ export const POST = async (req: NextRequest, {params}: {params:{id: string}}) =>
     try {
         await dbConnect();
 
-        const {user, error, status} = await requireRole(req, ['admin']);
-        if(error) return NextResponse.json({error}, {status});
+        // const {user, error, status} = await requireRole(req, ['admin']);
+        // if(error) return NextResponse.json({error}, {status});
 
         const { filename } = await req.json();
         
-        const id = params.id;
+        const {id} = (await params);
 
         const fileId = new Types.ObjectId(id);
 
         const file = await FileModel.findOne({_id: fileId});
         if(!file) return NextResponse.json({message: "File Does not Exist"}, {status: 404});
+
+        await renameAsset(file.cloudinaryUrl, file.parentFolderId, filename as string);
 
         await FileModel.updateOne({_id: file._id}, {$set: {filename: filename as string}});
 

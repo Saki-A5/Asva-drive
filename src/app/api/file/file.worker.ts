@@ -12,9 +12,9 @@ const handleFolderDeletion = async (folderId: Types.ObjectId) => {
         await Promise.all(
             descendantFiles.map(async (id) => {
                 const file = await FileModel.findById(id)
-                    .select("cloudinaryPublicId")
-                    .lean() as { cloudinaryPublicId?: string } | null;
-                return file?.cloudinaryPublicId ?? null;
+                    .select("cloudinaryUrl")
+                    .lean() as { cloudinaryUrl?: string } | null;
+                return file?.cloudinaryUrl ?? null;
             })
         )
     ).filter((p): p is string => p !== null);
@@ -37,7 +37,7 @@ const handleFileDeletion = async (fileId: Types.ObjectId) => {
         const file = await FileModel.findOne({ _id: fileId });
         if (!file) throw new Error("[File-Deletion] File Not Found");
 
-        const result = await deleteAsset(file.cloudinaryPublicId, file.resourceType);
+        const result = await deleteAsset(file.cloudinaryUrl, file.resourceType);
         if (result.error) {
             throw new Error(`[File Deletion] ${result.error}`);
         };
