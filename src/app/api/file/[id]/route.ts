@@ -1,4 +1,4 @@
-import { getAsset } from "@/lib/cloudinary";
+import { getAsset, getAssetDeliveryUrl } from "@/lib/cloudinary";
 import dbConnect from "@/lib/dbConnect";
 import FileModel from "@/models/files";
 import { Types } from "mongoose";
@@ -18,8 +18,12 @@ export const GET = async (req: Request, { params }: any) => {
     if (!file) return NextResponse.json({ message: 'No Such File exists' }, { status: 404 });
 
     try {
-        await getAsset(file.cloudinaryUrl);
-        return NextResponse.json({ message: "Successfully Retrieved Asset" });
+        const signedUrl = getAssetDeliveryUrl(file.cloudinarUrl, {
+            attachment: false, 
+            resource_type: file.resourceType, 
+            secure: true
+        });
+        return NextResponse.json({ message: "Successfully Retrieved Asset", file, signedUrl});
     }
     catch (e: any) {
         return NextResponse.json({ message: e.message }, { status: 500 })

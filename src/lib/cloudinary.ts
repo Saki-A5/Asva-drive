@@ -1,4 +1,4 @@
-import { v2 as cloudinary, UploadApiOptions, UploadApiResponse } from 'cloudinary'
+import { v2 as cloudinary, ConfigAndUrlOptions, TransformationOptions, UploadApiOptions, UploadApiResponse } from 'cloudinary'
 import { Types } from 'mongoose';
 import FileModel from '@/models/files';
 
@@ -53,6 +53,7 @@ export async function uploadFile(filename: string, file: string | Buffer, parent
         public_id: formattedFilename,
         unique_filename: false,
         resource_type: 'auto',
+        type: 'authenticated'   // makes sure that access to the folder isn't public
     };
 
     try {
@@ -70,6 +71,8 @@ export async function uploadFile(filename: string, file: string | Buffer, parent
                 );
                 uploadStream.end(file);
             });
+
+            console.log(`result: ${JSON.stringify(result)}`)
         } else {
             // Upload from HTTPS URL directly
             result = await cloudinary.uploader.upload(file, options);
@@ -149,4 +152,17 @@ export async function renameAsset(publicId: string, parentFolderId: Types.Object
     catch (e:any) {
         throw new Error(e.message || 'Error renaming file');
     }
+}
+
+export function getAssetDeliveryUrl(publicId: string, options: ConfigAndUrlOptions){
+    const signedUrl = cloudinary.url(publicId, {
+        resource_type: options.resource_type, 
+        type: options.type, 
+        sign_url: options.sign_url, 
+        secure: options.secure, 
+        expires_at: options.expires_at, 
+        attachment: options.attachment,
+    });
+
+    return signedUrl;
 }
