@@ -19,11 +19,11 @@ interface FileType {
   updatedAt: string;
 }
 
-const Recent = () => {
+const Starred = () => {
   const [myFiles, setMyFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const userId = '67a93bc9f92a5b14e25c5123'; // replace later with user object
+  const userId = '67a93bc9f92a5b14e25c5123'; // replace later
 
   useEffect(() => {
     const getFiles = async () => {
@@ -47,6 +47,7 @@ const Recent = () => {
       } catch (error) {
         console.error('Error fetching files:', error);
       } finally {
+        // Change this when the cloudhinary from Daniel data has been resolved
         setMyFiles([
           {
             id: '111222',
@@ -196,7 +197,7 @@ const Recent = () => {
       <Loginnav />
       <div className="px-6 flex flex-col flex-1 min-h-0">
         <div className="flex-between gap-2">
-          <h1 className="font-bold text-xl whitespace-nowrap">Recent</h1>
+          <h1 className="font-bold text-xl whitespace-nowrap">Starred</h1>
 
           <div className="flex space-x-2 gap-y-2">
             <Upload />
@@ -211,7 +212,10 @@ const Recent = () => {
             <div className="text-gray-500">Loading files...</div>
           ) : (
             <div className="flex-1 h-full">
-              <FileTable files={myFiles} />
+              <FileTable
+                files={myFiles}
+                header="Starred"
+              />
             </div>
           )}
         </div>
@@ -220,7 +224,7 @@ const Recent = () => {
   );
 };
 
-export default Recent;
+export default Starred;
 
 const SortFilters = () => {
   const sortType: string[] = ['Type', 'Modified', 'Source', 'Shared'];

@@ -1,14 +1,14 @@
-"use client"
-import React from "react";
-import { useHighlightable } from "@/hooks/useHighlightable";
-import { TableCell, TableRow } from "@/components/ui/table";
+'use client';
+import React from 'react';
+import { useHighlightable } from '@/hooks/useHighlightable';
+import { TableCell, TableRow } from '@/components/ui/table';
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import SharingCell from "./SharingCell";
+import AuthorCell from "./AuthorCell";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import Fileicon from "./Fileicon";
@@ -17,7 +17,7 @@ type FileItem = {
   id: string;
   name: string;
   type: string;
-  sharing: string;
+  author: string;
   size: string;
   modified: string;
   sharedUsers: string[];
@@ -31,18 +31,24 @@ export default function FileTableRow({ file }: { file: FileItem }) {
         {...eventHandlers}
         className={`
           transition cursor-pointer !border-b-0
-          ${isSelected ? "bg-[#0AFEF236] !border-b-0 hover:bg-0" : "hover:bg-muted/40 transition !border-b-0 cursor-pointer"}
-        `}
-      >
+          ${
+            isSelected
+              ? 'bg-[#0AFEF236] !border-b-0 hover:bg-0'
+              : 'hover:bg-muted/40 transition !border-b-0 cursor-pointer'
+          }
+        `}>
         <TableCell className="rounded-l-lg">
           <div className="flex items-center gap-3">
-            <Fileicon type={file.type} isSheetPage={false}/>
+            <Fileicon
+              type={file.type}
+              isSheetPage={false}
+            />
             <span className="font-medium">{file.name}</span>
           </div>
         </TableCell>
 
         <TableCell>
-          <SharingCell sharing={file.sharing} sharedUsers={file.sharedUsers} />
+          <AuthorCell author={file.author} />
         </TableCell>
 
         <TableCell className="text-muted-foreground">{file.size}</TableCell>
@@ -52,7 +58,9 @@ export default function FileTableRow({ file }: { file: FileItem }) {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button
+                  variant="ghost"
+                  size="icon">
                   <MoreHorizontal className="w-4 h-4 dark:text-[#0AFEF2] text-[#050E3F]" />
                 </Button>
               </TooltipTrigger>
@@ -66,7 +74,10 @@ export default function FileTableRow({ file }: { file: FileItem }) {
 
       {/* Spacer row */}
       <TableRow className="pointer-events-none !border-b-0">
-        <TableCell colSpan={5} className="h-[2px]" />
+        <TableCell
+          colSpan={5}
+          className="h-[2px]"
+        />
       </TableRow>
     </>
   );
