@@ -1,4 +1,5 @@
 import dbConnect from "@/lib/dbConnect";
+import { fileQueue } from "@/lib/queue";
 import { requireRole } from "@/lib/roles";
 import FileModel from "@/models/files";
 import User from "@/models/users";
@@ -7,8 +8,9 @@ import { NextResponse } from "next/server";
 
 export const runtime = 'nodejs';
 
-async function getAllDescendantIds(folderId: Types.ObjectId) {
-  const descendants = [];
+export async function getAllDescendantIds(folderId: Types.ObjectId) {
+  const descendantFolders = [];
+  const descendantFiles = [];
   const queue = [folderId];
 
   while (queue.length > 0) {
@@ -20,30 +22,32 @@ async function getAllDescendantIds(folderId: Types.ObjectId) {
     }).select('_id isFolder');
 
     for (const child of children) {
-      descendants.push(child._id);
       if (child.isFolder) {
+        descendantFolders.push(child._id);
         queue.push(child._id); // Add folders to queue for further traversal
+      } else {
+        descendantFiles.push(child._id);
       }
     }
   }
 
-  return descendants;
+  return { descendantFolders, descendantFiles };
 }
 
-async function deleteFileOrFolder(fileId: Types.ObjectId) {
+async function deleteFolder(fileId: Types.ObjectId) {
   const file = await FileModel.findById(fileId);
 
   if (!file) {
-    throw new Error('File not found');
+    throw new Error('Folder not found');
   }
 
   if (file.isFolder) {
     // Get all descendant IDs
-    const descendantIds = await getAllDescendantIds(fileId);
+    const {descendantFiles, descendantFolders} = await getAllDescendantIds(fileId);
 
     // Bulk soft delete all descendants
     await FileModel.updateMany(
-      { _id: { $in: descendantIds } },
+      { _id: { $in: descendantFiles.concat(descendantFolders) } },
       { isDeleted: true, deletedAt: new Date() }
     );
   }
@@ -102,7 +106,22 @@ export const DELETE = async (req: Request, { params }: any) => {
     const folder = await FileModel.findOne({ _id: folderId, isFolder: true, ownerId: user._id });
     if (!folder) return NextResponse.json({ message: "No Folder Found" }, { status: 404 });
 
-    await deleteFileOrFolder(folderId);
+    await deleteFolder(folderId);
+    const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW) || 28;
+    const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
+    await fileQueue.add(
+      'delete-folder', 
+      {
+        id: folderId
+      }, 
+      {
+        delay, 
+        attempts: 5, 
+        backoff: {type: 'exponential', delay: 1000}, 
+        removeOnComplete: true, 
+        jobId: `delete-folder-${folderId}`
+      }
+    )
 
     return NextResponse.json({ message: "Successfully Deleted Folder" }, { status: 200 });
   } catch (error) {

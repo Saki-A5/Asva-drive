@@ -107,3 +107,37 @@ export async function getAsset(publicId: string): Promise<any | null> {
 }
 
 
+export async function deleteAsset(publicId: string, resourceType: string): Promise<{succeeded: boolean, error?: string}>{
+    try{
+        const result = await cloudinary.uploader.destroy(publicId, {resource_type: resourceType});
+        console.log(result);
+        return {
+            succeeded: true
+        }
+    }
+    catch(e: any){
+        console.error('Cloudinary destroy error: ', e);
+        return {
+            succeeded: false, 
+            error: e.message || "Error While Destroying Asset",
+        }
+    }
+}
+
+export async function deleteAssets(publicIds: string[]): Promise<{succeeded: boolean, error?: false}>{
+    try{
+        const result = await cloudinary.api.delete_resources(publicIds);
+        console.log(result);
+
+        return {
+            succeeded: true
+        }
+    }
+    catch(e: any){
+        console.error("Cloudinary delete resources error: ", e);
+        return {
+            succeeded: false, 
+            error: e.message || "Error while destroying assets"
+        }
+    }
+}

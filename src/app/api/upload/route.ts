@@ -66,7 +66,7 @@ export const POST = async (req: Request) => {
       cloudinaryUrl: result.public_id,
       ownerId: new Types.ObjectId(user._id),
       resourceType: result.resource_type, // default for now
-      mimeType: result.format,
+      mimeType: file.type,
       sizeBytes: result.bytes,
       tags: tags
     });

@@ -5,6 +5,7 @@ import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 import User from "@/models/users";
 import { requireRole } from "@/lib/roles";
+import { fileQueue } from "@/lib/queue";
 
 export const runtime = 'nodejs';
 
@@ -43,6 +44,21 @@ export const DELETE = async (req: Request, { params }: any) => {
             isDeleted: true,
             deletedAt: new Date()
         });
+
+        // add the deleted file to the deleted queue so that 
+        const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW);
+        const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
+        await fileQueue.add(
+            'delete-file', 
+            {id: fileId}, 
+            {   
+                delay,
+                attempts: 5, 
+                backoff: {type: 'exponential', delay: 1000}, 
+                removeOnComplete: true, 
+                jobId: `delete-file-${fileId}`
+            }
+        )
 
         return NextResponse.json({ message: "Successfully Deleted File" }, { status: 200 });
     } catch (error) {
