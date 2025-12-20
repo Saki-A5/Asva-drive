@@ -11,5 +11,6 @@ const connection = {
 }
 
 export const indexQueue = new Queue('indexing', { connection })
+export const fileQueue = new Queue('file', {connection});   // handle the deletion of files after 28 days
 
 export { connection }
