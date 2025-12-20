@@ -1,4 +1,4 @@
-import { v2 as cloudinary, UploadApiOptions, UploadApiResponse } from 'cloudinary'
+import { v2 as cloudinary, ConfigAndUrlOptions, TransformationOptions, UploadApiOptions, UploadApiResponse } from 'cloudinary'
 import { Types } from 'mongoose';
 import FileModel from '@/models/files';
 
@@ -38,22 +38,22 @@ export async function uploadFile(filename: string, file: Buffer, folderId: Types
 
 export async function uploadFile(filename: string, file: string, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
 
-export async function uploadFile(filename: string, file: string | Buffer, parentFolderId: Types.ObjectId, ownerId: Types.ObjectId, tags: string[] = [], destFolder: string = ''): Promise<UploadApiResponse | null> {
+export async function uploadFile(filename: string, file: string | Buffer, parentFolderId: Types.ObjectId, collegeId: Types.ObjectId, tags: string[] = [], destFolder: string = ''): Promise<UploadApiResponse | null> {
 
     if (typeof file === 'string' && /^data:.*;base64,/.test(file)) {
         throw new Error('Base64 files are not allowed');
     }
 
-    const folderLocation = `${ownerId.toString()}/${destFolder}`;
+    const folderLocation = `${collegeId.toString()}/${destFolder}`;
 
     const formattedFilename = formatFilename(filename, parentFolderId.toString());
     const options: UploadApiOptions = {
         overwrite: true,
         asset_folder: folderLocation,
         public_id: formattedFilename,
-        use_filename: true,
         unique_filename: false,
         resource_type: 'auto',
+        type: 'authenticated'   // makes sure that access to the folder isn't public
     };
 
     try {
@@ -71,6 +71,8 @@ export async function uploadFile(filename: string, file: string | Buffer, parent
                 );
                 uploadStream.end(file);
             });
+
+            console.log(`result: ${JSON.stringify(result)}`)
         } else {
             // Upload from HTTPS URL directly
             result = await cloudinary.uploader.upload(file, options);
@@ -107,3 +109,60 @@ export async function getAsset(publicId: string): Promise<any | null> {
 }
 
 
+export async function deleteAsset(publicId: string, resourceType: string): Promise<{ succeeded: boolean, error?: string }> {
+    try {
+        const result = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+        console.log(result);
+        return {
+            succeeded: true
+        }
+    }
+    catch (e: any) {
+        console.error('Cloudinary destroy error: ', e);
+        return {
+            succeeded: false,
+            error: e.message || "Error While Destroying Asset",
+        }
+    }
+}
+
+export async function deleteAssets(publicIds: string[]): Promise<{ succeeded: boolean, error?: false }> {
+    try {
+        const result = await cloudinary.api.delete_resources(publicIds);
+        console.log(result);
+
+        return {
+            succeeded: true
+        }
+    }
+    catch (e: any) {
+        console.error("Cloudinary delete resources error: ", e);
+        return {
+            succeeded: false,
+            error: e.message || "Error while destroying assets"
+        }
+    }
+}
+
+export async function renameAsset(publicId: string, parentFolderId: Types.ObjectId, newFilename: string) {
+    try {
+        const formattedFilename = formatFilename(newFilename, parentFolderId.toString());
+        const result = await cloudinary.uploader.rename(publicId, formattedFilename);
+    }
+    catch (e:any) {
+        throw new Error(e.message || 'Error renaming file');
+    }
+}
+
+export function getAssetDeliveryUrl(publicId: string, options: ConfigAndUrlOptions){
+    const signedUrl = cloudinary.url(publicId, {
+        resource_type: options.resource_type, 
+        type: options.type, 
+        sign_url: options.sign_url, 
+        secure: options.secure, 
+        expires_at: options.expires_at, 
+        attachment: options.attachment,
+    });
+
+    return signedUrl;
+}
