@@ -5,7 +5,7 @@ import { adminAuth } from "@/lib/firebaseAdmin";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/users";
 
-export async function POST(req: Request) {
+export const POST = async (req: Request) => {
   try {
     const { idToken } = await req.json();
 
