@@ -52,7 +52,7 @@ export const DELETE = async (req: Request, { params }: any) => {
         });
 
         // add the deleted file to the deleted queue so that 
-        const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW);
+        const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW) || 28;
         const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
         await fileQueue.add(
             'delete-file', 

@@ -28,6 +28,8 @@ const handleFolderDeletion = async (folderId: Types.ObjectId) => {
 
     // delete the files and folders
     await FileModel.deleteMany({ id: { $in: descendantFiles.concat(descendantFolders) } });
+    // also delete the folder
+    await FileModel.findByIdAndDelete(folderId);
 
     return true;
 }

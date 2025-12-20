@@ -43,8 +43,12 @@ async function deleteFolder(fileId: Types.ObjectId) {
 
   if (file.isFolder) {
     // Get all descendant IDs
-    const {descendantFiles, descendantFolders} = await getAllDescendantIds(fileId);
+    const { descendantFiles, descendantFolders } = await getAllDescendantIds(fileId);
 
+    if (descendantFiles.length === 0) {// if the folder is empty contains empty folders permanently delete it
+      await FileModel.findByIdAndDelete(fileId);
+      return { success: true, isEmpty: true }
+    }
     // Bulk soft delete all descendants
     await FileModel.updateMany(
       { _id: { $in: descendantFiles.concat(descendantFolders) } },
@@ -58,7 +62,7 @@ async function deleteFolder(fileId: Types.ObjectId) {
     deletedAt: new Date()
   });
 
-  return { success: true };
+  return { success: true, isEmpty: false };
 }
 
 
@@ -106,22 +110,24 @@ export const DELETE = async (req: Request, { params }: any) => {
     const folder = await FileModel.findOne({ _id: folderId, isFolder: true, ownerId: user._id });
     if (!folder) return NextResponse.json({ message: "No Folder Found" }, { status: 404 });
 
-    await deleteFolder(folderId);
+    const { isEmpty } = await deleteFolder(folderId);
     const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW) || 28;
     const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
-    await fileQueue.add(
-      'delete-folder', 
-      {
-        id: folderId
-      }, 
-      {
-        delay, 
-        attempts: 5, 
-        backoff: {type: 'exponential', delay: 1000}, 
-        removeOnComplete: true, 
-        jobId: `delete-folder-${folderId}`
-      }
-    )
+    if (!isEmpty) { // only add folders to the queue if they are not empty
+      await fileQueue.add(
+        'delete-folder',
+        {
+          id: folderId
+        },
+        {
+          delay,
+          attempts: 5,
+          backoff: { type: 'exponential', delay: 1000 },
+          removeOnComplete: true,
+          jobId: `delete-folder-${folderId}`
+        }
+      )
+    }
 
     return NextResponse.json({ message: "Successfully Deleted Folder" }, { status: 200 });
   } catch (error) {
