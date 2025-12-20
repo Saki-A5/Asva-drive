@@ -13,7 +13,8 @@ export const GET = async (req: Request) => {
   if (!ownerId)
     return NextResponse.json({ message: 'Missing ownerId' }, { status: 400 });
 
-  const files = await FileModel.find({ owner: ownerId }).sort({
+  const rootFolder = await FileModel.findOne({ownerId, isRoot: true});
+  const files = await FileModel.find({ ownerId,parentFolderId: rootFolder._id}).sort({
     createdAt: -1,
   });
 

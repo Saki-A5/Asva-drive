@@ -15,7 +15,12 @@ const fileSchema = new Schema({
     sizeBytes: {type: Number, default: 0}, 
     tags: {type: [String], default:[]}, 
     isDeleted: {type: Boolean, default: false}, 
-    deletedAt: {type: Date, default: null}  
+    deletedAt: {type: Date, default: null}, 
+    reference: {
+        isReference: {required: true, default: false, type: Boolean}, 
+        referencedFile: {default: null, type: Types.ObjectId}
+    }, 
+    college: {type: Types.ObjectId, required: true, ref: 'College'}
 
 }, {timestamps: true});
 

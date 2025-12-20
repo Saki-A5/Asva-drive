@@ -57,7 +57,7 @@ export const POST = async (req: Request) => {
       file.name,
       fileBuffer,
       new Types.ObjectId(folderId),
-      user._id,
+      user.collegeId,
       tags,
     );
 

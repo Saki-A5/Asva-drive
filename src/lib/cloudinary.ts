@@ -38,13 +38,13 @@ export async function uploadFile(filename: string, file: Buffer, folderId: Types
 
 export async function uploadFile(filename: string, file: string, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
 
-export async function uploadFile(filename: string, file: string | Buffer, parentFolderId: Types.ObjectId, ownerId: Types.ObjectId, tags: string[] = [], destFolder: string = ''): Promise<UploadApiResponse | null> {
+export async function uploadFile(filename: string, file: string | Buffer, parentFolderId: Types.ObjectId, collegeId: Types.ObjectId, tags: string[] = [], destFolder: string = ''): Promise<UploadApiResponse | null> {
 
     if (typeof file === 'string' && /^data:.*;base64,/.test(file)) {
         throw new Error('Base64 files are not allowed');
     }
 
-    const folderLocation = `${ownerId.toString()}/${destFolder}`;
+    const folderLocation = `${collegeId.toString()}/${destFolder}`;
 
     const formattedFilename = formatFilename(filename, parentFolderId.toString());
     const options: UploadApiOptions = {
