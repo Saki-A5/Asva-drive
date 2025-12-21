@@ -41,5 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 secrets/
+
+# virtual env
 asva-core/
 
