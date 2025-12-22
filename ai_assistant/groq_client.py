@@ -40,13 +40,14 @@ class GroqClient:
     def __init__(
             self,
             api_key: str,
-            base_url: str = "https://api.groq.com/openai/v1",
+            base_url: str = "https://api.groq.com/openai/v1",  # <- no space,
+
             timeout: int = 30,
             max_retries: int = 5,
 
     ):
         self.api_key = api_key
-        self.base_url = base_url
+        self.base_url = base_url.strip()
         self.timeout = timeout
         self.max_retries = max_retries
         self.client = httpx.AsyncClient(
@@ -72,7 +73,7 @@ class GroqClient:
 
     async def generate_completion(self,
                                   messages: List[Dict[str, str]],
-                                  model: str = "mixtral-8x7b-32768",
+                                  model: str = "meta-llama/llama-4-maverick-17b-128e-instruct",
                                   temperature: float = 0.7,
                                   max_tokens: int = 2048,
                                   top_p: float = 1.0,
@@ -125,8 +126,8 @@ class GroqClient:
                     await asyncio.sleep(2 ** attempt)
                     continue
                 error_detail = self._extract_error_detail(e.response)
-                logger.error("GRoq API Error:", error_detail)
-                raise GroqAPIError(f"API request failed:", error_detail)
+                logger.error(f"Request Error: {str(e)}")
+                raise GroqAPIError(f"API request failed: {error_detail}")
 
 
             except httpx.RequestError as e:
@@ -142,7 +143,7 @@ class GroqClient:
     async def generate_streaming(
             self,
             messages: List[Dict[str, str]],
-            model: str = "mixtral-8X7b-32768",
+            model: str = "meta-llama/llama-4-maverick-17b-128e-instruct",
             temperature: float = 0.7,
             max_tokens: int = 2048,
             **kwargs
@@ -185,14 +186,13 @@ class GroqClient:
                         try:
                             chunk = json.loads(data)
                             yield chunk
-                        except json.JSONDecoderError:
+                        except json.JSONDecodeError:
                             logger.warning(f"Failed to parse streaming chunk: {data}")
                             continue
         except httpx.HTTPStatusError as e:
-            error_detail = self._extract_error_detail(e.response)
-            raise GroqAPIError(f"Streaming failed {error_detail}")
+            raise GroqAPIError(f"Streaming failed: {e.response.status_code} {e.response.reason_phrase}")
 
-    async def count_tokens(self, text: str, model: str = "mixtral-8x7b-32768"):
+    async def count_tokens(self, text: str, model: str = "meta-llama/llama-4-maverick-17b-128e-instruct"):
         """
         Estimate no of tokens for a particular text
         Args:
@@ -213,7 +213,7 @@ class GroqClient:
         """
         return [
             {
-                "id": "mixtral-8x7b-32768",
+                "id": "meta-llama/llama-4-maverick-17b-128e-instruct",
                 "name": "Mixtral 8x7B",
                 "context_window": 32768,
                 "description": "Fast, balanced model for general use"
