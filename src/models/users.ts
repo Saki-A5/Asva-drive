@@ -1,4 +1,4 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, Types, model, models } from "mongoose";
 
 const userSchema = new Schema(
   {
@@ -8,6 +8,7 @@ const userSchema = new Schema(
     role: { type: String, enum: ["admin", "user"], default: "user" },
     firebaseUid: { type: String, unique: true, sparse: true },
     authProvider: { type: String, enum: ["google", "email"], default: "email" },
+    collegeId: {type: Types.ObjectId, ref: 'College'}
   },
   { timestamps: true }
 );

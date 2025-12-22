@@ -1,4 +1,3 @@
-// src/app/api/refresh/route.ts
 import { NextResponse } from "next/server"
 import { adminAuth } from "@/lib/firebaseAdmin"
 
