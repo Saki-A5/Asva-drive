@@ -24,8 +24,8 @@ import FileTableRow from './FileTableRow';
 import FileTableHeader from './FileTableHeader';
 import FileGrid from './FileGrid';
 import Fileicon from './Fileicon';
-import SharingCell from './SharingCell';
 import SelectionActionBar from './SelectionActionBar';
+import AuthorCell from './AuthorCell';
 
 export type FileItem = {
   id: string;

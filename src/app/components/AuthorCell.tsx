@@ -30,6 +30,6 @@
 
 import React from 'react';
 
-export default function SharingCell({ author }: { author: string }) {
+export default function AuthorCell({ author }: { author: string }) {
   return <span className="text-muted-foreground">{author}</span>;
 }
