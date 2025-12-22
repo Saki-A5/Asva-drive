@@ -24,7 +24,7 @@ import FileTableRow from './FileTableRow';
 import FileTableHeader from './FileTableHeader';
 import FileGrid from './FileGrid';
 import Fileicon from './Fileicon';
-import SharingCell from './SharingCell';
+// import SharingCell from './SharingCell';
 import SelectionActionBar from './SelectionActionBar';
 
 export type FileItem = {
@@ -235,7 +235,7 @@ function FileTableContent({
 
                   <div className="w-full max-w-[320px] mt-6">
                     <h3 className="font-bold text-[20px]">Shared by</h3>
-                    <AuthorCell author={file.author} />
+                    {/* <AuthorCell author={file.author} /> */}
                   </div>
                 </div>
               </SheetContent>
