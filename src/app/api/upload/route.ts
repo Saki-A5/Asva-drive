@@ -71,7 +71,8 @@ export const POST = async (req: Request) => {
       resourceType: result.resource_type, // default for now
       mimeType: file.type,
       sizeBytes: result.bytes,
-      tags: tags
+      tags: tags, 
+      college: user.collegeId
     });
 
     await cFile.save();

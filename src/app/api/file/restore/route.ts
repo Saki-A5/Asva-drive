@@ -48,6 +48,8 @@ export const POST = async(req: Request) => {
 
             // restore the file
             await FileModel.findByIdAndUpdate(fileId, {$set: {isDeleted: false, deletedAt: null}});
+            // restore referenced files
+            await FileModel.updateMany({"reference.referencedFile": fileId}, {$set: {isDeleted: false, deletedAt: null}})
         }
 
         return NextResponse.json({message: "File has been successfully restored"});

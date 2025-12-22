@@ -28,7 +28,8 @@ export const POST = async (req: Request) => {
             filename: folderName, 
             parentFolderId: parentFolderId, 
             ownerId,
-        })
+            ...(owner.role === "admin" && {college: owner.collegeId})
+        });
 
         return NextResponse.json({
             message: 'Folder successfully created', 

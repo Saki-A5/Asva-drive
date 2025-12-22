@@ -45,6 +45,8 @@ const handleFileDeletion = async (fileId: Types.ObjectId) => {
         };
 
         await FileModel.deleteOne({ _id: file._id });
+        // also delete all references
+        await FileModel.deleteMany({"reference.referencedFile": file._id});
 
         console.log(`[File-Deletion] successfully deleted file`);
         return true;

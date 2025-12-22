@@ -50,6 +50,8 @@ export const DELETE = async (req: Request, { params }: any) => {
             isDeleted: true,
             deletedAt: new Date()
         });
+        // also delete all referenced Files
+        await FileModel.updateMany({"reference.referencedFile": fileId}, {$set: {isDeleted: true, deletedAt: Date.now()}});
 
         // add the deleted file to the deleted queue so that 
         const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW) || 28;
