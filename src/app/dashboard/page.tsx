@@ -219,10 +219,12 @@ const Dashboard = () => {
             {loading ? (
               <div className="text-gray-500">Loading files...</div>
             ) : (
-              <FileTable
-                files={starredFiles}
-                header="Starred"
-              />
+              <div className="flex-1 sm:h-full">
+                <FileTable
+                  files={starredFiles}
+                  header="Starred"
+                />
+              </div>
             )}
           </div>
         </div>

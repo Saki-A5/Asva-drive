@@ -37,7 +37,7 @@ export default function FileTableRow({ file }: { file: FileItem }) {
 
   return (
     <>
-      <TableRow
+      {/* <TableRow
         {...eventHandlers}
         className={`
           transition cursor-pointer !border-b-0
@@ -84,7 +84,6 @@ export default function FileTableRow({ file }: { file: FileItem }) {
                 </TooltipContent>
 
                 <DropdownMenuContent align="end">
-                  {/* SHARE SUBMENU */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
                       <Share2 className="mr-2 h-4 w-4" />
@@ -112,7 +111,6 @@ export default function FileTableRow({ file }: { file: FileItem }) {
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
 
-                  {/* DELETE */}
                   <DropdownMenuItem
                     className="text-red-600 focus:text-red-600"
                     onClick={(e) => {
@@ -126,6 +124,44 @@ export default function FileTableRow({ file }: { file: FileItem }) {
               </DropdownMenu>
             </Tooltip>
           </TooltipProvider>
+        </TableCell>
+      </TableRow> */}
+
+      <TableRow
+        {...eventHandlers}
+        className={`
+    transition cursor-pointer !border-b-0
+    ${isSelected ? 'bg-[#0AFEF236] hover:bg-[#0AFEF236]' : 'hover:bg-muted/40'}
+  `}>
+        {/* Name */}
+        <TableCell className="w-[40%] text-left rounded-l-lg">
+          <div className="flex items-center gap-3">
+            <Fileicon
+              type={file.type}
+              isSheetPage={false}
+            />
+            <span className="font-medium">{file.name}</span>
+          </div>
+        </TableCell>
+
+        {/* Author */}
+        <TableCell className="w-[20%] text-left">
+          <AuthorCell author={file.author} />
+        </TableCell>
+
+        {/* Size */}
+        <TableCell className="w-[15%] text-right text-muted-foreground">
+          {file.size}
+        </TableCell>
+
+        {/* Modified */}
+        <TableCell className="w-[15%] text-right text-muted-foreground">
+          {file.modified}
+        </TableCell>
+
+        {/* Actions */}
+        <TableCell className="w-[10%] text-right rounded-r-lg">
+          {/* Your DropdownMenu / Buttons */}
         </TableCell>
       </TableRow>
 
