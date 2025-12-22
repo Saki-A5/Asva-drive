@@ -8,9 +8,18 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+} from '@/components/ui/dropdown-menu';
 import AuthorCell from './AuthorCell';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Share2, Link, UserPlus, Trash2 } from 'lucide-react';
 import Fileicon from './Fileicon';
 
 type FileItem = {
@@ -25,6 +34,7 @@ type FileItem = {
 
 export default function FileTableRow({ file }: { file: FileItem }) {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
+
   return (
     <>
       <TableRow
@@ -33,8 +43,8 @@ export default function FileTableRow({ file }: { file: FileItem }) {
           transition cursor-pointer !border-b-0
           ${
             isSelected
-              ? 'bg-[#0AFEF236] !border-b-0 hover:bg-0'
-              : 'hover:bg-muted/40 transition !border-b-0 cursor-pointer'
+              ? 'bg-[#0AFEF236] hover:bg-[#0AFEF236]'
+              : 'hover:bg-muted/40'
           }
         `}>
         <TableCell className="rounded-l-lg">
@@ -57,22 +67,68 @@ export default function FileTableRow({ file }: { file: FileItem }) {
         <TableCell className="text-right rounded-r-lg">
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon">
-                  <MoreHorizontal className="w-4 h-4 dark:text-[#0AFEF2] text-[#050E3F]" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>File Actions Menu</p>
-              </TooltipContent>
+              <DropdownMenu>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => e.stopPropagation()}>
+                      <MoreHorizontal className="w-4 h-4 dark:text-[#0AFEF2] text-[#050E3F]" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+
+                <TooltipContent side="left">
+                  <p>Actions</p>
+                </TooltipContent>
+
+                <DropdownMenuContent align="end">
+                  {/* SHARE SUBMENU */}
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Share2 className="mr-2 h-4 w-4" />
+                      Share with
+                    </DropdownMenuSubTrigger>
+
+                    <DropdownMenuSubContent className="mr-2 mt-2">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('Share directly', file.id);
+                        }}>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Share via mail
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('Share via link', file.id);
+                        }}>
+                        <Link className="mr-2 h-4 w-4" />
+                        Share via link
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+
+                  {/* DELETE */}
+                  <DropdownMenuItem
+                    className="text-red-600 focus:text-red-600"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('Delete', file.id);
+                    }}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </Tooltip>
           </TooltipProvider>
         </TableCell>
       </TableRow>
 
-      {/* Spacer row */}
       <TableRow className="pointer-events-none !border-b-0">
         <TableCell
           colSpan={5}

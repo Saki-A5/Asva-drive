@@ -13,16 +13,26 @@ export const GET = async (req: Request) => {
   const { searchParams } = new URL(req.url);
   const ownerId = searchParams.get('ownerId');
 
-  if (!ownerId)
-    return NextResponse.json({ message: 'Missing ownerId' }, { status: 400 });
+    if (!ownerId)
+      return NextResponse.json({ message: 'Missing ownerId' }, { status: 400 });
 
   const rootFolder = await FileModel.findOne({ownerId: new Types.ObjectId(ownerId), isRoot: true});
   const files = await FileModel.find({ ownerId: new Types.ObjectId(ownerId), parentFolderId: rootFolder._id}).sort({
     createdAt: -1,
   });
 
-  return NextResponse.json({
-    message: 'Files fetched',
-    data: files,
-  });
+    return NextResponse.json({
+      message: 'Files fetched',
+      data: files,
+    });
+  } catch (error) {
+    console.error('Error fetching files:', error);
+    return NextResponse.json(
+      {
+        message: 'Internal server error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
 };
