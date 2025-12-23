@@ -14,6 +14,7 @@ import { requireRole } from '@/lib/roles';
 import Notification from '@/models/notificationSchema';
 import { sendPush } from '@/lib/sendPush';
 import Token from '@/models/notificationToken';
+import College from '@/models/colleges';
 
 // upload a file
 export const POST = async (req: Request) => {
@@ -23,11 +24,10 @@ export const POST = async (req: Request) => {
     // const {user, error, status} = await requireRole(req, ['admin']);
     // if(error) return NextResponse.json({message: "Unauthorized"}, {status});
 
-    const user = await User.findOne({email: 'demo@gmail.com'});
+    const user = await User.findOne({ email: 'demo@gmail.com' });
 
     const formData = await req.formData();
     const folderId = formData.get("folderId") as string;
-    const email = formData.get("email") as string;
     const file = formData.get("file") as File || null;
     const tags = (formData.get("tags") as string)?.split(",") || [];
 
@@ -67,16 +67,17 @@ export const POST = async (req: Request) => {
       filename: file.name,
       cloudinaryUrl: result.public_id,
       parentFolderId: folder._id,
-      ownerId: new Types.ObjectId(user._id),
+      ownerId: new Types.ObjectId(user.collegeId),
       resourceType: result.resource_type, // default for now
       mimeType: file.type,
       sizeBytes: result.bytes,
-      tags: tags, 
-      college: user.collegeId
+      tags: tags,
+      college: user.collegeId,
+      uploadedBy: new Types.ObjectId(user._id)
     });
 
     await cFile.save();
-   
+
     // in app notifications
     await Notification.create({
       userId: user._id,
@@ -103,9 +104,9 @@ export const POST = async (req: Request) => {
           folderId,
         },
       });
-     } catch (e) {
+    } catch (e) {
       console.log("Error sending push notification:", e);
-     }
+    }
 
 
     // Enqueue indexing job (worker will fetch document by id and index)
