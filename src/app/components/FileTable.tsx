@@ -327,7 +327,7 @@ function FileTableContent({
 
                   <div className="w-full max-w-[320px] mt-6">
                     <h3 className="font-bold text-[20px]">Shared by</h3>
-                    <AuthorCell author={file.author} />
+                    {/* <AuthorCell author={file.author} /> */}
                   </div>
                 </div>
               </SheetContent>

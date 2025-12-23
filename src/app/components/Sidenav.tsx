@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
+import { COLLEGE_META } from '@/lib/college';
 import {
   HomeIcon,
   Share2,
@@ -8,7 +9,6 @@ import {
   Clock,
   Folder,
   Trash2,
-  HardDrive,
   Cloud,
   PanelLeftOpen,
   PanelLeftClose,
@@ -32,17 +32,13 @@ const sidelinks: SideItem[] = [
   { href: '/recent', label: 'Recent', icon: Clock },
   { href: '/starred', label: 'Starred', icon: Star },
   { href: '/shared', label: 'Shared with me', icon: Share2 },
-
   {
-    label: 'Folders',
-    links: [
-      { href: '#sciences', label: 'Sciences', icon: Folder },
-      { href: '#mhs', label: 'MHS', icon: Folder },
-      { href: '#law', label: 'Law', icon: Folder },
-      { href: '#sms', label: 'SMS', icon: Folder },
-      { href: '#engineering', label: 'Engineering', icon: Folder },
-      { href: '#pharamcy', label: 'Pharmacy', icon: Folder },
-    ],
+    label: 'Colleges',
+    links: Object.values(COLLEGE_META).map(meta => ({
+      href: `/colleges/${meta.slug}`,
+      label: meta.label,
+      icon: Folder,
+    })),
   },
 ];
 
