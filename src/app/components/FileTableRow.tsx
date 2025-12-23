@@ -37,17 +37,13 @@ export default function FileTableRow({ file }: { file: FileItem }) {
 
   return (
     <>
-      {/* <TableRow
+      <TableRow
         {...eventHandlers}
         className={`
-          transition cursor-pointer !border-b-0
-          ${
-            isSelected
-              ? 'bg-[#0AFEF236] hover:bg-[#0AFEF236]'
-              : 'hover:bg-muted/40'
-          }
-        `}>
-        <TableCell className="rounded-l-lg">
+    transition cursor-pointer !border-b-0
+    ${isSelected ? 'bg-[#0AFEF236] hover:bg-[#0AFEF236]' : 'hover:bg-muted/40'}
+  `}>
+        <TableCell className="w-[40%] text-left rounded-l-lg">
           <div className="flex items-center gap-3">
             <Fileicon
               type={file.type}
@@ -57,14 +53,20 @@ export default function FileTableRow({ file }: { file: FileItem }) {
           </div>
         </TableCell>
 
-        <TableCell>
+        <TableCell className="w-[20%] text-left">
           <AuthorCell author={file.author} />
         </TableCell>
 
-        <TableCell className="text-muted-foreground">{file.size}</TableCell>
-        <TableCell className="text-muted-foreground">{file.modified}</TableCell>
+        <TableCell className="w-[15%] text-left text-muted-foreground">
+          {file.size}
+        </TableCell>
 
-        <TableCell className="text-right rounded-r-lg">
+        <TableCell className="w-[15%] text-left text-muted-foreground">
+          {file.modified}
+        </TableCell>
+
+        {/* Actions */}
+        <TableCell className="w-[10%] text-right rounded-r-lg">
           <TooltipProvider>
             <Tooltip>
               <DropdownMenu>
@@ -124,44 +126,6 @@ export default function FileTableRow({ file }: { file: FileItem }) {
               </DropdownMenu>
             </Tooltip>
           </TooltipProvider>
-        </TableCell>
-      </TableRow> */}
-
-      <TableRow
-        {...eventHandlers}
-        className={`
-    transition cursor-pointer !border-b-0
-    ${isSelected ? 'bg-[#0AFEF236] hover:bg-[#0AFEF236]' : 'hover:bg-muted/40'}
-  `}>
-        {/* Name */}
-        <TableCell className="w-[40%] text-left rounded-l-lg">
-          <div className="flex items-center gap-3">
-            <Fileicon
-              type={file.type}
-              isSheetPage={false}
-            />
-            <span className="font-medium">{file.name}</span>
-          </div>
-        </TableCell>
-
-        {/* Author */}
-        <TableCell className="w-[20%] text-left">
-          <AuthorCell author={file.author} />
-        </TableCell>
-
-        {/* Size */}
-        <TableCell className="w-[15%] text-right text-muted-foreground">
-          {file.size}
-        </TableCell>
-
-        {/* Modified */}
-        <TableCell className="w-[15%] text-right text-muted-foreground">
-          {file.modified}
-        </TableCell>
-
-        {/* Actions */}
-        <TableCell className="w-[10%] text-right rounded-r-lg">
-          {/* Your DropdownMenu / Buttons */}
         </TableCell>
       </TableRow>
 
