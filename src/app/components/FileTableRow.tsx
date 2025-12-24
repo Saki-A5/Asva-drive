@@ -37,7 +37,7 @@ export default function FileTableRow({ file }: { file: FileItem }) {
 
   return (
     <>
-      <TableRow
+      {/* <TableRow
         {...eventHandlers}
         className={`
     transition cursor-pointer !border-b-0
