@@ -34,24 +34,17 @@ const Recent = () => {
     const getFiles = async () => {
       try {
         setLoading(true);
-
-        const res = await axios.get('/api/file', {
-          params: { ownerId: userId },
-        });
-
-        // console.log('Initial Data: ', res.data);
+        const res = await axios.get('/api/recent');
         const files = res.data?.data ?? [];
-
         const mapped: FileItem[] = files.map((f: FileType) => ({
           id: f._id,
           name: f.name,
-          type: f.mimetype.split('/')[0], // image, pdf, video
+          type: f.mimetype?.split('/')[0] || '',
           author: 'SMS',
-          size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
-          modified: new Date(f.updatedAt).toDateString(),
+          size: f.size ? `${(f.size / (1024 * 1024)).toFixed(1)} MB` : '',
+          modified: f.updatedAt ? new Date(f.updatedAt).toDateString() : '',
           sharedUsers: [],
         }));
-
         setMyRecentFiles(mapped);
       } catch (error) {
         console.error('Error fetching files:', error);
@@ -59,9 +52,8 @@ const Recent = () => {
         setLoading(false);
       }
     };
-
     getFiles();
-  }, [userId]);
+  }, []);
 
   // console.log('My file: ', MyFiles);
 

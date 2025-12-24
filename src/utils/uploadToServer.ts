@@ -1,3 +1,5 @@
+import { UploadParams, UploadResponse } from './types';
+import axios from 'axios';
 export interface UploadParams {
   file: File;
   folderId: string;
@@ -26,13 +28,12 @@ export async function uploadToServer(
     formData.append('email', email);
     formData.append('tags', tags.join(','));
 
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
+    const res = await axios.post('/api/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
-
-    const data = await res.json();
-    return data;
+    return res.data;
   } catch (error) {
     console.error('Upload error:', error);
     return {
