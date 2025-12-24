@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Table, TableBody } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   MoreHorizontal,
   LayoutGrid,
@@ -159,20 +165,44 @@ function FileTableContent({
             // onMove={handleMove}
           />
 
-          <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden">
-            <div className="flex-1 overflow-y-auto">
-              <Table>
-                <FileTableHeader />
+          <div className="flex flex-col flex-1 min-h-0  rounded-2xl">
+            {/* SelectionActionBar */}
+            <SelectionActionBar
+              count={selectedItems.length}
+              onClear={clearSelection}
+            />
 
-                <TableBody>
-                  {files.map((file) => (
-                    <FileTableRow
-                      key={file.id}
-                      file={file}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
+            <div className="flex flex-col flex-1 min-h-0">
+              <div className="overflow-hidden">
+                <Table className="table-fixed min-w-[550px] w-full">
+                  <TableHeader className="sticky top-0 bg-background z-10">
+                    <TableRow className="border-b border-gray-200">
+                      <TableHead className="w-[40%] text-left">Name</TableHead>
+                      <TableHead className="w-[20%] text-left">
+                        Author
+                      </TableHead>
+                      <TableHead className="w-[15%] text-right">Size</TableHead>
+                      <TableHead className="w-[15%] text-right">
+                        Modified
+                      </TableHead>
+                      <TableHead className="w-[10%] text-right"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                </Table>
+              </div>
+
+              <div className="flex-1 overflow-x-auto overflow-y-auto">
+                <Table className="table-fixed min-w-[550px] w-full">
+                  <TableBody>
+                    {files.map((file) => (
+                      <FileTableRow
+                        key={file.id}
+                        file={file}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           </div>
         </>

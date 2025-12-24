@@ -154,3 +154,24 @@
     }
   ]
 }
+
+
+
+
+  {/* <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 overflow-y-auto">
+            
+              <Table>
+                <FileTableHeader />
+
+                <TableBody>
+                  {files.map((file) => (
+                    <FileTableRow
+                      key={file.id}
+                      file={file}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div> */}

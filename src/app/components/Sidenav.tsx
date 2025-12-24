@@ -182,7 +182,7 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
         {/* Bottom section */}
         <div className="mt-auto pt-4">
           {/* trash (only in open mode) */}
-          {user?.role === "admin" && mode === 'open' && (
+          {user?.role === 'admin' && mode === 'open' && (
             <Link
               href="/trash"
               className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition">
@@ -213,7 +213,7 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
           <Button
             variant="outline"
             size="icon"
-            className="absolute top-7 left-4 lg:hidden">
+            className="absolute top-5.5 left-4 lg:hidden">
             <PanelLeftOpen className="h-6 w-6" />
           </Button>
         </SheetTrigger>
@@ -238,7 +238,9 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
         </SheetContent>
       </Sheet>
       {/* Main content */}
-      <main className="flex-1 bg-background text-foreground mr-2 rounded-2xl shadow-lg lg:px-4 pl-12 pb-12 overflow-y-auto flex flex-col">
+      <main
+        className="flex-1 bg-background text-foreground mr-2 rounded-2xl shadow-lg pl-2 px-2
+sm:pl-12 sm:px-4 pb-12 overflow-y-auto flex flex-col">
         {children}
       </main>
     </div>

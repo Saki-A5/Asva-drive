@@ -84,7 +84,9 @@ const MyFiles = () => {
           {loading ? (
             <div className="text-gray-500">Loading files...</div>
           ) : (
-            <FileTable files={myFiles} />
+            <div className="flex-1 sm:h-full">
+              <FileTable files={myFiles} />
+            </div>
           )}
         </div>
       </div>

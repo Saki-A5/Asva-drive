@@ -211,7 +211,7 @@ const Shared = () => {
           {loading ? (
             <div className="text-gray-500">Loading files...</div>
           ) : (
-            <div className="flex-1 h-full">
+            <div className="flex-1 sm:h-full">
               <FileTable files={myFiles} />
             </div>
           )}
