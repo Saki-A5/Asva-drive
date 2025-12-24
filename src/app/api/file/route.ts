@@ -8,7 +8,6 @@ export const GET = async (req: Request) => {
   // Protect the route — only allow admins
   // const { user, error, status } = await requireRole(req, ['admin']);
   // if (error) return NextResponse.json({ message: error }, { status });
-try {
   await dbConnect();
   
   const { searchParams } = new URL(req.url);
@@ -16,7 +15,7 @@ try {
 
     if (!ownerId)
       return NextResponse.json({ message: 'Missing ownerId' }, { status: 400 });
-}
+
 
   const rootFolder = await FileModel.findOne({ownerId: new Types.ObjectId(ownerId), isRoot: true});
   const files = await FileModel.find({ ownerId: new Types.ObjectId(ownerId), parentFolderId: rootFolder._id}).sort({
