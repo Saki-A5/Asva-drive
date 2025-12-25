@@ -6,8 +6,14 @@ export function useHighlightable(id: string, delay = 500) {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const isSelected = selectedItems.includes(id);
+  const selectionModeActive = selectedItems.length > 0;
 
   const startPress = () => {
+    if (selectionModeActive) {
+      toggleItem(id);
+      return;
+    }
+
     timerRef.current = setTimeout(() => {
       toggleItem(id);
     }, delay);
@@ -23,9 +29,10 @@ export function useHighlightable(id: string, delay = 500) {
   return {
     isSelected,
     eventHandlers: {
-      onMouseDown: startPress,
-      onMouseUp: cancelPress,
-      onMouseLeave: cancelPress,
+      onPointerDown: startPress,
+      onPointerUp: cancelPress,
+      onPointerLeave: cancelPress,
+      onPointerCancel: cancelPress,
     },
   };
 }
