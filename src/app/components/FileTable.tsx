@@ -25,6 +25,7 @@ import FileTableHeader from './FileTableHeader';
 import FileGrid from './FileGrid';
 import Fileicon from './Fileicon';
 import SharingCell from './SharingCell';
+import AuthorCell from './AuthorCell'
 import SelectionActionBar from './SelectionActionBar';
 
 export type FileItem = {

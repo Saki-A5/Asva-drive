@@ -30,7 +30,7 @@ export default function FileTableRow({ file }: { file: FileItem }) {
       <TableRow
         {...eventHandlers}
         className={`
-          transition cursor-pointer !border-b-0
+          transition cursor-pointer !border-b-0 select-none touch-none
           ${
             isSelected
               ? 'bg-[#0AFEF236] !border-b-0 hover:bg-0'

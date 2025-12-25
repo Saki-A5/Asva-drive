@@ -38,7 +38,7 @@ const FileGridItem: React.FC<FileGridItemProps> = ({ file }) => {
   return (
     <div
       {...eventHandlers}
-      className={`flex flex-col items-start p-4 rounded-xl shadow-sm transition h-[200px] gap-3 w-full cursor-pointer
+      className={`flex flex-col items-start p-4 rounded-xl shadow-sm transition h-[200px] gap-3 w-full cursor-pointer touch-none select-none
         ${selected ? "bg-[#0AFEF236] border border-blue-400" : "bg-white dark:bg-neutral-900 hover:shadow-md"}
       `}
     >
