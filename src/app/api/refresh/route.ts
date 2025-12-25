@@ -1,29 +1,41 @@
-import { NextResponse } from "next/server"
-import { adminAuth } from "@/lib/firebaseAdmin"
+import { NextResponse } from "next/server";
+import { adminAuth } from "@/lib/firebaseAdmin";
 
 export const POST = async (req: Request) => {
   try {
-    const { idToken } = await req.json()
-    if (!idToken) {
-      return NextResponse.json({ error: "Missing token" }, { status: 400 })
+    // Get the current session cookie from the request
+    const cookieHeader = req.headers.get("cookie") || "";
+    const cookies = Object.fromEntries(
+      cookieHeader.split("; ").map((c) => {
+        const [key, val] = c.split("=");
+        return [key, decodeURIComponent(val)];
+      })
+    );
+    const sessionCookie = cookies.token;
+
+    if (!sessionCookie) {
+      return NextResponse.json({ error: "No session cookie found" }, { status: 401 });
     }
 
-    // Verify the token with Firebase Admin
-    const decodedToken = await adminAuth.verifyIdToken(idToken)
+    // Verify the session cookie
+    const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
 
+    // Create a new session cookie to extend expiry
+    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+    const newSessionCookie = await adminAuth.createSessionCookie(sessionCookie, { expiresIn });
 
-    // Reset cookie
-    const res = NextResponse.json({ message: "Token refreshed" })
-    res.cookies.set("token", idToken, {
+    // Set the new cookie
+    const res = NextResponse.json({ message: "Session refreshed" });
+    res.cookies.set("token", newSessionCookie, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 30,
-    })
+      maxAge: expiresIn / 1000,
+    });
 
-    return res
+    return res;
   } catch (error: any) {
-    console.error("Refresh Error:", error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error("Refresh Error:", error);
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-}
+};

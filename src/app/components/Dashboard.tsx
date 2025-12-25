@@ -62,7 +62,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const res = await axios.get(`/api/file?ownerId=${user?.uid}`);
+        const res = await axios.get(`/api/file`);
         const files: File[] = res.data.files;
 
         const data = files
