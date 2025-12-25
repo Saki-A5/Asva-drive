@@ -13,8 +13,8 @@ const DashboardPage = async() => {
   }
 
   try {
-    // Verify Firebase ID token
-    await adminAuth.verifyIdToken(token);
+    // Verify Firebase session cookie
+    await adminAuth.verifySessionCookie(token, true);
 
     // Token valid → render client dashboard
     return <Dashboard />;

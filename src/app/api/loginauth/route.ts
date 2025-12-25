@@ -31,7 +31,7 @@ export const POST = async (req: Request) => {
 
     // cookie
     const res = NextResponse.json({ message: "Login successful", user });
-    res.cookies.set("token", idToken, { 
+    res.cookies.set("token", sessionCookie, { 
       httpOnly: true, 
       secure: process.env.NODE_ENV === "production",  
       path: '/',
@@ -42,6 +42,6 @@ export const POST = async (req: Request) => {
     return res;
   } catch (error: any) {
     console.error("Login Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Authentication failed" }, { status: 401 });
   }
 }

@@ -127,7 +127,7 @@ export default function FileTableRow({ file }: { file: FileItem }) {
             </Tooltip>
           </TooltipProvider>
         </TableCell>
-      </TableRow>
+      {/* </TableRow> */}
 
       <TableRow className="pointer-events-none !border-b-0">
         <TableCell

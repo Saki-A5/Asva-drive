@@ -11,6 +11,7 @@ export const POST = async (req: Request) => {
     // Verify the token with Firebase Admin
     const decodedToken = await adminAuth.verifyIdToken(idToken)
 
+
     // Reset cookie
     const res = NextResponse.json({ message: "Token refreshed" })
     res.cookies.set("token", idToken, {

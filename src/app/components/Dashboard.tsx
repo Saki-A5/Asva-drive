@@ -62,7 +62,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const res = await axios.get('/api/file');
+        const res = await axios.get(`/api/file?ownerId=${user?.uid}`);
         const files: File[] = res.data.files;
 
         const data = files
@@ -178,7 +178,7 @@ const Dashboard = () => {
           </h1>
 
           <div className="flex space-x-2 px-2 lg:px-6 mb-6">
-            {user.role === 'admin' && <Upload />}
+            {user?.role === 'admin' && <Upload />}
             <Create />
           </div>
         </div>

@@ -5,7 +5,7 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
 
-  // 🟢 Landing page logic
+  //  Landing page logic
   if (pathname === "/") {
     if (token) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
@@ -13,7 +13,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 🔒 Protected routes
+  //  Protected routes
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
