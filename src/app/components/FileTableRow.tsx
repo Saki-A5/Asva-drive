@@ -40,7 +40,7 @@ export default function FileTableRow({ file }: { file: FileItem }) {
       {/* <TableRow
         {...eventHandlers}
         className={`
-    transition cursor-pointer !border-b-0
+    transition cursor-pointer !border-b-0 select-none touch-none
     ${isSelected ? 'bg-[#0AFEF236] hover:bg-[#0AFEF236]' : 'hover:bg-muted/40'}
   `}>
         <TableCell className="w-[40%] text-left rounded-l-lg">
