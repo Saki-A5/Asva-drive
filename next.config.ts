@@ -5,4 +5,8 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ['localhost', 'undefined']
 };
 
+module.exports = {
+  productionBrowserSourceMaps: false,
+};
+
 export default nextConfig;

@@ -8,7 +8,7 @@ export const GET = async (req: Request) => {
   try {
     await dbConnect();
 
-    // 1️⃣ Get session cookie
+    //  Get session cookie
     const cookies = req.headers.get('cookie') || '';
     const match = cookies.match(/token=([^;]+)/);
     const sessionCookie = match ? match[1] : null;
@@ -16,7 +16,7 @@ export const GET = async (req: Request) => {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    // 2️⃣ Verify session cookie
+    // Verify session cookie
     const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
     const ownerId = decodedToken.uid;
 
@@ -24,13 +24,13 @@ export const GET = async (req: Request) => {
       return NextResponse.json({ message: 'missing user id' }, { status: 401 });
     }
 
-    // 3️⃣ Fetch files
-    const rootFolder = await FileModel.findOne({ ownerId: new Types.ObjectId(ownerId), isRoot: true });
+    // Fetch files
+    const rootFolder = await FileModel.findOne({ ownerId, isRoot: true });
     if (!rootFolder) {
       return NextResponse.json({ message: 'Root folder not found' }, { status: 404 });
     }
 
-    const files = await FileModel.find({ ownerId: new Types.ObjectId(ownerId), parentFolderId: rootFolder._id })
+    const files = await FileModel.find({ ownerId, parentFolderId: rootFolder._id })
       .sort({ createdAt: -1 });
 
     return NextResponse.json({

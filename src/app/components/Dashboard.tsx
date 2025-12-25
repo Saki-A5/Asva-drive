@@ -62,8 +62,8 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const res = await axios.get(`/api/file`);
-        const files: File[] = res.data.files;
+        const res = await axios.get(`/api/file`, {withCredentials: true});
+        const files: File[] = res.data.data;
 
         const data = files
           .filter((file: any) => file.starred)
