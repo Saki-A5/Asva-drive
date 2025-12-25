@@ -10,7 +10,6 @@ import User from '@/models/users';
 import { Types } from 'mongoose';
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server';
-import { requireRole } from '@/lib/roles';
 import Notification from '@/models/notificationSchema';
 import { sendPush } from '@/lib/sendPush';
 import Token from '@/models/notificationToken';

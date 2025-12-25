@@ -47,18 +47,18 @@ const Loginnav = () => {
     }
   }
 
-    const refreshToken = async () => {
-      try{
-        const currentUser = auth.currentUser;
-        if (!currentUser) return
+    // const refreshToken = async () => {
+    //   try{
+    //     const currentUser = auth.currentUser;
+    //     if (!currentUser) return
 
-        const idToken = await currentUser.getIdToken(true);
+    //     const idToken = await currentUser.getIdToken(true);
 
-        await axios.post('/api/refresh', {idToken})
-      } catch (error) {
-        console.error("Error refreshing token:", error);
-      }
-    }
+    //     await axios.post('/api/refresh', {idToken})
+    //   } catch (error) {
+    //     console.error("Error refreshing token:", error);
+    //   }
+    // }
 
     const fetchUser = async () => {
           try {
@@ -71,13 +71,13 @@ const Loginnav = () => {
 
     useEffect(() => {
       const init = async () => {
-        await refreshToken();
+        // await refreshToken();
         await fetchUser();
       }
       init();
       
-      const interval = setInterval(refreshToken, 55 * 60 * 1000); // Refresh every 55 minutes
-      return () => clearInterval(interval);
+      // const interval = setInterval(refreshToken, 55 * 60 * 1000); // Refresh every 55 minutes
+      // return () => clearInterval(interval);
     }, []);
 
     const initials = getInitials(user?.name || user?.email);

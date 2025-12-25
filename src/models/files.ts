@@ -6,7 +6,7 @@ const fileSchema = new Schema({
     // fileLocation:{type: String}, // this was removed because changing this would require changing the fileLocation of all the children
     isFolder: {type: Boolean, default: false}, 
     parentFolderId: {type: Types.ObjectId, ref: 'File', default:null},
-    ownerId: {type: Types.ObjectId, ref: 'User', required: true}, 
+    ownerId: {type: String, ref: 'User', required: true}, 
     extractedText: {type: String, default: ''},
     indexed: {type: Boolean,  default: false},
     resourceType: {type: String}, 

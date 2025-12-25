@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Table, TableBody } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   MoreHorizontal,
   LayoutGrid,
@@ -19,6 +25,7 @@ import {
   TooltipProvider,
 } from '@/components/ui/tooltip';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { parseDate, parseSize } from '@/utils/sort';
 
 import FileTableRow from './FileTableRow';
 import FileTableHeader from './FileTableHeader';
@@ -27,6 +34,9 @@ import Fileicon from './Fileicon';
 import SharingCell from './SharingCell';
 import AuthorCell from './AuthorCell'
 import SelectionActionBar from './SelectionActionBar';
+import AuthorCell from './AuthorCell';
+
+const SORT_COOKIE_KEY = 'file_table_sort';
 
 export type FileItem = {
   id: string;
@@ -66,6 +76,8 @@ interface FileTableContentProps {
   header?: string;
 }
 
+type SortKeyType = 'name' | 'author' | 'size' | 'modified';
+
 function FileTableContent({
   files,
   layout,
@@ -73,8 +85,73 @@ function FileTableContent({
   header,
 }: FileTableContentProps) {
   const { selectedItems, clearSelection } = useSelection();
-
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  const [sortKey, setSortKey] = useState<SortKeyType>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  function handleSort(key: SortKeyType) {
+    if (sortKey === key) {
+      // same column → toggle direction
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      // new column → start ascending
+      setSortKey(key);
+      setSortDirection('asc');
+    }
+  }
+
+  const sortedFiles = [...files].sort((a, b) => {
+    if (!sortKey) return 0;
+
+    let aValue: any = a[sortKey];
+    let bValue: any = b[sortKey];
+
+    if (sortKey === 'size') {
+      aValue = parseSize(a.size);
+      bValue = parseSize(b.size);
+    }
+
+    if (sortKey === 'modified') {
+      aValue = parseDate(a.modified).getTime();
+      bValue = parseDate(b.modified).getTime();
+    }
+
+    if (typeof aValue === 'string') {
+      return sortDirection === 'asc'
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+
+    return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+  });
+
+  useEffect(() => {
+    const cookie = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`${SORT_COOKIE_KEY}=`));
+
+    if (!cookie) return;
+
+    try {
+      const value = JSON.parse(decodeURIComponent(cookie.split('=')[1]));
+      if (value.sortKey && value.sortDirection) {
+        setSortKey(value.sortKey);
+        setSortDirection(value.sortDirection);
+      }
+    } catch {
+      // ignore corrupted cookie
+      console.error('Cookie corrupted');
+    }
+  }, []);
+
+  useEffect(() => {
+    const value = JSON.stringify({ sortKey, sortDirection });
+
+    document.cookie = `${SORT_COOKIE_KEY}=${encodeURIComponent(
+      value
+    )}; path=/; max-age=31536000`;
+  }, [sortKey, sortDirection]);
 
   useEffect(() => {
     if (selectedItems.length === 1) {
@@ -140,7 +217,7 @@ function FileTableContent({
             // onMove={handleMove}
           />
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {files.map((file) => (
+            {sortedFiles.map((file) => (
               <FileGrid
                 file={file}
                 key={file.id}
@@ -160,20 +237,36 @@ function FileTableContent({
             // onMove={handleMove}
           />
 
-          <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden">
-            <div className="flex-1 overflow-y-auto">
-              <Table>
-                <FileTableHeader />
+          <div className="flex flex-col flex-1 min-h-0  rounded-2xl">
+            {/* SelectionActionBar */}
+            <SelectionActionBar
+              count={selectedItems.length}
+              onClear={clearSelection}
+            />
 
-                <TableBody>
-                  {files.map((file) => (
-                    <FileTableRow
-                      key={file.id}
-                      file={file}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
+            <div className="flex flex-col flex-1 min-h-0">
+              <div className="overflow-hidden">
+                <Table className="table-fixed min-w-[550px] w-full">
+                  <FileTableHeader
+                    onSort={handleSort}
+                    sortKey={sortKey}
+                    sortDirection={sortDirection}
+                  />
+                </Table>
+              </div>
+
+              <div className="flex-1 overflow-x-auto overflow-y-auto">
+                <Table className="table-fixed min-w-[550px] w-full">
+                  <TableBody>
+                    {sortedFiles.map((file) => (
+                      <FileTableRow
+                        key={file.id}
+                        file={file}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           </div>
         </>
@@ -236,7 +329,7 @@ function FileTableContent({
 
                   <div className="w-full max-w-[320px] mt-6">
                     <h3 className="font-bold text-[20px]">Shared by</h3>
-                    <AuthorCell author={file.author} />
+                    {/* <AuthorCell author={file.author} /> */}
                   </div>
                 </div>
               </SheetContent>
