@@ -1,4 +1,3 @@
-import { UploadParams, UploadResponse } from './types';
 import axios from 'axios';
 export interface UploadParams {
   file: File;
