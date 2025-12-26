@@ -73,7 +73,7 @@ const MyFiles = () => {
         <div className="flex-between gap-2">
           <h1 className="font-bold text-xl whitespace-nowrap">My Files</h1>
 
-          <div className="flex space-x-2 gap-y-2">
+          <div className="hidden sm:flex space-x-2 gap-y-2">
             {user?.role === 'admin' && <Upload />}
             <Create />
           </div>
