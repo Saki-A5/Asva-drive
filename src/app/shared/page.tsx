@@ -9,6 +9,7 @@ import FileTable from '../components/FileTable';
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
 import { FileItem } from '../components/FileTable';
+import useCurrentUser from '@/hooks/useCurrentUser';
 
 interface FileType {
   _id: string;
@@ -22,6 +23,7 @@ interface FileType {
 const Shared = () => {
   const [myFiles, setMyFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user} = useCurrentUser();
 
   const userId = '67a93bc9f92a5b14e25c5123'; // replace later
 
@@ -200,7 +202,7 @@ const Shared = () => {
           <h1 className="font-bold text-xl whitespace-nowrap">Shared</h1>
 
           <div className="flex space-x-2 gap-y-2">
-            <Upload />
+            {user?.role === 'admin' && <Upload />}
             <Create />
           </div>
         </div>

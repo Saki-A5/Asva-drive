@@ -8,7 +8,7 @@ import Create from '../components/Create';
 import FileTable from '../components/FileTable';
 import { FileItem } from '../components/FileTable';
 import axios from 'axios';
-
+import Floating from '../components/Floating';
 import Fileicon from '../components/Fileicon';
 import useCurrentUser from '@/hooks/useCurrentUser';
 
@@ -177,10 +177,11 @@ const Dashboard = () => {
             Welcome to the hub
           </h1>
 
-          <div className="flex space-x-2 px-2 lg:px-6 mb-6">
+          <div className="sm:flex space-x-2 px-2 lg:px-6 mb-6 hidden">
             {user?.role === 'admin' && <Upload />}
             <Create />
           </div>
+          <Floating />
         </div>
 
         <div className="flex flex-col gap-8 flex-1 min-h-0">

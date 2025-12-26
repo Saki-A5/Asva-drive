@@ -65,7 +65,7 @@ const Recent = () => {
           <h1 className="font-bold text-xl whitespace-nowrap">Recent</h1>
 
           <div className="flex space-x-2 gap-y-2">
-            <Upload />
+            {user?.role === 'admin' && <Upload />}
             <Create />
           </div>
         </div>
