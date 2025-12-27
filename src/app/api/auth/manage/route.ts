@@ -26,7 +26,7 @@ export async function PUT(req: Request) {
 
     const body = await req.json();
     // Whitelist fields that can be updated
-    const allowed: string[] = [];
+    const allowed: string[] = ['name', 'college', 'department', 'currentLevel', 'matricNumber', 'avatarStyle', 'avatarSeed'];
     const updates: any = {};
     for (const key of allowed) {
       if (body[key] !== undefined) updates[key] = body[key];
