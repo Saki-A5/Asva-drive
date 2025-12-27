@@ -10,6 +10,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.2.4",
+    "@dicebear/core": "^9.2.4",
+    "@dicebear/lorelei": "^9.2.4",
+    "@dicebear/notionists": "^9.2.4",
+    "@dicebear/open-peeps": "^9.2.4",
     "@hookform/resolvers": "^5.2.1",
     "@next/font": "^14.2.15",
     "@radix-ui/react-accordion": "^1.2.12",
