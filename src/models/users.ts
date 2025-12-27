@@ -8,6 +8,12 @@ const userSchema = new Schema(
     role: { type: String, enum: ["admin", "user"], default: "user" },
     firebaseUid: { type: String, unique: true, sparse: true },
     authProvider: { type: String, enum: ["google", "email"], default: "email" },
+    matricNumber: { type: String },
+    college: { type: String },
+    department: { type: String },
+    currentLevel: { type: String },
+    avatarStyle: { type: String },
+    avatarSeed: { type: String },
   },
   { timestamps: true }
 );

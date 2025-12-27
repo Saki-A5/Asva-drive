@@ -16,12 +16,16 @@ import { auth } from "@/lib/firebaseClient"
 import { useRouter } from "next/navigation"
 import { getAuth, signOut } from "firebase/auth"
 import Link from "next/link"
+import { getAvatarUrl, AvatarStyle } from "@/utils/avatar"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 
 type User = {
     id: string;
     name: string
-    email: string 
+    email: string
+    avatarStyle?: string
+    avatarSeed?: string
 }
 
 const getInitials = (name: string | null | undefined) => {
@@ -81,6 +85,15 @@ const Loginnav = () => {
     }, []);
 
     const initials = getInitials(user?.name || user?.email);
+    
+    // Get avatar URL if user has selected an avatar style - use saved seed if available
+    const avatarUrl = user?.avatarStyle && ['lorelei', 'notionists', 'open-peeps'].includes(user.avatarStyle)
+      ? getAvatarUrl(
+          user.avatarStyle as AvatarStyle, 
+          user?.avatarSeed || user?.email || user?.name || 'default', 
+          40
+        )
+      : null;
 
 
   return (
@@ -104,9 +117,18 @@ const Loginnav = () => {
             {/* User Menu */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                <button className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold">
+                {avatarUrl ? (
+                  <Avatar className="w-10 h-10 cursor-pointer border-2 border-primary">
+                    <AvatarImage src={avatarUrl} alt={user?.name || 'User'} />
+                    <AvatarFallback className="bg-primary text-primary-foreground font-bold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <button className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold">
                     {initials}
-                </button>
+                  </button>
+                )}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40">
                 <DropdownMenuItem>
