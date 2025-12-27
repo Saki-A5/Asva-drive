@@ -10,27 +10,19 @@ import User from '@/models/users';
 import { Types } from 'mongoose';
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server';
-import { requireRole } from '@/lib/roles';
 import Notification from '@/models/notificationSchema';
 import { sendPush } from '@/lib/sendPush';
 import Token from '@/models/notificationToken';
 
 // upload a file
 export const POST = async (req: Request) => {
-  const { user, error, status } = await requireRole(req, ["admin"]);
-  if (error) return NextResponse.json({ error }, { status });
-
   try {
-    // const cookieStore = await cookies();
-    // const token = cookieStore.get('token')?.value;
-
-    // if(!token) return NextResponse.json({error: "Not Authenticated"}, {status: 401});
-
-    // const decodedToken = await adminAuth.verifyIdToken(token);
-    // const {email} = decodedToken;
-
     await dbConnect();
 
+    // const {user, error, status} = await requireRole(req, ['admin']);
+    // if(error) return NextResponse.json({message: "Unauthorized"}, {status});
+
+    const user = await User.findOne({email: 'demo@gmail.com'});
 
     const formData = await req.formData();
     const folderId = formData.get("folderId") as string;
@@ -38,8 +30,6 @@ export const POST = async (req: Request) => {
     const file = formData.get("file") as File || null;
     const tags = (formData.get("tags") as string)?.split(",") || [];
 
-    const owner = await User.findOne({ email: email });
-    if (!owner) return NextResponse.json({ error: "User not found" }, { status: 404 });
     console.log(file);
 
     // Validation
@@ -66,7 +56,7 @@ export const POST = async (req: Request) => {
       file.name,
       fileBuffer,
       new Types.ObjectId(folderId),
-      user._id,
+      user.collegeId,
       tags,
     );
 
@@ -75,9 +65,10 @@ export const POST = async (req: Request) => {
     const cFile = await FileModel.create({
       filename: file.name,
       cloudinaryUrl: result.public_id,
+      parentFolderId: folder._id,
       ownerId: new Types.ObjectId(user._id),
       resourceType: result.resource_type, // default for now
-      mimeType: result.format,
+      mimeType: file.type,
       sizeBytes: result.bytes,
       tags: tags
     });
@@ -86,7 +77,7 @@ export const POST = async (req: Request) => {
    
     // in app notifications
     await Notification.create({
-      userId: owner._id,
+      userId: user._id,
       title: "New File Uploaded",
       body: `${file.name} has been uploaded to your folder`,
       type: "FILE_UPLOAD",
@@ -98,7 +89,7 @@ export const POST = async (req: Request) => {
     });
 
     // push notifications
-    const recipientTokens = await Token.find({ userId: owner._id }).distinct("token");
+    const recipientTokens = await Token.find({ userId: user._id }).distinct("token");
 
     try {
       await sendPush({

@@ -1,7 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import Notification from "@/models/notificationSchema";
 
-const GET = async (req: Request) => {
+export const GET = async (req: Request) => {
   const userId = req.headers.get("x-user-id");
 
   if (!userId) {
@@ -15,5 +15,3 @@ const GET = async (req: Request) => {
 
   return Response.json(notifications);
 }
-
-export default GET;

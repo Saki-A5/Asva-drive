@@ -1,3 +1,6 @@
+import { renameAsset } from "@/lib/cloudinary";
+import dbConnect from "@/lib/dbConnect";
+import { requireRole } from "@/lib/roles";
 import FileModel from "@/models/files";
 import User from "@/models/users";
 import { Types } from "mongoose";
@@ -5,28 +8,23 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = 'nodejs';
 
-export const POST = async (req: NextRequest, {params}: {params:{id: string}}) => {
+export const POST = async (req: NextRequest, {params}: any) => {
     try {
-        // const cookieStore = await cookies();
-        // const token = cookieStore.get('token')?.value;
+        await dbConnect();
 
-        // if(!token) return NextResponse.json({error: "Not Authenticated"}, {status: 401});
-
-        // const decodedToken = await adminAuth.verifyIdToken(token);
-        // const {email} = decodedToken;
+        // const {user, error, status} = await requireRole(req, ['admin']);
+        // if(error) return NextResponse.json({error}, {status});
 
         const { filename } = await req.json();
-
-        const email = 'demo@gmail.com';
-        const user = await User.findOne({email});
-        if (!user) return NextResponse.json({message: "Did not find User"}, {status: 404});
         
-        const id = params.id;
+        const {id} = (await params);
 
         const fileId = new Types.ObjectId(id);
 
         const file = await FileModel.findOne({_id: fileId});
         if(!file) return NextResponse.json({message: "File Does not Exist"}, {status: 404});
+
+        await renameAsset(file.cloudinaryUrl, file.parentFolderId, filename as string);
 
         await FileModel.updateOne({_id: file._id}, {$set: {filename: filename as string}});
 

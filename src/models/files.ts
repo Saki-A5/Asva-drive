@@ -6,7 +6,7 @@ const fileSchema = new Schema({
     // fileLocation:{type: String}, // this was removed because changing this would require changing the fileLocation of all the children
     isFolder: {type: Boolean, default: false}, 
     parentFolderId: {type: Types.ObjectId, ref: 'File', default:null},
-    ownerId: {type: Types.ObjectId, ref: 'User', required: true}, 
+    ownerId: {type: String, ref: 'User', required: true}, 
     extractedText: {type: String, default: ''},
     indexed: {type: Boolean,  default: false},
     resourceType: {type: String}, 
@@ -15,7 +15,12 @@ const fileSchema = new Schema({
     sizeBytes: {type: Number, default: 0}, 
     tags: {type: [String], default:[]}, 
     isDeleted: {type: Boolean, default: false}, 
-    deletedAt: {type: Date, default: null}  
+    deletedAt: {type: Date, default: null}, 
+    reference: {
+        isReference: {required: true, default: false, type: Boolean}, 
+        referencedFile: {default: null, type: Types.ObjectId}
+    }, 
+    college: {type: Types.ObjectId, required: true, ref: 'College'}
 
 }, {timestamps: true});
 

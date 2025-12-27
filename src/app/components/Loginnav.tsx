@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { auth } from "@/lib/firebaseClient"
@@ -51,18 +50,18 @@ const Loginnav = () => {
     }
   }
 
-    const refreshToken = async () => {
-      try{
-        const currentUser = auth.currentUser;
-        if (!currentUser) return
+    // const refreshToken = async () => {
+    //   try{
+    //     const currentUser = auth.currentUser;
+    //     if (!currentUser) return
 
-        const idToken = await currentUser.getIdToken(true);
+    //     const idToken = await currentUser.getIdToken(true);
 
-        await axios.post('/api/refresh', {idToken})
-      } catch (error) {
-        console.error("Error refreshing token:", error);
-      }
-    }
+    //     await axios.post('/api/refresh', {idToken})
+    //   } catch (error) {
+    //     console.error("Error refreshing token:", error);
+    //   }
+    // }
 
     const fetchUser = async () => {
           try {
@@ -75,13 +74,13 @@ const Loginnav = () => {
 
     useEffect(() => {
       const init = async () => {
-        await refreshToken();
+        // await refreshToken();
         await fetchUser();
       }
       init();
       
-      const interval = setInterval(refreshToken, 55 * 60 * 1000); // Refresh every 55 minutes
-      return () => clearInterval(interval);
+      // const interval = setInterval(refreshToken, 55 * 60 * 1000); // Refresh every 55 minutes
+      // return () => clearInterval(interval);
     }, []);
 
     const initials = getInitials(user?.name || user?.email);
@@ -101,19 +100,15 @@ const Loginnav = () => {
       <div className="flex h-20 sm:p-0 pl-12 mt-4">
         <div className="flex-1 max-w-xl ml-2 mr-4">
             <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white" />
-          <Input
-            type="search"
-            placeholder="Search for anything"
-            className="w-7/10 pl-12 h-11 bg-secondary rounded-4xl"
-          />
+                <SearchBar />
             </div>
         </div>
         <div className="flex ml-auto mr-4 gap-x-4">
           {/* settings */}
-          <Link href="/settings"><Settings className="h-6 w-6 mt-2 text-foreground cursor-pointer"/></Link>
+          <Link href="/settings"><Settings className="hidden md:flex h-6 w-6 mt-2 text-foreground cursor-pointer"/></Link>
           {/* notifications */}
           <Bell className="h-6 w-6 mt-2 text-foreground cursor-pointer"/>
+          {/* <NotificationBell /> */}
             {/* User Menu */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -142,10 +137,10 @@ const Loginnav = () => {
                 </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-        
+
             <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon">
+                        <Button variant="outline" size="icon" className="hidden md:flex">
                             <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
                             <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
                             <span className="sr-only">Toggle theme</span>

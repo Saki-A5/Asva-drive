@@ -1,12 +1,9 @@
 import 'dotenv/config'
-import { Worker, QueueScheduler } from 'bullmq'
+import { Worker } from 'bullmq'
 import dbConnect from '@/lib/dbConnect'
 import FileModel from '@/models/files'
 import { connection } from '@/lib/queue'
 import { ensureIndex, addDocuments } from '@/lib/meilisearch'
-
-// Create a scheduler to handle stalled jobs
-new QueueScheduler('indexing', { connection })
 
 const worker = new Worker(
   'indexing',
@@ -15,18 +12,25 @@ const worker = new Worker(
     if (!data?.id) throw new Error('Job payload missing id')
 
     await dbConnect()
-    const file = await FileModel.findById(data.id).lean()
-    if (!file) throw new Error('File not found: ' + data.id)
+    const file: any = await FileModel.findById(data.id).lean()
+    if (!file || Array.isArray(file)) throw new Error('File not found or invalid: ' + data.id)
 
     const doc = {
-      id: file._id.toString(),
-      name: file.name,
-      owner: file.ownerEmail,
+      id: file._id?.toString?.() || '',
+      filename: file.filename,
+      ownerId: file.ownerId?.toString?.() || '',
       mimeType: file.mimeType,
-      size: file.size,
+      sizeBytes: file.sizeBytes,
       tags: file.tags || [],
       text: file.extractedText || '',
+      cloudinaryUrl: file.cloudinaryUrl || '',
+      isFolder: file.isFolder,
+      parentFolderId: file.parentFolderId?.toString?.() || null,
+      isRoot: file.isRoot,
+      isDeleted: file.isDeleted,
+      deletedAt: file.deletedAt,
       createdAt: file.createdAt?.toISOString(),
+      updatedAt: file.updatedAt?.toISOString(),
     }
 
     // ensure index exists and index the document
