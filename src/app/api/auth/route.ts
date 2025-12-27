@@ -53,7 +53,8 @@ export async function POST(req: Request) {
         filename: '/', 
         isFolder: true, 
         parentFolderId: null,
-        isRoot: true
+        isRoot: true,
+        college: new Types.ObjectId(), // temporary college id, should be updated later
       })
     }
 
