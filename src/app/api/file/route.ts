@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { Types } from 'mongoose';
 import dbConnect from '@/lib/dbConnect';
 import { adminAuth } from '@/lib/firebaseAdmin';
-import useCurrentUser from '@/hooks/useCurrentUser';
+import { ro } from 'date-fns/locale';
 
 export const GET = async (req: Request) => {
   try {
@@ -29,13 +29,17 @@ export const GET = async (req: Request) => {
     }
 
     // Fetch files
-    const rootFolder = await FileModel.findOne({ ownerId, isRoot: true });
-
+    let rootFolder = await FileModel.findOne({ ownerId, isRoot: true });
     if (!rootFolder) {
-      return NextResponse.json(
-        { message: 'Root folder not found' },
-        { status: 404 }
-      );
+      // return NextResponse.json({ message: 'Root folder not found' }, { status: 404 });
+      // don't forget to remove the below later and uncommrent the above and change the above let to const
+      rootFolder = await FileModel.create({
+        ownerId: ownerId,
+        filename: '/',
+        isFolder: true,
+        parentFolderId: null,
+        isRoot: true,
+      });
     }
 
     const files = await FileModel.find({

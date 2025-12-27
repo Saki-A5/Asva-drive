@@ -20,6 +20,10 @@ export async function POST(req: Request) {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const { uid, email, name } = decodedToken;
 
+    const sessionCookie = await adminAuth.createSessionCookie(idToken, { 
+      expiresIn: 60 * 60 * 24 * 30 * 1000 
+    });
+
     if (!email) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
@@ -38,17 +42,17 @@ export async function POST(req: Request) {
 
     // find or create the root folder
     let rootFolder = await FileModel.findOne({
-      ownerId: new Types.ObjectId(user._id.toString()), 
+      ownerId: uid, 
       filename: '/', 
       isFolder: true,
       isRoot: true,
     });
     if(!rootFolder){
       rootFolder = await FileModel.create({
-        ownerId: new Types.ObjectId(user._id.toString()), 
+        ownerId: uid, 
         filename: '/', 
         isFolder: true, 
-        parentFolder: null,
+        parentFolderId: null,
         isRoot: true
       })
     }
@@ -59,7 +63,7 @@ export async function POST(req: Request) {
       user, 
       rootFolder: rootFolder.id, 
     });
-    res.cookies.set("token", idToken, { 
+    res.cookies.set("token", sessionCookie, { 
       httpOnly: true, 
       secure: process.env.NODE_ENV === "production",  
       path: '/',

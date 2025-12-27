@@ -1,6 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { LogOut, Settings, Search, Moon, Sun, Bell } from 'lucide-react';
+import { LogOut, Settings, Moon, Sun, Bell } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
   DropdownMenu,
@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { auth } from '@/lib/firebaseClient';
 import { useRouter } from 'next/navigation';
 import { getAuth, signOut } from 'firebase/auth';
 import Link from 'next/link';
