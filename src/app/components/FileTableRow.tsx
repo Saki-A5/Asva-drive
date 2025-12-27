@@ -21,6 +21,7 @@ import AuthorCell from './AuthorCell';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Share2, Link, UserPlus, Trash2 } from 'lucide-react';
 import Fileicon from './Fileicon';
+import { MoreVertical } from 'lucide-react';
 
 type FileItem = {
   id: string;
@@ -32,12 +33,12 @@ type FileItem = {
   sharedUsers: string[];
 };
 
-export default function FileTableRow({ file }: { file: FileItem }) {
+export function FileTableRow({ file }: { file: FileItem }) {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
 
   return (
     <>
-      {/* <TableRow
+      <TableRow
         {...eventHandlers}
         className={`
     transition cursor-pointer !border-b-0 select-none touch-none
@@ -127,8 +128,7 @@ export default function FileTableRow({ file }: { file: FileItem }) {
             </Tooltip>
           </TooltipProvider>
         </TableCell>
-      {/* </TableRow> */}
-
+      </TableRow>
       <TableRow className="pointer-events-none !border-b-0">
         <TableCell
           colSpan={5}
@@ -136,5 +136,57 @@ export default function FileTableRow({ file }: { file: FileItem }) {
         />
       </TableRow>
     </>
+  );
+}
+
+export function MobileFileRow({ file }: { file: FileItem }) {
+  // Uses your custom hook for selection logic
+  const { isSelected, eventHandlers } = useHighlightable(file.id);
+
+  return (
+    <div
+      {...eventHandlers}
+      className={`
+        flex items-center justify-between p-4 transition cursor-pointer select-none touch-none
+        ${isSelected ? 'bg-[#0AFEF236]' : 'hover:bg-muted/40'}
+      `}>
+      <div className="flex items-center gap-4 overflow-hidden">
+        {/* Consistent Icon with Desktop */}
+        <div className="flex-shrink-0">
+          <Fileicon
+            type={file.type}
+            isSheetPage={false}
+          />
+        </div>
+
+        <div className="flex flex-col overflow-hidden">
+          <span className="font-semibold text-[15px] truncate text-[#050E3F] dark:text-white">
+            {file.name}
+          </span>
+
+          {/* Metadata Subtitle - Similar to Drive layout */}
+          <div className="flex items-center gap-1 text-[12px] text-muted-foreground font-normal">
+            <span className="truncate max-w-[80px]">{file.author}</span>
+            <span>•</span>
+            <span>{file.size}</span>
+            <span>•</span>
+            <span className="truncate">{file.modified}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Button - Using your primary colors */}
+      <div className="flex-shrink-0 ml-2">
+        <button
+          className="p-2 hover:bg-black/5 rounded-full transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            // This button's click behavior is handled by your SelectionContext
+            // and the useEffect that opens the Sheet in the parent
+          }}>
+          <MoreHorizontal className="w-5 h-5 dark:text-[#0AFEF2] text-[#050E3F]" />
+        </button>
+      </div>
+    </div>
   );
 }
