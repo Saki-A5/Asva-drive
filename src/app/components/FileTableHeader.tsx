@@ -36,7 +36,11 @@ export default function FileTableHeader({
     <TableHeader className="sticky top-0 bg-background z-10">
       <TableRow className="border-b border-gray-200 hover:bg-transparent">
         <TableHead
-          className="w-[40%] text-left cursor-pointer select-none hover:bg-muted/50"
+          className={`w-[40%] text-left cursor-pointer select-none hover:bg-muted/50 transition-colors ${
+            sortKey === 'name'
+              ? 'text-[#050E3F] dark:text-[#0AFEF2] bg-muted'
+              : 'text-muted-foreground'
+          }`}
           onClick={() => onSort('name')}>
           <span className="inline-flex items-center">
             Name
@@ -48,7 +52,11 @@ export default function FileTableHeader({
         </TableHead>
 
         <TableHead
-          className="w-[20%] text-left cursor-pointer select-none hover:bg-muted/50"
+          className={`w-[20%] text-left cursor-pointer select-none hover:bg-muted/50 transition-colors ${
+            sortKey === 'author'
+              ? 'text-[#050E3F] dark:text-[#0AFEF2] bg-muted'
+              : 'text-muted-foreground'
+          }`}
           onClick={() => onSort('author')}>
           <span className="inline-flex items-center">
             Author
@@ -60,7 +68,11 @@ export default function FileTableHeader({
         </TableHead>
 
         <TableHead
-          className="w-[15%] text-left cursor-pointer select-none hover:bg-muted/50"
+          className={`w-[15%] text-left cursor-pointer select-none hover:bg-muted/50 transition-colors ${
+            sortKey === 'size'
+              ? 'text-[#050E3F] dark:text-[#0AFEF2] bg-muted'
+              : 'text-muted-foreground'
+          }`}
           onClick={() => onSort('size')}>
           <span className="inline-flex items-center">
             Size
@@ -72,7 +84,11 @@ export default function FileTableHeader({
         </TableHead>
 
         <TableHead
-          className="w-[15%] text-left cursor-pointer select-none hover:bg-muted/50"
+          className={`w-[15%] text-left cursor-pointer select-none hover:bg-muted/50 transition-colors ${
+            sortKey === 'modified'
+              ? 'text-[#050E3F] dark:text-[#0AFEF2] bg-muted'
+              : 'text-muted-foreground'
+          }`}
           onClick={() => onSort('modified')}>
           <span className="inline-flex items-center">
             Modified

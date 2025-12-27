@@ -62,7 +62,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const res = await axios.get(`/api/file`, {withCredentials: true});
+        const res = await axios.get(`/api/file`, { withCredentials: true });
         const files: File[] = res.data.data;
 
         const data = files
@@ -70,7 +70,7 @@ const Dashboard = () => {
           .map((file: any) => ({
             id: file._id ?? '',
             name: file.name ?? '',
-            type: file.mimetype ? file.mimetype.split('/')[0] : '',
+            type: file.mimeType ? file.mimeType.split('/')[0] : '',
             size: file.size
               ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
               : '',
@@ -87,78 +87,78 @@ const Dashboard = () => {
       } catch (error) {
         console.error('Error fetching files:', error);
       } finally {
-        setStarredFiles([
-          {
-            id: '111222',
-            name: 'Past Questions',
-            type: 'folder',
-            author: 'Sciences',
-            size: '1.2GB',
-            items: '10 items',
-            modified: 'Jun 12, 2025',
-            sharedUsers: [],
-          },
-          {
-            id: '222333',
-            name: 'C#/C++',
-            type: 'folder',
-            author: 'Sciences',
-            size: '2.7GB',
-            items: '8 items',
-            modified: 'Oct 12, 2025',
-            sharedUsers: [],
-          },
-          {
-            id: '333444',
-            name: 'MATLAB',
-            type: 'folder',
-            author: 'Sciences',
-            size: '5.2GB',
-            items: '15 items',
-            modified: 'Jan 12, 2026',
-            sharedUsers: [],
-          },
-          {
-            id: '444555',
-            name: 'Previous Work',
-            type: 'pdf',
-            author: 'Sciences',
-            size: '1.0GB',
-            items: 'PDF',
-            modified: 'Nov 8, 2025',
-            sharedUsers: [],
-          },
-          {
-            id: '555666',
-            name: 'AutoCAD Workbook',
-            type: 'folder',
-            author: 'Sciences',
-            size: '320MB',
-            items: '5 items',
-            modified: 'Yesterday',
-            sharedUsers: [],
-          },
-          {
-            id: '666777',
-            name: 'Python',
-            type: 'folder',
-            author: 'Engineering',
-            size: '1.2GB',
-            items: '12 items',
-            modified: 'Apr 27, 2025',
-            sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
-          },
-          {
-            id: '777888',
-            name: 'Past Questions',
-            type: 'folder',
-            author: 'Sciences',
-            size: '1.2GB',
-            items: '10 items',
-            modified: 'Jun 12, 2025',
-            sharedUsers: [],
-          },
-        ]);
+        // setStarredFiles([
+        //   {
+        //     id: '111222',
+        //     name: 'Past Questions',
+        //     type: 'folder',
+        //     author: 'Sciences',
+        //     size: '1.2GB',
+        //     items: '10 items',
+        //     modified: 'Jun 12, 2025',
+        //     sharedUsers: [],
+        //   },
+        //   {
+        //     id: '222333',
+        //     name: 'C#/C++',
+        //     type: 'folder',
+        //     author: 'Sciences',
+        //     size: '2.7GB',
+        //     items: '8 items',
+        //     modified: 'Oct 12, 2025',
+        //     sharedUsers: [],
+        //   },
+        //   {
+        //     id: '333444',
+        //     name: 'MATLAB',
+        //     type: 'folder',
+        //     author: 'Sciences',
+        //     size: '5.2GB',
+        //     items: '15 items',
+        //     modified: 'Jan 12, 2026',
+        //     sharedUsers: [],
+        //   },
+        //   {
+        //     id: '444555',
+        //     name: 'Previous Work',
+        //     type: 'pdf',
+        //     author: 'Sciences',
+        //     size: '1.0GB',
+        //     items: 'PDF',
+        //     modified: 'Nov 8, 2025',
+        //     sharedUsers: [],
+        //   },
+        //   {
+        //     id: '555666',
+        //     name: 'AutoCAD Workbook',
+        //     type: 'folder',
+        //     author: 'Sciences',
+        //     size: '320MB',
+        //     items: '5 items',
+        //     modified: 'Yesterday',
+        //     sharedUsers: [],
+        //   },
+        //   {
+        //     id: '666777',
+        //     name: 'Python',
+        //     type: 'folder',
+        //     author: 'Engineering',
+        //     size: '1.2GB',
+        //     items: '12 items',
+        //     modified: 'Apr 27, 2025',
+        //     sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
+        //   },
+        //   {
+        //     id: '777888',
+        //     name: 'Past Questions',
+        //     type: 'folder',
+        //     author: 'Sciences',
+        //     size: '1.2GB',
+        //     items: '10 items',
+        //     modified: 'Jun 12, 2025',
+        //     sharedUsers: [],
+        //   },
+        // ]);
       }
     };
 
