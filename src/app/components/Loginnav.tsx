@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useState, useEffect } from "react"
 import axios from "axios"
-import { auth } from "@/lib/firebaseClient"
+import SearchBar from "./SearchBar"
 import { useRouter } from "next/navigation"
 import { getAuth, signOut } from "firebase/auth"
 import Link from "next/link"
