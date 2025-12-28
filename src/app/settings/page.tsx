@@ -15,8 +15,18 @@ import * as lorelei from '@dicebear/lorelei';
 import * as notionists from '@dicebear/notionists';
 import * as openPeeps from '@dicebear/open-peeps';
 import { getAvatarUrl as getAvatarUrlUtil, AvatarStyle } from '@/utils/avatar';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { X } from 'lucide-react';
 
 type SettingsSection = 'general' | 'account' | 'permissions' | 'avatar';
+
+// Get user initials
+const getInitials = (name: string | null | undefined) => {
+  if (!name) return 'U'; // Default initials
+  const names = name.trim().split(' ');
+  if (names.length === 1) return names[0][0].toUpperCase();
+  return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+};
 
 // Generate unique seeds for avatar examples - consistent across renders
 const generateSeeds = (styleName: string, count: number): string[] => {
@@ -221,6 +231,40 @@ export default function SettingsPage() {
     } catch (error: any) {
       console.error('Failed to update avatar', error);
       alert(error.message || 'Failed to update avatar');
+    } finally {
+      setSavingAvatar(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    setSavingAvatar(true);
+    try {
+      const res = await fetch('/api/auth/manage', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          avatarStyle: null,
+          avatarSeed: null,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to remove avatar');
+      }
+
+      const data = await res.json();
+      setUser({
+        ...user,
+        avatarStyle: undefined,
+        avatarSeed: undefined,
+      });
+      setSelectedAvatarStyle('lorelei');
+      setSelectedAvatarSeed('');
+    } catch (error: any) {
+      console.error('Failed to remove avatar', error);
+      alert(error.message || 'Failed to remove avatar');
     } finally {
       setSavingAvatar(false);
     }
@@ -495,25 +539,47 @@ export default function SettingsPage() {
 
         {/* Current Avatar Preview */}
         <div className="mb-6 p-4 bg-muted/50 rounded-lg">
-          <p className="text-sm font-medium mb-3">Current Avatar</p>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-medium">Current Avatar</p>
+            {user?.avatarStyle && user?.avatarSeed && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRemoveAvatar}
+                disabled={savingAvatar}
+                className="h-8 text-xs">
+                <X className="w-3 h-3 mr-1" />
+                Remove Avatar
+              </Button>
+            )}
+          </div>
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary">
-              <img
-                src={user?.avatarSeed && user?.avatarStyle
-                  ? getAvatarUrl(user.avatarStyle as AvatarStyle, user.avatarSeed)
-                  : selectedAvatarSeed
-                  ? getAvatarUrl(selectedAvatarStyle, selectedAvatarSeed)
-                  : getAvatarUrl(selectedAvatarStyle, user?.email || user?.name || 'default')
-                }
-                alt="Current avatar"
-                className="w-full h-full object-cover"
-              />
-            </div>
+            {user?.avatarStyle && user?.avatarSeed ? (
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary">
+                <img
+                  src={getAvatarUrl(user.avatarStyle as AvatarStyle, user.avatarSeed)}
+                  alt="Current avatar"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <Avatar className="w-20 h-20 border-2 border-primary">
+                <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-semibold">
+                  {getInitials(user?.name || user?.email)}
+                </AvatarFallback>
+              </Avatar>
+            )}
             <div>
               <p className="text-sm font-semibold">
-                {avatarStyleOptions.find(opt => opt.name === selectedAvatarStyle)?.label || 'Lorelei'}
+                {user?.avatarStyle && user?.avatarSeed
+                  ? avatarStyleOptions.find(opt => opt.name === user.avatarStyle)?.label || 'Custom'
+                  : 'Default (Initials)'}
               </p>
-              <p className="text-xs text-muted-foreground">Style: {selectedAvatarStyle}</p>
+              <p className="text-xs text-muted-foreground">
+                {user?.avatarStyle && user?.avatarSeed
+                  ? `Style: ${user.avatarStyle}`
+                  : 'Using your initials'}
+              </p>
             </div>
           </div>
         </div>
