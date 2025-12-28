@@ -179,7 +179,16 @@ const Dashboard = () => {
 
           <div className="sm:flex space-x-2 px-2 lg:px-6 mb-6 hidden">
             {user?.role === 'admin' && <Upload />}
-            <Create />
+            <Create
+  onCreate={(name) => {
+    console.log("Folder created:", name);
+    // add your folder creation logic
+  }}
+  onCancel={() => {
+    console.log("Cancelled folder creation");
+    // handle cancel logic
+  }}
+/>
           </div>
           <Floating />
         </div>
