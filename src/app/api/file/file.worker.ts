@@ -1,23 +1,20 @@
 import { deleteAsset, deleteAssets } from "@/lib/cloudinary";
-import FileModel from "@/models/files";
+import FileModel, { FileInterface } from "@/models/files";
 import { Job, Worker } from "bullmq";
-import { Types } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import { getAllDescendantIds } from "./folder/[id]/route";
+import FileItemModel from "@/models/fileItem";
 
 const handleFolderDeletion = async (folderId: Types.ObjectId) => {
 
-    const { descendantFiles, descendantFolders } = await getAllDescendantIds(folderId);
+    const { descendantFileItems: fileItems, descendantFolderItems: folderItems } = await getAllDescendantIds(folderId);
 
-    const publicIds = (
-        await Promise.all(
-            descendantFiles.map(async (id) => {
-                const file = await FileModel.findById(id)
-                    .select("cloudinaryUrl")
-                    .lean() as { cloudinaryUrl?: string } | null;
-                return file?.cloudinaryUrl ?? null;
-            })
-        )
-    ).filter((p): p is string => p !== null);
+    // descendantFiles could contain referencedFiles and nonReferencedFiles
+    // make sure that only nonReferencedFiles go through this code block
+    const files: {file: {cloudinaryUrl: string, _id: Types.ObjectId}}[] = await FileItemModel.find({_id: {$in: fileItems}, isReference: false}).populate<{file: FileInterface}>("file", "cloudinaryUrl _id").select<{file: {cloudinaryUrl: string, _id: Types.ObjectId}}>("file").lean();
+
+    const publicIds = files.map(i => i.file.cloudinaryUrl);
+    const ids = files.map(i => i.file._id);
 
     for (let i = 0; i < publicIds.length; i += 100) {   // cloudinary only allows to delete a 100 elements at once
         const result = await deleteAssets(publicIds.slice(i, i + 100));
@@ -25,9 +22,10 @@ const handleFolderDeletion = async (folderId: Types.ObjectId) => {
             throw new Error(`[Folder Deletion] ${result.error}`);
         }
     }
-
+    // delete the actual files
+    await FileModel.deleteMany(ids);
     // delete the files and folders
-    await FileModel.deleteMany({ id: { $in: descendantFiles.concat(descendantFolders) } });
+    await FileModel.deleteMany(fileItems.concat(folderItems));
     // also delete the folder
     await FileModel.findByIdAndDelete(folderId);
 
@@ -44,9 +42,10 @@ const handleFileDeletion = async (fileId: Types.ObjectId) => {
             throw new Error(`[File Deletion] ${result.error}`);
         };
 
-        await FileModel.deleteOne({ _id: file._id });
-        // also delete all references
-        await FileModel.deleteMany({"reference.referencedFile": file._id});
+        // delete the actual file
+        await FileModel.findOneAndDelete(fileId);
+        // delete the file Item and all references
+        await FileItemModel.deleteMany({file: fileId});
 
         console.log(`[File-Deletion] successfully deleted file`);
         return true;

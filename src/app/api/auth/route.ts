@@ -6,6 +6,7 @@ import dbConnect from "@/lib/dbConnect";
 import User from "@/models/users";
 import FileModel from "@/models/files";
 import { Types } from "mongoose";
+import FileItemModel from "@/models/fileItem";
 
 // Create user (POST)
 export async function POST(req: Request) {
@@ -37,19 +38,20 @@ export async function POST(req: Request) {
     }
 
     // find or create the root folder
-    let rootFolder = await FileModel.findOne({
+    let rootFolder = await FileItemModel.findOne({
       ownerId: new Types.ObjectId(user._id.toString()), 
       filename: '/', 
       isFolder: true,
       isRoot: true,
     });
     if(!rootFolder){
-      rootFolder = await FileModel.create({
+      rootFolder = await FileItemModel.create({
         ownerId: new Types.ObjectId(user._id.toString()), 
         filename: '/', 
         isFolder: true, 
         parentFolder: null,
-        isRoot: true
+        isRoot: true, 
+        ownerType: 'User'
       })
     }
 

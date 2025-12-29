@@ -15,6 +15,7 @@ import Notification from '@/models/notificationSchema';
 import { sendPush } from '@/lib/sendPush';
 import Token from '@/models/notificationToken';
 import College from '@/models/colleges';
+import FileItemModel from '@/models/fileItem';
 
 // upload a file
 export const POST = async (req: Request) => {
@@ -77,6 +78,16 @@ export const POST = async (req: Request) => {
     });
 
     await cFile.save();
+
+    const fileItem = await FileItemModel.create({
+      filename: file.name, 
+      parentFolderId: new Types.ObjectId(folderId),
+      ownerId: new Types.ObjectId(cFile.ownerId), 
+      ownerType: 'College', 
+      fileId: new Types.ObjectId(cFile._id)
+    });
+
+    await fileItem.save();
 
     // in app notifications
     await Notification.create({
