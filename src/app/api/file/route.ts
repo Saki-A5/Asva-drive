@@ -36,15 +36,15 @@ export const GET = async (req: Request) => {
     // Fetch files
     let rootFolder = await FileItemModel.findOne({ ownerId, isRoot: true });
     if (!rootFolder) {
-      // return NextResponse.json({ message: 'Root folder not found' }, { status: 404 });
+      return NextResponse.json({ message: 'Root folder not found' }, { status: 404 });
       // don't forget to remove the below later and uncommrent the above and change the above let to const
-      rootFolder = await FileItemModel.create({
-        ownerId: userId,
-        filename: '/',
-        isFolder: true,
-        parentFolderId: null,
-        isRoot: true,
-      });
+      // rootFolder = await FileItemModel.create({
+      //   ownerId: userId,
+      //   filename: '/',
+      //   isFolder: true,
+      //   parentFolderId: null,
+      //   isRoot: true,
+      // });
     }
 
     const files = await FileItemModel.find({
