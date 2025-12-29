@@ -24,6 +24,9 @@ interface FileType {
 const Shared = () => {
   const [myFiles, setMyFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const handleCreateFolder = () => {
+    console.log('Create folder clicked');
+  }
   const { user } = useCurrentUser();
 
   const userId = '67a93bc9f92a5b14e25c5123'; // replace later
@@ -204,7 +207,7 @@ const Shared = () => {
 
           <div className="flex space-x-2 gap-y-2">
             {user?.role === 'admin' && <Upload />}
-            <Create />
+            <Create onCreateFolderClick={handleCreateFolder} />
           </div>
         </div>
 

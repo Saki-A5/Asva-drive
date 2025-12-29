@@ -23,6 +23,9 @@ interface FileType {
 const Starred = () => {
   const [myFiles, setMyFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const handleCreateFolder = () => {
+    console.log('Create folder clicked');
+  }
 
   const userId = '67a93bc9f92a5b14e25c5123'; // replace later
 
@@ -202,7 +205,7 @@ const Starred = () => {
 
           <div className="flex space-x-2 gap-y-2">
             <Upload />
-            <Create />
+            <Create onCreateFolderClick={handleCreateFolder}/>
           </div>
         </div>
 
