@@ -54,7 +54,6 @@ export async function POST(req: Request) {
         isFolder: true, 
         parentFolderId: null,
         isRoot: true,
-        college: new Types.ObjectId(), // temporary college id, should be updated later
       })
     }
 
