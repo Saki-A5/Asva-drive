@@ -11,12 +11,13 @@ import { ChevronDown } from 'lucide-react';
 import { FileItem } from '../components/FileTable';
 import useCurrentUser from '@/hooks/useCurrentUser';
 import axios from 'axios';
+import SortFilters from '../components/SortFilter';
 
 interface FileType {
   _id: string;
-  name: string;
+  filename: string;
   url: string;
-  size: number;
+  sizeBytes: number;
   mimetype: string;
   updatedAt: string;
 }
@@ -24,11 +25,13 @@ interface FileType {
 const Recent = () => {
   const [myRecentFiles, setMyRecentFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const handleCreateFolder = () => {
+    console.log('Create folder clicked');
+  }
 
   const { user } = useCurrentUser();
 
   const userId = user?._id;
-  // console.log('User: ', user?._id);
 
   useEffect(() => {
     const getFiles = async () => {
@@ -38,10 +41,12 @@ const Recent = () => {
         const files = res.data?.data ?? [];
         const mapped: FileItem[] = files.map((f: FileType) => ({
           id: f._id,
-          name: f.name,
+          name: f.filename,
           type: f.mimetype?.split('/')[0] || '',
           author: 'SMS',
-          size: f.size ? `${(f.size / (1024 * 1024)).toFixed(1)} MB` : '',
+          size: f.sizeBytes
+            ? `${(f.sizeBytes / (1024 * 1024)).toFixed(1)} MB`
+            : '',
           modified: f.updatedAt ? new Date(f.updatedAt).toDateString() : '',
           sharedUsers: [],
         }));
@@ -55,8 +60,6 @@ const Recent = () => {
     getFiles();
   }, []);
 
-  // console.log('My file: ', MyFiles);
-
   return (
     <Sidenav>
       <Loginnav />
@@ -65,8 +68,8 @@ const Recent = () => {
           <h1 className="font-bold text-xl whitespace-nowrap">Recent</h1>
 
           <div className="flex space-x-2 gap-y-2">
-            <Upload />
-            <Create />
+            {user?.role === 'admin' && <Upload />}
+            <Create onCreateFolderClick={handleCreateFolder}/>
           </div>
         </div>
 
@@ -87,26 +90,6 @@ const Recent = () => {
 };
 
 export default Recent;
-
-const SortFilters = () => {
-  const sortType: string[] = ['Type', 'Modified', 'Source', 'Shared'];
-
-  return (
-    <div className="my-6 flex flex-wrap gap-x-2 gap-y-3">
-      {sortType.map((type) => (
-        <Button
-          key={type}
-          variant="outline"
-          className="cursor-pointer">
-          <span className="flex gap-2 items-center">
-            <span>{type}</span>
-            <ChevronDown className="h-5 w-5" />
-          </span>
-        </Button>
-      ))}
-    </div>
-  );
-};
 
 // setRecentMyFiles([
 //   {

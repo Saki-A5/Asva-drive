@@ -239,7 +239,7 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
       </Sheet>
       {/* Main content */}
       <main
-        className="flex-1 bg-background text-foreground mr-2 rounded-2xl shadow-lg pl-2 px-2
+        className="flex-1 bg-background text-foreground sm:mr-2 rounded-2xl shadow-lg
 sm:pl-12 sm:px-4 pb-12 overflow-y-auto flex flex-col">
         {children}
       </main>

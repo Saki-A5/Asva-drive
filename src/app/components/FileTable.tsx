@@ -15,6 +15,8 @@ import {
   Download,
   Star,
   Trash2,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { SelectionProvider, useSelection } from '@/context/SelectionContext';
 
@@ -27,7 +29,7 @@ import {
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { parseDate, parseSize } from '@/utils/sort';
 
-import FileTableRow from './FileTableRow';
+import { FileTableRow, MobileFileRow } from './FileTableRow';
 import FileTableHeader from './FileTableHeader';
 import FileGrid from './FileGrid';
 import Fileicon from './Fileicon';
@@ -204,7 +206,6 @@ function FileTableContent({
         </div>
       </div>
 
-      {/* conditional here */}
       {layout === 'grid' ? (
         <section className="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-card">
           <SelectionActionBar
@@ -226,53 +227,72 @@ function FileTableContent({
           </div>
         </section>
       ) : (
-        <>
+        <div className="flex flex-col flex-1 min-h-0 rounded-2xl">
           <SelectionActionBar
             count={selectedItems.length}
             onClear={clearSelection}
-            // onDelete={handleDelete}
-            // onDownload={handleDownload}
-            // onShare={handleShare}
-            // onGetLink={handleGetLink}
-            // onMove={handleMove}
           />
 
-          <div className="flex flex-col flex-1 min-h-0  rounded-2xl">
-            {/* SelectionActionBar */}
-            <SelectionActionBar
-              count={selectedItems.length}
-              onClear={clearSelection}
-            />
-
-            <div className="flex flex-col flex-1 min-h-0">
-              <div className="overflow-hidden">
-                <Table className="table-fixed min-w-[550px] w-full">
-                  <FileTableHeader
-                    onSort={handleSort}
-                    sortKey={sortKey}
-                    sortDirection={sortDirection}
-                  />
-                </Table>
-              </div>
-
-              <div className="flex-1 overflow-x-auto overflow-y-auto">
-                <Table className="table-fixed min-w-[550px] w-full">
-                  <TableBody>
-                    {sortedFiles.map((file) => (
-                      <FileTableRow
-                        key={file.id}
-                        file={file}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+          <div className="hidden md:flex flex-col flex-1 min-h-0">
+            <div className="overflow-hidden">
+              <Table className="table-fixed min-w-[550px] w-full">
+                <FileTableHeader
+                  onSort={handleSort}
+                  sortKey={sortKey}
+                  sortDirection={sortDirection}
+                />
+              </Table>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <Table className="table-fixed min-w-[550px] w-full">
+                <TableBody>
+                  {sortedFiles.map((file) => (
+                    <FileTableRow
+                      key={file.id}
+                      file={file}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </div>
-        </>
+          <div className="flex md:hidden flex-col flex-1 min-h-0">
+            <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 overflow-x-auto no-scrollbar whitespace-nowrap bg-background/50 sticky top-0 z-10">
+              {(['name', 'author', 'size', 'modified'] as SortKeyType[]).map(
+                (key) => (
+                  <button
+                    key={key}
+                    onClick={() => handleSort(key)}
+                    className={`text-sm font-semibold flex items-center gap-1 px-2 py-1 rounded-md transition-colors ${
+                      sortKey === key
+                        ? 'text-[#050E3F] dark:text-[#0AFEF2] bg-muted'
+                        : 'text-muted-foreground'
+                    }`}>
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                    {sortKey === key &&
+                      (sortDirection === 'asc' ? (
+                        <ArrowUp className="w-3 h-3" />
+                      ) : (
+                        <ArrowDown className="w-3 h-3" />
+                      ))}
+                  </button>
+                )
+              )}
+            </div>
+
+            <div className="flex-1 overflow-y-auto divide-y divide-gray-50/10">
+              {sortedFiles.map((file) => (
+                <MobileFileRow
+                  key={file.id}
+                  file={file}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
-      {files.map(
+      {/* {files.map(
         (file) =>
           selectedItems.includes(file.id) && (
             <Sheet
@@ -329,13 +349,13 @@ function FileTableContent({
 
                   <div className="w-full max-w-[320px] mt-6">
                     <h3 className="font-bold text-[20px]">Shared by</h3>
-                    {/* <AuthorCell author={file.author} /> */}
+                    <AuthorCell author={file.author} />
                   </div>
                 </div>
               </SheetContent>
             </Sheet>
           )
-      )}
+      )} */}
     </div>
   );
 }

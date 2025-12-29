@@ -10,23 +10,27 @@ import FileTable, { FileItem } from '../components/FileTable';
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
 import useCurrentUser from '@/hooks/useCurrentUser';
+import Floating from '../components/Floating';
+import SortFilters from '../components/SortFilter';
 
 interface FileType {
   _id: string;
   name: string;
   size: number;
-  mimetype: string;
+  mimeType: string;
   updatedAt: string;
 }
 
 const MyFiles = () => {
   const [myFiles, setMyFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const handleCreateFolder = () => {
+    console.log('Create folder clicked');
+  }
 
   const { user } = useCurrentUser();
 
   const userId = user?._id;
-  // console.log('User: ', user);
 
   useEffect(() => {
     const getFiles = async () => {
@@ -38,31 +42,102 @@ const MyFiles = () => {
           params: { ownerId: userId },
         });
 
-        console.log('Response Data: ', res.data);
         const files = res.data?.data ?? [];
-        console.log('Files: ', files);
 
-        const mapped: FileItem[] = files.map((f: FileType) => ({
-          id: f._id,
-          name: f.name,
-          type: f.mimetype.split('/')[0],
-          author: 'SMS',
-          size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
-          modified: new Date(f.updatedAt).toDateString(),
-          sharedUsers: [],
-        }));
+        const mapped: FileItem[] = files
+          .filter((f: FileType | null | undefined) => f && f.mimeType)
+          .map((f: FileType) => ({
+            id: f._id,
+            name: f.name,
+            type: f.mimeType.split('/')[0],
+            author: 'SMS',
+            size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
+            modified: new Date(f.updatedAt).toDateString(),
+            sharedUsers: [],
+          }));
         setMyFiles(mapped);
       } catch (error) {
         console.error('Error fetching files:', error);
         // Optionally show error to user
       } finally {
+        setMyFiles([
+          {
+            id: '111222',
+            name: 'Past Questions',
+            type: 'folder',
+            author: 'Sciences',
+            size: '1.2GB',
+            items: '10 items',
+            modified: 'Jun 12, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '222333',
+            name: 'C#/C++',
+            type: 'folder',
+            author: 'Sciences',
+            size: '2.7GB',
+            items: '8 items',
+            modified: 'Oct 12, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '333444',
+            name: 'MATLAB',
+            type: 'folder',
+            author: 'Sciences',
+            size: '5.2GB',
+            items: '15 items',
+            modified: 'Jan 12, 2026',
+            sharedUsers: [],
+          },
+          {
+            id: '444555',
+            name: 'Previous Work',
+            type: 'pdf',
+            author: 'Sciences',
+            size: '1.0GB',
+            items: 'PDF',
+            modified: 'Nov 8, 2025',
+            sharedUsers: [],
+          },
+          {
+            id: '555666',
+            name: 'AutoCAD Workbook',
+            type: 'folder',
+            author: 'Sciences',
+            size: '320MB',
+            items: '5 items',
+            modified: 'Yesterday',
+            sharedUsers: [],
+          },
+          {
+            id: '666777',
+            name: 'Python',
+            type: 'folder',
+            author: 'Engineering',
+            size: '1.2GB',
+            items: '12 items',
+            modified: 'Apr 27, 2025',
+            sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
+          },
+          {
+            id: '777888',
+            name: 'Past Questions',
+            type: 'folder',
+            author: 'Sciences',
+            size: '1.2GB',
+            items: '10 items',
+            modified: 'Jun 12, 2025',
+            sharedUsers: [],
+          },
+        ]);
+
         setLoading(false);
       }
     };
     getFiles();
   }, [userId]);
-
-  // console.log('My file: ', MyFiles);
 
   return (
     <Sidenav>
@@ -72,10 +147,11 @@ const MyFiles = () => {
         <div className="flex-between gap-2">
           <h1 className="font-bold text-xl whitespace-nowrap">My Files</h1>
 
-          <div className="flex space-x-2 gap-y-2">
-            <Upload />
-            <Create />
+          <div className="hidden sm:flex space-x-2 gap-y-2">
+            {user?.role === 'admin' && <Upload />}
+            <Create onCreateFolderClick={handleCreateFolder}/>
           </div>
+          <Floating />
         </div>
 
         <SortFilters />
@@ -95,23 +171,3 @@ const MyFiles = () => {
 };
 
 export default MyFiles;
-
-const SortFilters = () => {
-  const sortType: string[] = ['Type', 'Modified', 'Source', 'Shared'];
-
-  return (
-    <div className="my-6 flex flex-wrap gap-x-2 gap-y-3">
-      {sortType.map((type) => (
-        <Button
-          key={type}
-          variant="outline"
-          className="cursor-pointer">
-          <span className="flex gap-2 items-center">
-            <span>{type}</span>
-            <ChevronDown className="h-5 w-5" />
-          </span>
-        </Button>
-      ))}
-    </div>
-  );
-};

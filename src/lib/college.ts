@@ -21,7 +21,7 @@ export const COLLEGE_META = {
     slug: "law",
   },
   COLLEGE_OF_MEDICINE: {
-    label: "College of Medicine",
+    label: "College of MHS",
     slug: "medicine",
   },
   COLLEGE_OF_SMS: {
