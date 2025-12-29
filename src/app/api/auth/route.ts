@@ -7,6 +7,7 @@ import User from "@/models/users";
 import FileModel from "@/models/files";
 import { Types } from "mongoose";
 import FileItemModel from "@/models/fileItem";
+import { createRootIfNotExists } from "@/lib/fileUtil";
 
 // Create user (POST)
 export async function POST(req: Request) {
@@ -20,6 +21,10 @@ export async function POST(req: Request) {
     // Verify Firebase ID token
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const { uid, email, name } = decodedToken;
+
+    const sessionCookie = await adminAuth.createSessionCookie(idToken, { 
+      expiresIn: 60 * 60 * 24 * 30 * 1000 
+    });
 
     if (!email) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
@@ -38,30 +43,15 @@ export async function POST(req: Request) {
     }
 
     // find or create the root folder
-    let rootFolder = await FileItemModel.findOne({
-      ownerId: new Types.ObjectId(user._id.toString()), 
-      filename: '/', 
-      isFolder: true,
-      isRoot: true,
-    });
-    if(!rootFolder){
-      rootFolder = await FileItemModel.create({
-        ownerId: new Types.ObjectId(user._id.toString()), 
-        filename: '/', 
-        isFolder: true, 
-        parentFolder: null,
-        isRoot: true, 
-        ownerType: 'User'
-      })
-    }
+    const rootFolderId = await createRootIfNotExists(uid, "User");
 
     // Set authentication cookie
     const res = NextResponse.json({ 
       message: "Signup successful", 
       user, 
-      rootFolder: rootFolder.id, 
+      rootFolder: rootFolderId,
     });
-    res.cookies.set("token", idToken, { 
+    res.cookies.set("token", sessionCookie, { 
       httpOnly: true, 
       secure: process.env.NODE_ENV === "production",  
       path: '/',

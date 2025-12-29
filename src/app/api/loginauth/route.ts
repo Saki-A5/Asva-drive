@@ -26,22 +26,22 @@ export const POST = async (req: Request) => {
     }
 
     // firebase session cookie
-    const expiresIn = 60 * 60 * 24 * 28; // 5 days
+    const expiresIn = 60 * 60 * 24 * 28; // 28 days
     const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
 
     // cookie
     const res = NextResponse.json({ message: "Login successful", user });
-    res.cookies.set("token", idToken, { 
+    res.cookies.set("token", sessionCookie, { 
       httpOnly: true, 
       secure: process.env.NODE_ENV === "production",  
       path: '/',
-      maxAge: 60 * 60 * 24 * 28,
+      maxAge: 60 * 60 * 24 * 28, 
       sameSite: 'lax'
     });
 
     return res;
   } catch (error: any) {
     console.error("Login Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Authentication failed" }, { status: 401 });
   }
 }

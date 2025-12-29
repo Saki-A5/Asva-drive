@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import Notification from "@/models/notificationSchema";
 import { Types } from "mongoose";
-const PATCH = async (req: Request, { params }: any) => {
+export const PATCH = async (req: Request, { params }: any) => {
   const { id } = params;
 
   if (!id) return NextResponse.json({ error: "Notification ID is required" }, { status: 400 });
@@ -25,5 +25,3 @@ const PATCH = async (req: Request, { params }: any) => {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 };
-
-export default PATCH;

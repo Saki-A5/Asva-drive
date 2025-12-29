@@ -3,7 +3,7 @@ import { Model, model, models, Schema, Types } from "mongoose";
 export interface FileInterface {
     filename: string, 
     cloudinaryUrl: string, 
-    ownerId: Types.ObjectId, 
+    ownerId: string, 
     extractedText: string, 
     uploadedBy: Types.ObjectId, 
     indexed: boolean, 
@@ -18,7 +18,7 @@ export interface FileInterface {
 const fileSchema = new Schema<FileInterface>({
     filename: {type: String, required:true},
     cloudinaryUrl: {type: String, required: true},
-    ownerId: {type: Schema.Types.ObjectId, ref: 'College', required: true},    // files are owned by colleges
+    ownerId: {type: String, ref: 'College', required: true}, 
     extractedText: {type: String, default: ''},
     uploadedBy: {type: Schema.Types.ObjectId, ref: 'User', required: true},
     indexed: {type: Boolean,  default: false},

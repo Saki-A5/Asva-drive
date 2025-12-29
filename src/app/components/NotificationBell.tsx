@@ -26,18 +26,6 @@ const NotificationBell = async () => {
     fetchNotifications();
   }, []);
 
-  const markAsRead = async (id: string) => {
-    try {
-      await axios.patch(`/api/notifications/read/${id}`);
-      setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, read: true } : n))
-      );
-      setUnreadCount((prev) => prev - 1);
-    } catch (err) {
-      console.error("Failed to mark notification as read:", err);
-    }
-  };
-
   return (
     <div className="relative">
       <button onClick={() => setOpen((prev) => !prev)} className="relative">
@@ -49,12 +37,7 @@ const NotificationBell = async () => {
         )}
       </button>
 
-      {open && (
-        <NotificationDropdown
-          notifications={notifications}
-          onMarkAsRead={markAsRead}
-        />
-      )}
+      {open && <NotificationDropdown />}
     </div>
   );
 }

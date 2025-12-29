@@ -1,17 +1,21 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import dbConnect from "@/lib/dbConnect"
 import FileModel from "@/models/files"
+import FileItemModel from "@/models/fileItem"
 
 // Helper to build a tree from flat file list
 type FileNode = {
-  [key: string]: any;
-  _id: string;
-  parentFolderId: string | null;
-  children: FileNode[];
-};
+  [key: string]: any
+  _id: string
+  parentFolderId: string | null
+  children: FileNode[]
+}
+
 function buildTree(files: any[], parentId: string | null = null): FileNode[] {
   return files
-    .filter(f => (f.parentFolderId ? f.parentFolderId.toString() : null) === parentId)
+    .filter(
+      f => (f.parentFolderId ? f.parentFolderId.toString() : null) === parentId
+    )
     .map(f => ({
       ...f,
       _id: f._id.toString(),
@@ -20,16 +24,29 @@ function buildTree(files: any[], parentId: string | null = null): FileNode[] {
     }))
 }
 
-export const GET = async (req: Request, { params }: { params: { collegeId: string } }) => {
+export const GET = async (
+  request: NextRequest,
+  { params }: { params: Promise<{ collegeId: string }> }
+) => {
   try {
-    const { collegeId } = params
+    const { collegeId } = await params
+
     await dbConnect()
-    // Find all files/folders for this college (ownerId)
-    const files = await FileModel.find({ ownerId: collegeId, isDeleted: false }).lean()
+
+    const files = await FileItemModel.find({
+      ownerId: collegeId,
+      ownerType: "College",
+      isDeleted: false,
+    }).lean()
+
     const tree = buildTree(files, null)
-    return NextResponse.json({ tree }) 
+
+    return NextResponse.json({ tree })
   } catch (error: any) {
     console.error("College tree error:", error)
-    return NextResponse.json({ error: error.message || String(error) }, { status: 500 })
+    return NextResponse.json(
+      { error: error.message || String(error) },
+      { status: 500 }
+    )
   }
 }

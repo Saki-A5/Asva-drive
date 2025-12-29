@@ -10,12 +10,13 @@ import User from '@/models/users';
 import { Types } from 'mongoose';
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server';
-import { requireRole } from '@/lib/roles';
 import Notification from '@/models/notificationSchema';
 import { sendPush } from '@/lib/sendPush';
 import Token from '@/models/notificationToken';
 import College from '@/models/colleges';
 import FileItemModel from '@/models/fileItem';
+import FileItem from '@/app/components/FileItem';
+import { createRootIfNotExists } from '@/lib/fileUtil';
 
 // upload a file
 export const POST = async (req: Request) => {
@@ -38,11 +39,7 @@ export const POST = async (req: Request) => {
     if (!folderId) {
       return NextResponse.json({ error: "Missing folderId" }, { status: 400 });
     }
-    const folder = await FileModel.findOne({
-      _id: new Types.ObjectId(folderId.toString()),
-      ownerId: new Types.ObjectId(user._id.toString()),
-      isFolder: true
-    });
+    const folder = await FileItemModel.findById(folderId);
     if (!folder) return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
 
     if (!file) {
@@ -58,11 +55,11 @@ export const POST = async (req: Request) => {
       file.name,
       fileBuffer,
       new Types.ObjectId(folderId),
-      user.collegeId,
+      user.college,
       tags,
     );
 
-    if (!result) return NextResponse.json({ message: "Error uploading file" }, { status: 500 })
+    if (!result) return NextResponse.json({ message: "Error uploading file" }, { status: 500 });
 
     const cFile = await FileModel.create({
       filename: file.name,

@@ -38,13 +38,23 @@ const CollegeFiles = () => {
   )?.[0];
 
   useEffect(() => {
-    if (!collegeId) return;
+  if (!collegeId) return;
+
+  const fetchTree = async () => {
     setLoading(true);
-    axios
-      .get(`/api/colleges/${collegeId}/tree`)
-      .then((res) => setTree(res.data.tree))
-      .finally(() => setLoading(false));
-  }, [collegeId]);
+    try {
+      const res = await axios.get<{ tree: FileNode[] }>(`/api/colleges/${collegeId}/tree`);
+      setTree(res.data.tree);
+    } catch (err) {
+      console.error("Error fetching tree:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchTree();
+}, [collegeId]);
+
 
   return (
     <div>
