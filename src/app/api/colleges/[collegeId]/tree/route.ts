@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import dbConnect from "@/lib/dbConnect"
 import FileModel from "@/models/files"
+import FileItemModel from "@/models/fileItem"
 
 // Helper to build a tree from flat file list
 type FileNode = {
@@ -32,8 +33,9 @@ export const GET = async (
 
     await dbConnect()
 
-    const files = await FileModel.find({
+    const files = await FileItemModel.find({
       ownerId: collegeId,
+      ownerType: "College",
       isDeleted: false,
     }).lean()
 

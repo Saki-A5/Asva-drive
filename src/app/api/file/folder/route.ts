@@ -1,5 +1,6 @@
 export const runtime = 'nodejs';
 
+import FileItemModel from "@/models/fileItem";
 import FileModel from "@/models/files";
 import User from "@/models/users";
 import { Types } from "mongoose";
@@ -10,7 +11,7 @@ export const POST = async (req: Request) => {
     if(!folderName || !parentFolderId || !ownerId) return NextResponse.json({message: "folder name, parentFolderId and ownerId are compulsory"}, {status: 400});
 
     try{
-        const parentFolder = await FileModel.findOne({
+        const parentFolder = await FileItemModel.findOne({
             _id: new Types.ObjectId(parentFolderId)
         });
         if(!parentFolder) return NextResponse.json({
@@ -24,11 +25,12 @@ export const POST = async (req: Request) => {
             message: "No user with that ID"
         }, {status: 404});
 
-        const folder = await FileModel.create({
+        const folder = await FileItemModel.create({
             filename: folderName, 
             parentFolderId: parentFolderId, 
             ownerId,
-        })
+            ownerType: (owner.role === "admin" ? "College":"User")
+        });
 
         return NextResponse.json({
             message: 'Folder successfully created', 

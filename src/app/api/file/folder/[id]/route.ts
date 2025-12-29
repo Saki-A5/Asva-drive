@@ -1,70 +1,71 @@
 import dbConnect from "@/lib/dbConnect";
 import { fileQueue } from "@/lib/queue";
 import { requireRole } from "@/lib/roles";
-import FileModel from "@/models/files";
+import FileItemModel from "@/models/fileItem";
+import FileModel, { FileInterface } from "@/models/files";
 import User from "@/models/users";
-import { Types } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import { NextResponse } from "next/server";
 
 export const runtime = 'nodejs';
 
 export async function getAllDescendantIds(folderId: Types.ObjectId) {
-  const descendantFolders = [];
-  const descendantFiles = [];
+  const descendantFolderItems = [];
+  const descendantFileItems = [];
   const queue = [folderId];
 
   while (queue.length > 0) {
     const currentId = queue.shift();
 
     // Find all children of current folder
-    const children = await FileModel.find({
+    const children = await FileItemModel.find({
       parentFolderId: currentId
     }).select('_id isFolder');
 
     for (const child of children) {
       if (child.isFolder) {
-        descendantFolders.push(child._id);
+        descendantFolderItems.push(child._id);
         queue.push(child._id); // Add folders to queue for further traversal
       } else {
-        descendantFiles.push(child._id);
+        descendantFileItems.push(child._id);
       }
     }
   }
 
-  return { descendantFolders, descendantFiles };
+  return { descendantFolderItems, descendantFileItems };
 }
 
-async function deleteFolder(fileId: Types.ObjectId) {
-  const file = await FileModel.findById(fileId);
+async function deleteFolder(folderId: Types.ObjectId): Promise<{ success: boolean, permanentlyDeleted: boolean }> {
+  const folder = await FileItemModel.findById(folderId);
 
-  if (!file) {
-    throw new Error('Folder not found');
+  const { descendantFileItems: fileItems, descendantFolderItems: folderItems } = await getAllDescendantIds(folderId);
+
+  if (fileItems.concat(folderItems).length === 0) { // if there are no contents in this folder, permanently delete it
+    await FileItemModel.deleteOne(folderId);
+    return { success: true, permanentlyDeleted: true }
   }
 
-  if (file.isFolder) {
-    // Get all descendant IDs
-    const { descendantFiles, descendantFolders } = await getAllDescendantIds(fileId);
+  // if the folder is owned by a "user", it contains reference files and should be deleted permanently
+  if ((folder!).ownerType === "User") {
+    await FileItemModel.deleteMany({ _id: { $in: fileItems.concat([...folderItems, folderId]) } }) // delete all children files and folders along with the parent folder
+    return { success: true, permanentlyDeleted: true }
+  };
 
-    if (descendantFiles.length === 0) {// if the folder is empty contains empty folders permanently delete it
-      await FileModel.findByIdAndDelete(fileId);
-      return { success: true, isEmpty: true }
-    }
-    // Bulk soft delete all descendants
-    await FileModel.updateMany(
-      { _id: { $in: descendantFiles.concat(descendantFolders) } },
-      { isDeleted: true, deletedAt: new Date() }
-    );
+  // for non reference files
+  // soft delete children fileItems and the folder Item
+  await FileItemModel.updateMany({ _id: { $in: fileItems.concat([...folderItems, folderId]) } }, { $set: { isDeleted: true, deletedAt: Date.now() } });
+
+  // soft delete the actual files
+  const files = await FileItemModel.find({ _id: { $in: fileItems }, isReference: false }).select("file") as { file: Types.ObjectId }[];
+  // soft delete the actual files
+  if (files.length > 0) await FileModel.updateMany(files, { $set: { isDeleted: true, deletedAt: Date.now() } });
+
+  return {
+    success: true, 
+    permanentlyDeleted: false
   }
-
-  // Delete/soft delete the folder itself
-  await FileModel.findByIdAndUpdate(fileId, {
-    isDeleted: true,
-    deletedAt: new Date()
-  });
-
-  return { success: true, isEmpty: false };
+  
 }
-
 
 // get the contents of a folder
 export const GET = async (req: Request, { params }: any) => {
@@ -85,18 +86,22 @@ export const GET = async (req: Request, { params }: any) => {
   const { id } = await params;
   const folderId = new Types.ObjectId(id as string);
 
-  const folder = await FileModel.findOne({ _id: folderId, isFolder: true, ownerId: user._id });
-  if (!folder) return NextResponse.json({ message: "Folder not Found" }, { status: 404 });
+  // if the user is an admin, they are accessing college files, if the user is a "user" they are accessing user files
+  const ownerId = user.role === "admin" ? user.collegeId : user._id;
 
-  const contents = await FileModel.find({
+  const folder = await FileItemModel.findOne({ _id: folderId, isFolder: true, ownerId });
+  if (!folder) return NextResponse.json({ error: "Folder not Found" }, { status: 404 });
+  if (!folder.isFolder) return NextResponse.json({ error: "This is not a folder" }, { status: 400 })
+
+  const contents = await FileItemModel.find({
     parentFolderId: folderId,
-    ownerId: user._id
+    ownerId
   });
 
   return NextResponse.json({ contents });
 }
 
-// delete a folder and its contens
+// delete a folder and its contents
 export const DELETE = async (req: Request, { params }: any) => {
   try {
     await dbConnect();
@@ -107,13 +112,14 @@ export const DELETE = async (req: Request, { params }: any) => {
     const { id } = await params;
 
     const folderId = new Types.ObjectId(id);
-    const folder = await FileModel.findOne({ _id: folderId, isFolder: true, ownerId: user._id });
-    if (!folder) return NextResponse.json({ message: "No Folder Found" }, { status: 404 });
+    const folder = await FileItemModel.findOne({ _id: folderId, isFolder: true, ownerId: user._id });
+    if (!folder) return NextResponse.json({ error: "No Folder Found" }, { status: 404 });
+    if (!folder.isFolder) return NextResponse.json({ error: "This is not a folder" }, { status: 400 })
 
-    const { isEmpty } = await deleteFolder(folderId);
+    const { permanentlyDeleted } = await deleteFolder(folderId);
     const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW) || 28;
     const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
-    if (!isEmpty) { // only add folders to the queue if they are not empty
+    if (!permanentlyDeleted) { // only add folders to the queue if they have not been permanently deleted
       await fileQueue.add(
         'delete-folder',
         {

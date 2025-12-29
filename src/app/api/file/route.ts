@@ -2,8 +2,10 @@ import FileModel from '@/models/files';
 import { NextResponse } from 'next/server';
 import { Types } from 'mongoose';
 import dbConnect from '@/lib/dbConnect';
+import FileItemModel from '@/models/fileItem';
 import { adminAuth } from '@/lib/firebaseAdmin';
 import { ro } from 'date-fns/locale';
+import User from '@/models/users';
 
 export const GET = async (req: Request) => {
   try {
@@ -22,27 +24,30 @@ export const GET = async (req: Request) => {
       sessionCookie,
       true
     );
-    const ownerId = decodedToken.uid;
+    const userId = decodedToken.uid;
 
-    if (!ownerId) {
+    if (!userId) {
       return NextResponse.json({ message: 'missing user id' }, { status: 401 });
     }
 
+    const user = await User.findById(userId);
+    const ownerId = user.role === "admin" ? user.collegeId : user._id;
+
     // Fetch files
-    let rootFolder = await FileModel.findOne({ ownerId, isRoot: true });
+    let rootFolder = await FileItemModel.findOne({ ownerId, isRoot: true });
     if (!rootFolder) {
-      // return NextResponse.json({ message: 'Root folder not found' }, { status: 404 });
+      return NextResponse.json({ message: 'Root folder not found' }, { status: 404 });
       // don't forget to remove the below later and uncommrent the above and change the above let to const
-      rootFolder = await FileModel.create({
-        ownerId: ownerId,
-        filename: '/',
-        isFolder: true,
-        parentFolderId: null,
-        isRoot: true,
-      });
+      // rootFolder = await FileItemModel.create({
+      //   ownerId: userId,
+      //   filename: '/',
+      //   isFolder: true,
+      //   parentFolderId: null,
+      //   isRoot: true,
+      // });
     }
 
-    const files = await FileModel.find({
+    const files = await FileItemModel.find({
       ownerId,
       parentFolderId: rootFolder._id,
     }).sort({ createdAt: -1 });

@@ -6,6 +6,8 @@ import dbConnect from "@/lib/dbConnect";
 import User from "@/models/users";
 import FileModel from "@/models/files";
 import { Types } from "mongoose";
+import FileItemModel from "@/models/fileItem";
+import { createRootIfNotExists } from "@/lib/fileUtil";
 
 // Create user (POST)
 export async function POST(req: Request) {
@@ -41,27 +43,13 @@ export async function POST(req: Request) {
     }
 
     // find or create the root folder
-    let rootFolder = await FileModel.findOne({
-      ownerId: uid, 
-      filename: '/', 
-      isFolder: true,
-      isRoot: true,
-    });
-    if(!rootFolder){
-      rootFolder = await FileModel.create({
-        ownerId: uid, 
-        filename: '/', 
-        isFolder: true, 
-        parentFolderId: null,
-        isRoot: true,
-      })
-    }
+    const rootFolderId = await createRootIfNotExists(uid, "User");
 
     // Set authentication cookie
     const res = NextResponse.json({ 
       message: "Signup successful", 
       user, 
-      rootFolder: rootFolder.id, 
+      rootFolder: rootFolderId,
     });
     res.cookies.set("token", sessionCookie, { 
       httpOnly: true, 

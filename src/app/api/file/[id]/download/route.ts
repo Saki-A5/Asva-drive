@@ -1,4 +1,5 @@
 import { getAssetDeliveryUrl } from "@/lib/cloudinary";
+import FileItemModel from "@/models/fileItem";
 import FileModel from "@/models/files";
 import { NextResponse } from "next/server";
 
@@ -8,8 +9,13 @@ export const GET = async (req: Request, { params }: any) => {
     try {
         const { id } = await params;
 
-        const file = await FileModel.findById(id);
-        if (!file) return NextResponse.json({ error: "Could not find file" }, { status: 404 });
+        const fileItem = await FileItemModel.findById(id);
+        if (!fileItem) return NextResponse.json({ error: "Could not find file" }, { status: 404 });
+
+        // get the actual file
+        const file = await FileModel.findById(fileItem.file);
+        if(!file) return NextResponse.json({error: "File could not be found"}, {status: 404});
+        
 
         const signedUrl = getAssetDeliveryUrl(file.cloudinaryUrl, {
             attachment: true,

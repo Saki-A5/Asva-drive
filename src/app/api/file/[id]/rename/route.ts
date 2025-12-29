@@ -1,9 +1,10 @@
 import { renameAsset } from "@/lib/cloudinary";
 import dbConnect from "@/lib/dbConnect";
 import { requireRole } from "@/lib/roles";
-import FileModel from "@/models/files";
+import FileItemModel from "@/models/fileItem";
+import FileModel, { FileInterface } from "@/models/files";
 import User from "@/models/users";
-import { Types } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = 'nodejs';
@@ -19,14 +20,18 @@ export const POST = async (req: NextRequest, {params}: any) => {
         
         const {id} = (await params);
 
-        const fileId = new Types.ObjectId(id);
+        const fileItemId = new Types.ObjectId(id);
 
-        const file = await FileModel.findOne({_id: fileId});
-        if(!file) return NextResponse.json({message: "File Does not Exist"}, {status: 404});
+        const fileItem = await FileItemModel.findById(fileItemId).populate<{file: HydratedDocument<FileInterface>}>("file");
+        if(!fileItem) return NextResponse.json({message: "File Does not Exist"}, {status: 404});
 
-        await renameAsset(file.cloudinaryUrl, file.parentFolderId, filename as string);
-
-        await FileModel.updateOne({_id: file._id}, {$set: {filename: filename as string}});
+        if(!fileItem.isFolder){
+            await renameAsset(fileItem.file.cloudinaryUrl, fileItem.parentFolderId!, filename as string);
+        }
+        // rename the actual file
+        await FileModel.updateOne({_id: fileItem.file._id}, {$set: {filename: filename as string}});
+        // rename the file item and all reference files
+        await FileItemModel.updateMany({file: fileItem.file._id}, {$set: {filename: filename as string}});
 
         return NextResponse.json({message: "Successfully renamed"});
     } catch (error) {

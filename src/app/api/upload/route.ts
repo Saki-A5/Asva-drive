@@ -13,6 +13,10 @@ import { NextResponse } from 'next/server';
 import Notification from '@/models/notificationSchema';
 import { sendPush } from '@/lib/sendPush';
 import Token from '@/models/notificationToken';
+import College from '@/models/colleges';
+import FileItemModel from '@/models/fileItem';
+import FileItem from '@/app/components/FileItem';
+import { createRootIfNotExists } from '@/lib/fileUtil';
 
 // upload a file
 export const POST = async (req: Request) => {
@@ -22,11 +26,10 @@ export const POST = async (req: Request) => {
     // const {user, error, status} = await requireRole(req, ['admin']);
     // if(error) return NextResponse.json({message: "Unauthorized"}, {status});
 
-    const user = await User.findOne({email: 'demo@gmail.com'});
+    const user = await User.findOne({ email: 'demo@gmail.com' });
 
     const formData = await req.formData();
     const folderId = formData.get("folderId") as string;
-    const email = formData.get("email") as string;
     const file = formData.get("file") as File || null;
     const tags = (formData.get("tags") as string)?.split(",") || [];
 
@@ -36,11 +39,7 @@ export const POST = async (req: Request) => {
     if (!folderId) {
       return NextResponse.json({ error: "Missing folderId" }, { status: 400 });
     }
-    const folder = await FileModel.findOne({
-      _id: new Types.ObjectId(folderId.toString()),
-      ownerId: new Types.ObjectId(user._id.toString()),
-      isFolder: true
-    });
+    const folder = await FileItemModel.findById(folderId);
     if (!folder) return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
 
     if (!file) {
@@ -56,25 +55,37 @@ export const POST = async (req: Request) => {
       file.name,
       fileBuffer,
       new Types.ObjectId(folderId),
-      user.collegeId,
+      user.college,
       tags,
     );
 
-    if (!result) return NextResponse.json({ message: "Error uploading file" }, { status: 500 })
+    if (!result) return NextResponse.json({ message: "Error uploading file" }, { status: 500 });
 
     const cFile = await FileModel.create({
       filename: file.name,
       cloudinaryUrl: result.public_id,
       parentFolderId: folder._id,
-      ownerId: new Types.ObjectId(user._id),
+      ownerId: new Types.ObjectId(user.collegeId),
       resourceType: result.resource_type, // default for now
       mimeType: file.type,
       sizeBytes: result.bytes,
-      tags: tags
+      tags: tags,
+      college: user.collegeId,
+      uploadedBy: new Types.ObjectId(user._id)
     });
 
     await cFile.save();
-   
+
+    const fileItem = await FileItemModel.create({
+      filename: file.name, 
+      parentFolderId: new Types.ObjectId(folderId),
+      ownerId: new Types.ObjectId(cFile.ownerId), 
+      ownerType: 'College', 
+      fileId: new Types.ObjectId(cFile._id)
+    });
+
+    await fileItem.save();
+
     // in app notifications
     await Notification.create({
       userId: user._id,
@@ -101,9 +112,9 @@ export const POST = async (req: Request) => {
           folderId,
         },
       });
-     } catch (e) {
+    } catch (e) {
       console.log("Error sending push notification:", e);
-     }
+    }
 
 
     // Enqueue indexing job (worker will fetch document by id and index)
