@@ -37,11 +37,14 @@ export const POST = async (req: Request) => {
             const job = await fileQueue.getJob(`delete-folder-${fileItemId}`);
             if (job) await job.remove();
 
-            // restore all the files items
-            await FileItemModel.updateMany({ id: { $in: descendantFileItems.concat(descendantFolderItems) } }, { $set: { isDeleted: false, deletedAt: null } });
+            // restore all the files items and the parent folder item
+            await FileItemModel.updateMany({ _id: { $in: descendantFileItems.concat([...descendantFolderItems, fileItemId]) } }, { $set: { isDeleted: false, deletedAt: null } });
+
             // restore the actual files, if any were soft deleted
-            const fileIds = await FileItemModel.find({ _id: { $in: descendantFileItems }, isReference: false }).select<{ file: { _id: Types.ObjectId } }>("file._id");
-            if (fileIds.length > 0) await FileModel.updateMany({ _id: { $in: fileIds } }, { isDeleted: false, deletedAt: null });
+            const fileItems = await FileItemModel.find({ _id: { $in: descendantFileItems }, isReference: false }).select<{ file: Types.ObjectId }>("file");
+            const fileIds = fileItems.map(fileItem => fileItem.file);
+            if (fileIds.length > 0) await FileModel.updateMany({ _id: { $in: fileIds } }, { $set: { isDeleted: false, deletedAt: null } });
+
         }
         else {
 
