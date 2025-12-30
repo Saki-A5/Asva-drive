@@ -26,16 +26,16 @@ export const POST = async (req: NextRequest, {params}: any) => {
         if(!fileItem) return NextResponse.json({message: "File Does not Exist"}, {status: 404});
 
         if(!fileItem.isFolder){
-            await renameAsset(fileItem.file.cloudinaryUrl, fileItem.parentFolderId!, filename as string);
+            await renameAsset(fileItem.file.cloudinaryUrl, fileItem.parentFolderId!, filename as string); // TODO: fix the error that is being thrown here
         }
         // rename the actual file
         await FileModel.updateOne({_id: fileItem.file._id}, {$set: {filename: filename as string}});
         // rename the file item and all reference files
         await FileItemModel.updateMany({file: fileItem.file._id}, {$set: {filename: filename as string}});
 
-        return NextResponse.json({message: "Successfully renamed"});
-    } catch (error) {
+        return NextResponse.json({message: "Successfully renamed", file: fileItem});
+    } catch (error: any) {
         console.error(error);
-        return NextResponse.json({error: "An error occurred"}, {status: 500});
+        return NextResponse.json({error:error.message || "An Error Occurred"}, {status: 500});
     }
 }

@@ -26,7 +26,7 @@ export const POST = async (req: Request) => {
     // const {user, error, status} = await requireRole(req, ['admin']);
     // if(error) return NextResponse.json({message: "Unauthorized"}, {status});
 
-    const user = await User.findOne({ email: 'demo@gmail.com' });
+    const user = await User.findOne({ email: 'asvasoftwareteam@gmail.com' });
 
     const formData = await req.formData();
     const folderId = formData.get("folderId") as string;
@@ -55,7 +55,7 @@ export const POST = async (req: Request) => {
       file.name,
       fileBuffer,
       new Types.ObjectId(folderId),
-      user.college,
+      new Types.ObjectId(user.college),
       tags,
     );
 
@@ -81,10 +81,11 @@ export const POST = async (req: Request) => {
       parentFolderId: new Types.ObjectId(folderId),
       ownerId: new Types.ObjectId(cFile.ownerId), 
       ownerType: 'College', 
-      fileId: new Types.ObjectId(cFile._id)
+      file: new Types.ObjectId(cFile._id)
     });
 
     await fileItem.save();
+    const pFileItem = await FileItemModel.findById(fileItem._id).populate("file");
 
     // in app notifications
     await Notification.create({
@@ -131,7 +132,7 @@ export const POST = async (req: Request) => {
 
     return NextResponse.json({
       message: "File uploaded successfully",
-      file: cFile
+      file: pFileItem
     }, { status: 200 });
   }
   catch (e) {

@@ -1,4 +1,4 @@
-import FileModel from '@/models/files';
+import "@/models/files";
 import { NextResponse } from 'next/server';
 import { Types } from 'mongoose';
 import dbConnect from '@/lib/dbConnect';
@@ -24,13 +24,12 @@ export const GET = async (req: Request) => {
       sessionCookie,
       true
     );
-    const userId = decodedToken.uid;
-
-    if (!userId) {
+    const userEmail = decodedToken.email;
+    const user = await User.findOne({email: userEmail});
+  
+    if (!userEmail) {
       return NextResponse.json({ message: 'missing user id' }, { status: 401 });
     }
-
-    const user = await User.findById(userId);
     const ownerId = user.role === "admin" ? user.collegeId : user._id;
 
     // Fetch files
@@ -50,7 +49,7 @@ export const GET = async (req: Request) => {
     const files = await FileItemModel.find({
       ownerId,
       parentFolderId: rootFolder._id,
-    }).sort({ createdAt: -1 });
+    }).populate("file");
 
     return NextResponse.json({
       message: 'Files fetched',

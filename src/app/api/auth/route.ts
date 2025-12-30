@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const { uid, email, name: firebaseName } = decodedToken;
 
     const sessionCookie = await adminAuth.createSessionCookie(idToken, { 
-      expiresIn: 60 * 60 * 24 * 30 * 1000 
+      expiresIn: 60 * 60 * 24 * 5 * 1000 
     });
 
     if (!email) {
