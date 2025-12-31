@@ -61,7 +61,7 @@ const FolderPage = ({ params }: PageProps) => {
     if (!name) return;
 
     await axios.post('/api/file/folder', {
-      name,
+      folderName: name,
       parentFolderId: folderId,
     });
 

@@ -9,6 +9,8 @@ type FileNode = {
   _id: string
   parentFolderId: string | null
   children: FileNode[]
+  filename: string
+  isFolder: boolean
 }
 
 function buildTree(files: any[], parentId: string | null = null): FileNode[] {

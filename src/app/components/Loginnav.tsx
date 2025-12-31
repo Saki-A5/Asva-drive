@@ -43,6 +43,7 @@ const Loginnav = () => {
       const auth = getAuth();
       await signOut(auth);
       await axios.post('/api/logout');
+      localStorage.removeItem('userId');
       router.push('/login');
     } catch (error) {
       console.error('Logout Error:', error);

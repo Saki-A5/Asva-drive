@@ -99,8 +99,16 @@ export const GET = async (req: Request, { params }: any) => {
     ownerId
   });
 
-  return NextResponse.json({ contents });
-}
+   const breadcrumbs: { _id: string; filename: string }[] = [];
+    let currentFolder: any = folder;
+    while (currentFolder) {
+      breadcrumbs.unshift({ _id: currentFolder._id.toString(), filename: currentFolder.filename });
+      if (!currentFolder.parentFolderId) break;
+      currentFolder = await FileItemModel.findById(currentFolder.parentFolderId);
+    }
+
+  return NextResponse.json({ contents, breadcrumbs });
+} 
 
 // delete a folder and its contents
 export const DELETE = async (req: Request, { params }: any) => {
