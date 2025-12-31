@@ -43,3 +43,6 @@ next-env.d.ts
 secrets/
 asva-core/
 
+
+# Scraps local notes
+.scraps/

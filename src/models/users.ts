@@ -9,7 +9,7 @@ const userSchema = new Schema(
     firebaseUid: { type: String, unique: true, sparse: true },
     authProvider: { type: String, enum: ["google", "email"], default: "email" },
     matricNumber: { type: String },
-    college: { type: String },
+    collegeId: { type: String },
     department: { type: String },
     currentLevel: { type: String },
     avatarStyle: { type: String },

@@ -1,4 +1,5 @@
 import FileItemModel from "@/models/fileItem";
+import { Types } from "mongoose";
 
 export async function createRootIfNotExists(ownerId: string, ownerType: "College"|"User"): Promise<string>{
     const rootFolder = await FileItemModel.findOne({ownerId, ownerType, isRoot: true});
@@ -7,7 +8,7 @@ export async function createRootIfNotExists(ownerId: string, ownerType: "College
             filename: '/', 
             isFolder: true, 
             parentFolderId: null, 
-            ownerId, 
+            ownerId: new Types.ObjectId(ownerId), 
             ownerType, 
             isRoot: true,
         });
