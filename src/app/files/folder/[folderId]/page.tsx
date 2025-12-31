@@ -9,6 +9,8 @@ import FileItem from '@/app/components/FileItem';
 import Breadcrumbs from '@/app/components/Breadcrumbs';
 import { Button } from '@/components/ui/button';
 import Create from '@/app/components/Create';
+import Upload from '@/app/components/Upload';
+
 
 interface PageProps {
   params: { folderId: string };
@@ -77,6 +79,8 @@ const FolderPage = ({ params }: PageProps) => {
         <Button onClick={() => setShowCreateFolder(true)} variant="default">
           New Folder
         </Button>
+
+        <Upload folderId={folderId} /> 
       </div>
 
       {/* Create Folder */}
@@ -109,7 +113,6 @@ const FolderPage = ({ params }: PageProps) => {
         <FolderItem folder={folder} />
       </div>
     ))}
-
     {files.map((file) => (
       <div key={file._id}>
         <FileItem file={file} />

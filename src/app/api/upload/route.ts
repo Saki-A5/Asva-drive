@@ -30,15 +30,45 @@ export const POST = async (req: Request) => {
 
     const formData = await req.formData();
     const folderId = formData.get("folderId") as string;
+
+    let targetFolder;
+
+// CASE 1: folderId explicitly provided (subfolder upload)
+if (folderId && Types.ObjectId.isValid(folderId)) {
+  targetFolder = await FileItemModel.findById(folderId);
+  if (!targetFolder) {
+    return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
+  }
+}
+
+// CASE 2: NO folderId → ROOT upload
+if (!targetFolder) {
+  targetFolder = await FileItemModel.findOne({
+    ownerId: user.collegeId,
+    isRoot: true,
+  });
+
+  if (!targetFolder) {
+    targetFolder = await FileItemModel.create({
+      filename: '/',
+      isFolder: true,
+      parentFolderId: null,
+      ownerId: user.collegeId,
+      ownerType: 'College',
+      isRoot: true,
+    });
+  }
+}
+
     const file = formData.get("file") as File || null;
     const tags = (formData.get("tags") as string)?.split(",") || [];
 
     console.log(file);
 
     // Validation
-    if (!folderId) {
-      return NextResponse.json({ error: "Missing folderId" }, { status: 400 });
-    }
+    // if (!folderId) {
+    //   return NextResponse.json({ error: "Missing folderId" }, { status: 400 });
+    // }
     const folder = await FileItemModel.findById(folderId);
     if (!folder) return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
 
@@ -78,7 +108,8 @@ export const POST = async (req: Request) => {
 
     const fileItem = await FileItemModel.create({
       filename: file.name, 
-      parentFolderId: new Types.ObjectId(folderId),
+      // parentFolderId: new Types.ObjectId(folderId),
+      parentFolderId: targetFolder._id,
       ownerId: new Types.ObjectId(cFile.ownerId), 
       ownerType: 'College', 
       file: new Types.ObjectId(cFile._id)
@@ -119,16 +150,16 @@ export const POST = async (req: Request) => {
 
 
     // Enqueue indexing job (worker will fetch document by id and index)
-    await indexQueue.add(
-      'index-file',
-      { id: cFile._id.toString() },
-      {
-        attempts: 5,
-        backoff: { type: 'exponential', delay: 1000 },
-        removeOnComplete: true,
-        jobId: `file-${cFile._id.toString()}`,
-      }
-    )
+    // await indexQueue.add(
+    //   'index-file',
+    //   { id: cFile._id.toString() },
+    //   {
+    //     attempts: 5,
+    //     backoff: { type: 'exponential', delay: 1000 },
+    //     removeOnComplete: true,
+    //     jobId: `file-${cFile._id.toString()}`,
+    //   }
+    // )
 
     return NextResponse.json({
       message: "File uploaded successfully",

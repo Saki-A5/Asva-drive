@@ -96,7 +96,7 @@ finally {
           <h1 className="font-bold text-xl whitespace-nowrap">My Files</h1>
 
           <div className="hidden sm:flex space-x-2 gap-y-2">
-            {user?.role === 'admin' && <Upload folderId={folderId}/>}
+            {user?.role === 'admin' && <Upload/>}
             <Create onCreateFolderClick={handleCreateFolder}/>
           </div>
           <Floating />
