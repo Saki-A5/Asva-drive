@@ -29,13 +29,18 @@ type UploadingFile = {
   progress: number;
 };
 
-const Upload = () => {
+interface UploadProps {
+  folderId: string;
+}
+
+const Upload = ({ folderId }: UploadProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<UploadingFile[]>([]);
   const [description, setDescription] = useState('');
+
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
@@ -55,7 +60,7 @@ const Upload = () => {
       setLoading(true);
       const response = await uploadToServer({
         file: f.file,
-        folderId: 'default-folder-id',
+        folderId,
         email: 'user@example.com',
       });
       console.log(response);

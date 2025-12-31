@@ -24,8 +24,11 @@ interface Fileitem {
   };
 }
 
+interface MyFilesProps {
+  folderId: string;
+}
 
-const MyFiles = () => {
+const MyFiles = ({ folderId }: MyFilesProps) => {
   const [myFiles, setMyFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
   const handleCreateFolder = () => {
@@ -93,7 +96,7 @@ finally {
           <h1 className="font-bold text-xl whitespace-nowrap">My Files</h1>
 
           <div className="hidden sm:flex space-x-2 gap-y-2">
-            {user?.role === 'admin' && <Upload />}
+            {user?.role === 'admin' && <Upload folderId={folderId}/>}
             <Create onCreateFolderClick={handleCreateFolder}/>
           </div>
           <Floating />
