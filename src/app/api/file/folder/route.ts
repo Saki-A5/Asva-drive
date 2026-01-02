@@ -71,8 +71,7 @@ export const POST = async (req: Request) => {
             message: 'Folder successfully created',
             data: { folderId: folder._id }
         })
-    }
-    catch (e: any) {
+    } catch (e: any) {
         return NextResponse.json({
             message: e.message
         }, { status: 404 })
