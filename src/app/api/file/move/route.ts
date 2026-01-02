@@ -1,4 +1,5 @@
 import { renameAsset } from "@/lib/cloudinary";
+import dbConnect from "@/lib/dbConnect";
 import FileItemModel from "@/models/fileItem";
 import { FileInterface } from "@/models/files";
 import { HydratedDocument } from "mongoose";
@@ -10,6 +11,8 @@ export const POST = async (req: Request) => {
     const { fileItemId, currentParent, destParent } = await req.json();
 
     try {
+        await dbConnect();
+
         if(!fileItemId || !currentParent || destParent) return NextResponse.json({error: "fileItemId, currentParent and destParent are cumpulsory paramters"});
 
         const fileItem = await FileItemModel.findById(fileItemId).populate<{file: HydratedDocument<FileInterface>}>("file");
