@@ -46,16 +46,16 @@ export const POST = async (req: Request) => {
         // }, { status: 404 });
 
         let parentFolder = null;
-    if (parentFolderId) {
-      if (!Types.ObjectId.isValid(parentFolderId)) {
-        return NextResponse.json({ message: "Invalid parentFolderId" }, { status: 400 });
-      }
+        if (parentFolderId) {
+            if (!Types.ObjectId.isValid(parentFolderId)) {
+                return NextResponse.json({ message: "Invalid parentFolderId" }, { status: 400 });
+            }
 
-      parentFolder = await FileItemModel.findById(parentFolderId);
-      if (!parentFolder) {
-        return NextResponse.json({ message: "Parent folder not found" }, { status: 404 });
-      }
-    }
+            parentFolder = await FileItemModel.findById(parentFolderId);
+            if (!parentFolder) {
+                return NextResponse.json({ message: "Parent folder not found" }, { status: 404 });
+            }
+        }
 
         const folder = await FileItemModel.create({
             // filename: folderName,
