@@ -57,6 +57,10 @@ export const POST = async (req: Request) => {
             }
         }
 
+        const ownerId = user.role === "admin" ? user.collegeId : user._id;
+        if(!parentFolder) parentFolder = await FileItemModel.findOne({ownerId, isRoot: true, filename: '/'});
+        if(!parentFolder) return NextResponse.json({message: "This user doesn not have a root folder"}, {status: 404});
+
         const folder = await FileItemModel.create({
             // filename: folderName,
             filename: folderName.trim(),
