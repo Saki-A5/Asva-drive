@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { getAuth, signOut } from 'firebase/auth';
+import {auth} from '@/lib/firebaseClient';
 import Link from 'next/link';
 import { getAvatarUrl, AvatarStyle } from '@/utils/avatar';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -40,9 +41,10 @@ const Loginnav = () => {
 
   const handleLogout = async () => {
     try {
-      const auth = getAuth();
+      // const auth = getAuth();
       await signOut(auth);
       await axios.post('/api/logout');
+      localStorage.removeItem('userId');
       router.push('/login');
     } catch (error) {
       console.error('Logout Error:', error);

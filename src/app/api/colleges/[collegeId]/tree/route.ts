@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import dbConnect from "@/lib/dbConnect"
 import FileModel from "@/models/files"
+import FileItemModel from "@/models/fileItem"
 
 // Helper to build a tree from flat file list
 type FileNode = {
@@ -8,6 +9,8 @@ type FileNode = {
   _id: string
   parentFolderId: string | null
   children: FileNode[]
+  filename: string
+  isFolder: boolean
 }
 
 function buildTree(files: any[], parentId: string | null = null): FileNode[] {
@@ -32,8 +35,9 @@ export const GET = async (
 
     await dbConnect()
 
-    const files = await FileModel.find({
+    const files = await FileItemModel.find({
       ownerId: collegeId,
+      ownerType: "College",
       isDeleted: false,
     }).lean()
 

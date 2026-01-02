@@ -1,7 +1,7 @@
 import axios from 'axios';
 export interface UploadParams {
   file: File;
-  folderId: string;
+  folderId?: string;
   email: string;
   tags?: string[];
 }
@@ -23,7 +23,9 @@ export async function uploadToServer(
     formData.append('file', file);
     formData.append('filename', file.name);
     formData.append('mimetype', file.type);
-    formData.append('folderId', folderId);
+    if (folderId) {
+      formData.append('folderId', folderId);
+    }
     formData.append('email', email);
     formData.append('tags', tags.join(','));
 

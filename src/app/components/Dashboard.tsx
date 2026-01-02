@@ -58,6 +58,9 @@ const recentFiles: FileItem[] = [
 const Dashboard = () => {
   const { user, loading } = useCurrentUser();
   const [starredFiles, setStarredFiles] = useState<FileItem[]>([]);
+  const handleCreateFolder = () => {
+    console.log('Create folder clicked');
+  }
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -179,7 +182,7 @@ const Dashboard = () => {
 
           <div className="sm:flex space-x-2 px-2 lg:px-6 mb-6 hidden">
             {user?.role === 'admin' && <Upload />}
-            <Create />
+            <Create onCreateFolderClick={handleCreateFolder} />
           </div>
           <Floating />
         </div>

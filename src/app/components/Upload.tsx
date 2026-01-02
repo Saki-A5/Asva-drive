@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
@@ -29,13 +30,18 @@ type UploadingFile = {
   progress: number;
 };
 
-const Upload = () => {
+interface UploadProps {
+  folderId?: string;
+}
+
+const Upload = ({ folderId }: UploadProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<UploadingFile[]>([]);
   const [description, setDescription] = useState('');
+
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
@@ -55,7 +61,7 @@ const Upload = () => {
       setLoading(true);
       const response = await uploadToServer({
         file: f.file,
-        folderId: 'default-folder-id',
+        folderId,
         email: 'user@example.com',
       });
       console.log(response);
@@ -86,16 +92,22 @@ const Upload = () => {
 
       <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto rounded-xl [&>button]:hidden dark:bg-[#1A1E26]">
         <DialogHeader className="flex flex-row items-center justify-between border-b-[#D9D9D961] border-b-[1px] pb-5 rounded-b-2xl dark:rounded-b-none dark:border-b-0">
-          <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-            <div className="px-3 py-3 rounded-full border border-[#D9D9D999]">
-              <UploadCloud className="text-[#000000] dark:text-white" />
-            </div>
-            Upload Files
-          </DialogTitle>
-          <X
-            className="h-6 w-6 cursor-pointer text-[#00000080] dark:text-white"
-            onClick={() => setOpen(false)}
-          />
+          <DialogHeader className="flex flex-row items-center justify-between ...">
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <div className="px-3 py-3 rounded-full border border-[#D9D9D999]">
+                <UploadCloud className="text-[#000000] dark:text-white" />
+                </div>
+                Upload Files
+                </DialogTitle>
+                <DialogDescription>
+                  Select one or more files 
+                </DialogDescription>
+                <X
+                className="h-6 w-6 cursor-pointer text-[#00000080] dark:text-white"
+                onClick={() => setOpen(false)}
+                />
+          </DialogHeader>
+
         </DialogHeader>
 
         <div
