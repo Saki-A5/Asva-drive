@@ -1,6 +1,6 @@
 /**
  * Comprehensive device permissions utility for web applications
- * Handles: Camera, Microphone, Location, Notifications, File System, and Storage permissions
+ * Handles: Camera, Microphone, Location, Notifications, Calendar, File System, and Storage permissions
  */
 
 export type PermissionStatus = 'granted' | 'denied' | 'prompt' | 'unsupported';
@@ -178,6 +178,70 @@ export async function checkNotificationPermission(): Promise<PermissionStatus> {
 }
 
 /**
+ * Calendar Permission
+ * Note: There's no native browser Calendar API permission.
+ * This checks for Web Share API support which can be used to share calendar events,
+ * and the ability to create/download .ics files for calendar integration.
+ * 
+ * On mobile devices:
+ * - Web Share API is widely supported and can share to calendar apps
+ * - .ics files can be downloaded and opened in calendar apps
+ * 
+ * On desktop:
+ * - .ics files can be downloaded and imported into calendar apps
+ * - Web Share API support varies by browser
+ */
+export async function requestCalendarPermission(): Promise<PermissionResult> {
+  try {
+    // Check if we're on a mobile device (better calendar integration support)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    // Check if Web Share API is available (can be used to share calendar events)
+    if ('share' in navigator) {
+      // Web Share API is available - we can share calendar events
+      // On mobile, this opens the native share sheet with calendar apps
+      // The permission is requested when share() is called, so we return 'prompt'
+      // to indicate it's available but requires user interaction
+      return { 
+        status: 'prompt',
+        // Add helpful message for mobile users
+        ...(isMobile ? {} : {})
+      };
+    }
+    
+    // If Web Share API is not available, we can still create .ics files
+    // (which is always possible, so we return 'granted' for file-based calendar access)
+    // On mobile, .ics files typically open directly in the calendar app
+    return { status: 'granted' };
+  } catch (error: any) {
+    return { status: 'denied', error: error.message || 'Failed to check calendar access' };
+  }
+}
+
+export async function checkCalendarPermission(): Promise<PermissionStatus> {
+  try {
+    // Check if we're on a mobile device
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    // Check if Web Share API is available
+    if ('share' in navigator) {
+      // Web Share API is available - can share calendar events
+      // On mobile devices, this is the preferred method as it opens native calendar apps
+      // Since there's no persistent permission state for Web Share API,
+      // we return 'prompt' to indicate it's available
+      return 'prompt';
+    }
+    
+    // Web Share API not available, but we can still create .ics files
+    // This is always available and works on both mobile and desktop
+    // On mobile, .ics files typically open directly in the calendar app
+    return 'granted';
+  } catch {
+    return 'unsupported';
+  }
+}
+
+/**
  * File System Permission (File System Access API)
  */
 export async function requestFileSystemPermission(): Promise<PermissionResult> {
@@ -298,14 +362,16 @@ export async function getAllPermissionStatuses(): Promise<{
   microphone: PermissionStatus;
   location: PermissionStatus;
   notifications: PermissionStatus;
+  calendar: PermissionStatus;
   fileSystem: boolean;
   storage: PermissionStatus;
 }> {
-  const [camera, microphone, location, notifications, fileSystem, storage] = await Promise.all([
+  const [camera, microphone, location, notifications, calendar, fileSystem, storage] = await Promise.all([
     checkCameraPermission(),
     checkMicrophonePermission(),
     checkLocationPermission(),
     checkNotificationPermission(),
+    checkCalendarPermission(),
     Promise.resolve(checkFileSystemSupport()),
     checkStoragePermission().then(result => result.status)
   ]);
@@ -315,6 +381,7 @@ export async function getAllPermissionStatuses(): Promise<{
     microphone,
     location,
     notifications,
+    calendar,
     fileSystem,
     storage
   };
