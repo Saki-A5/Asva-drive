@@ -8,136 +8,109 @@ import Upload from '../components/Upload';
 import Create from '../components/Create';
 import FileTable, { FileItem } from '../components/FileTable';
 import { Button } from '@/components/ui/button';
-import { ChevronDown } from 'lucide-react';
 import useCurrentUser from '@/hooks/useCurrentUser';
 import Floating from '../components/Floating';
 import SortFilters from '../components/SortFilter';
+import CreateFolder from '../components/CreateFolder';
 
-interface FileType {
+interface Fileitem {
   _id: string;
-  name: string;
-  size: number;
-  mimeType: string;
-  updatedAt: string;
+  filename: string;
+  isFolder: boolean;
+  file?: {
+    size: number;
+    mimeType: string;
+    updatedAt: string;
+  };
 }
 
-const MyFiles = () => {
+interface MyFilesProps {
+  folderId: string;
+}
+
+const MyFiles = ({ folderId }: MyFilesProps) => {
   const [myFiles, setMyFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const handleCreateFolder = () => {
-    console.log('Create folder clicked');
-  }
+
+  const [showCreateFolder, setShowCreateFolder] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const { user } = useCurrentUser();
 
-  const userId = user?._id;
+  const getFiles = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get('/api/file'); 
+      const items: Fileitem[] = res.data?.data ?? [];
+
+      const mapped: FileItem[] = items.map((item) => {
+        if (item.isFolder) {
+          return {
+            id: item._id,
+            name: item.filename,
+            type: 'folder',
+            author: 'SMS',
+            size: '—',
+            modified: '—',
+            sharedUsers: [],
+          };
+        }
+
+        return {
+          id: item._id,
+          name: item.filename,
+          type: item.file?.mimeType.split('/')[0] ?? 'file',
+          author: 'SMS',
+          size: `${((item.file?.size ?? 0) / (1024 * 1024)).toFixed(1)} MB`,
+          modified: item.file?.updatedAt
+            ? new Date(item.file.updatedAt).toDateString()
+            : '—',
+          sharedUsers: [],
+        };
+      });
+
+      setMyFiles(mapped);
+    } catch (error) {
+      console.error('Error fetching files:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const getFiles = async () => {
-      if (!userId) return; // Don't fetch if no user ID
-
-      try {
-        setLoading(true);
-        const res = await axios.get('/api/file', {
-          params: { ownerId: userId },
-        });
-
-        const files = res.data?.data ?? [];
-
-        const mapped: FileItem[] = files
-          .filter((f: FileType | null | undefined) => f && f.mimeType)
-          .map((f: FileType) => ({
-            id: f._id,
-            name: f.name,
-            type: f.mimeType.split('/')[0],
-            author: 'SMS',
-            size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
-            modified: new Date(f.updatedAt).toDateString(),
-            sharedUsers: [],
-          }));
-        setMyFiles(mapped);
-      } catch (error) {
-        console.error('Error fetching files:', error);
-        // Optionally show error to user
-      } finally {
-        setMyFiles([
-          {
-            id: '111222',
-            name: 'Past Questions',
-            type: 'folder',
-            author: 'Sciences',
-            size: '1.2GB',
-            items: '10 items',
-            modified: 'Jun 12, 2025',
-            sharedUsers: [],
-          },
-          {
-            id: '222333',
-            name: 'C#/C++',
-            type: 'folder',
-            author: 'Sciences',
-            size: '2.7GB',
-            items: '8 items',
-            modified: 'Oct 12, 2025',
-            sharedUsers: [],
-          },
-          {
-            id: '333444',
-            name: 'MATLAB',
-            type: 'folder',
-            author: 'Sciences',
-            size: '5.2GB',
-            items: '15 items',
-            modified: 'Jan 12, 2026',
-            sharedUsers: [],
-          },
-          {
-            id: '444555',
-            name: 'Previous Work',
-            type: 'pdf',
-            author: 'Sciences',
-            size: '1.0GB',
-            items: 'PDF',
-            modified: 'Nov 8, 2025',
-            sharedUsers: [],
-          },
-          {
-            id: '555666',
-            name: 'AutoCAD Workbook',
-            type: 'folder',
-            author: 'Sciences',
-            size: '320MB',
-            items: '5 items',
-            modified: 'Yesterday',
-            sharedUsers: [],
-          },
-          {
-            id: '666777',
-            name: 'Python',
-            type: 'folder',
-            author: 'Engineering',
-            size: '1.2GB',
-            items: '12 items',
-            modified: 'Apr 27, 2025',
-            sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
-          },
-          {
-            id: '777888',
-            name: 'Past Questions',
-            type: 'folder',
-            author: 'Sciences',
-            size: '1.2GB',
-            items: '10 items',
-            modified: 'Jun 12, 2025',
-            sharedUsers: [],
-          },
-        ]);
-
-        setLoading(false);
-      }
-    };
     getFiles();
-  }, [userId]);
+  }, []);
+
+  // --------------- FOLDER CREATION ----------------
+
+  // Show input when user clicks "Create → Folder"
+  const handleCreateFolderClick = () => {
+    setShowCreateFolder(true);
+  };
+
+  // Call API to create folder
+  const handleCreateFolder = async (name: string) => {
+    if (!name || !user) return;
+
+    setCreating(true);
+
+    try {
+      const res = await axios.post('/api/file/folder', {
+        folderName: name,
+        parentFolderId: folderId || null,
+      });
+
+      console.log('Folder created:', res.data);
+
+      // Refresh file list
+      await getFiles();
+    } catch (err) {
+      console.error('Error creating folder:', err);
+    } finally {
+      setCreating(false);
+      setShowCreateFolder(false);
+    }
+  };
 
   return (
     <Sidenav>
@@ -149,13 +122,30 @@ const MyFiles = () => {
 
           <div className="hidden sm:flex space-x-2 gap-y-2">
             {user?.role === 'admin' && <Upload />}
-            <Create onCreateFolderClick={handleCreateFolder}/>
+            <Create
+              onCreateFolderClick={handleCreateFolderClick}
+              creating={creating}
+            />
           </div>
+
           <Floating />
         </div>
 
         <SortFilters />
 
+        {/* Show folder input if clicked */}
+        {showCreateFolder && (
+          <div className="mt-4">
+            <CreateFolder
+              parentFolderId={folderId || null}
+              onCreate={handleCreateFolder}
+              onCancel={() => setShowCreateFolder(false)}
+              creating={creating}
+            />
+          </div>
+        )}
+
+        {/* File Table */}
         <div className="space-y-8 flex-1 min-h-0 mt-6">
           {loading ? (
             <div className="text-gray-500">Loading files...</div>

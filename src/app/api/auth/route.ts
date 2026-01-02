@@ -12,7 +12,7 @@ import { createRootIfNotExists } from "@/lib/fileUtil";
 // Create user (POST)
 export async function POST(req: Request) {
   try {
-    const { idToken, name } = await req.json();
+    const { idToken, name: clientName } = await req.json();
 
     if (!idToken) {
       return NextResponse.json({ error: "Missing token" }, { status: 400 });
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       user = await User.create({
         uid,
         email,
-        name: name || firebaseName || email ? email.split("@")[0] : "User"
+        name: clientName || firebaseName || email ? email.split("@")[0] : "User"
       });
     }
 

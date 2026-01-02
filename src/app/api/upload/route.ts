@@ -15,7 +15,6 @@ import { sendPush } from '@/lib/sendPush';
 import Token from '@/models/notificationToken';
 import College from '@/models/colleges';
 import FileItemModel from '@/models/fileItem';
-import FileItem from '@/app/components/FileItem';
 import { createRootIfNotExists } from '@/lib/fileUtil';
 
 // upload a file
@@ -30,17 +29,48 @@ export const POST = async (req: Request) => {
 
     const formData = await req.formData();
     const folderId = formData.get("folderId") as string;
+
+    let targetFolder;
+
+// CASE 1: folderId explicitly provided (subfolder upload)
+if (folderId && Types.ObjectId.isValid(folderId)) {
+  targetFolder = await FileItemModel.findById(folderId);
+  if (!targetFolder) {
+    return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
+  }
+}
+
+// CASE 2: NO folderId → ROOT upload
+if (!targetFolder) {
+  targetFolder = await FileItemModel.findOne({
+    ownerId: user.collegeId,
+    isRoot: true,
+  });
+
+  if (!targetFolder) {
+    targetFolder = await FileItemModel.create({
+      filename: '/',
+      isFolder: true,
+      parentFolderId: null,
+      ownerId: user.collegeId,
+      ownerType: 'College',
+      isRoot: true,
+    });
+  }
+}
+
     const file = formData.get("file") as File || null;
     const tags = (formData.get("tags") as string)?.split(",") || [];
 
     console.log(file);
 
     // Validation
-    if (!folderId) {
-      return NextResponse.json({ error: "Missing folderId" }, { status: 400 });
-    }
-    const folder = await FileItemModel.findById(folderId);
-    if (!folder) return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
+    // if (!folderId) {
+    //   return NextResponse.json({ error: "Missing folderId" }, { status: 400 });
+    // }
+    // const folder = await FileItemModel.findById(folderId);
+    // if (!folder) return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
+    // i commented line sixety seven to seventy two to allow root uploads
 
     if (!file) {
       return NextResponse.json({ error: "Missing file" }, { status: 400 });
@@ -55,7 +85,7 @@ export const POST = async (req: Request) => {
       file.name,
       fileBuffer,
       new Types.ObjectId(folderId),
-      new Types.ObjectId(user.college),
+      new Types.ObjectId(user.collegeId), // i changed this to collegeId from college
       tags,
     );
 
@@ -64,7 +94,7 @@ export const POST = async (req: Request) => {
     const cFile = await FileModel.create({
       filename: file.name,
       cloudinaryUrl: result.public_id,
-      parentFolderId: folder._id,
+      parentFolderId: targetFolder._id,
       ownerId: new Types.ObjectId(user.collegeId),
       resourceType: result.resource_type, // default for now
       mimeType: file.type,
@@ -78,7 +108,8 @@ export const POST = async (req: Request) => {
 
     const fileItem = await FileItemModel.create({
       filename: file.name, 
-      parentFolderId: new Types.ObjectId(folderId),
+      // parentFolderId: new Types.ObjectId(folderId),
+      parentFolderId: targetFolder._id,
       ownerId: new Types.ObjectId(cFile.ownerId), 
       ownerType: 'College', 
       file: new Types.ObjectId(cFile._id)
@@ -119,16 +150,16 @@ export const POST = async (req: Request) => {
 
 
     // Enqueue indexing job (worker will fetch document by id and index)
-    await indexQueue.add(
-      'index-file',
-      { id: cFile._id.toString() },
-      {
-        attempts: 5,
-        backoff: { type: 'exponential', delay: 1000 },
-        removeOnComplete: true,
-        jobId: `file-${cFile._id.toString()}`,
-      }
-    )
+    // await indexQueue.add(
+    //   'index-file',
+    //   { id: cFile._id.toString() },
+    //   {
+    //     attempts: 5,
+    //     backoff: { type: 'exponential', delay: 1000 },
+    //     removeOnComplete: true,
+    //     jobId: `file-${cFile._id.toString()}`,
+    //   }
+    // )
 
     return NextResponse.json({
       message: "File uploaded successfully",
@@ -142,3 +173,14 @@ export const POST = async (req: Request) => {
     }, { status: 500 })
   }
 }
+
+// import { NextResponse } from "next/server";
+
+// export const GET = async () => {
+//   return NextResponse.json({ message: "Upload route alive" });
+// };
+
+// export const POST = async (req: Request) => {
+//   return NextResponse.json({ message: "POST upload hit" });
+// };
+

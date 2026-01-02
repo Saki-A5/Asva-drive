@@ -9,6 +9,8 @@ import FileItem from '@/app/components/FileItem';
 import Breadcrumbs from '@/app/components/Breadcrumbs';
 import { Button } from '@/components/ui/button';
 import Create from '@/app/components/Create';
+import Upload from '@/app/components/Upload';
+
 
 interface PageProps {
   params: { folderId: string };
@@ -58,16 +60,36 @@ const FolderPage = ({ params }: PageProps) => {
 
   // Create folder trigger
   const handleCreateFolder = async (name: string) => {
-    if (!name) return;
+  if (!name) return;
 
-    await axios.post('/api/file/folder', {
-      name,
+  try {
+    setCreating(true);
+
+    console.log("Creating folder:", {
+      folderName: name,
       parentFolderId: folderId,
     });
 
+    const res = await axios.post('/api/file/folder', {
+      folderName: name,
+      parentFolderId: folderId,
+    });
+
+    console.log("Create folder response:", res.data);
+
     setShowCreateFolder(false);
     fetchFolderContents();
-  };
+  } catch (err: any) {
+    console.error(
+      "Create folder failed:",
+      err.response?.data || err.message
+    );
+    alert(err.response?.data?.message || "Failed to create folder");
+  } finally {
+    setCreating(false);
+  }
+};
+
 
   return (
     <div className="p-6">
@@ -77,6 +99,8 @@ const FolderPage = ({ params }: PageProps) => {
         <Button onClick={() => setShowCreateFolder(true)} variant="default">
           New Folder
         </Button>
+
+        <Upload folderId={folderId} /> 
       </div>
 
       {/* Create Folder */}
@@ -109,7 +133,6 @@ const FolderPage = ({ params }: PageProps) => {
         <FolderItem folder={folder} />
       </div>
     ))}
-
     {files.map((file) => (
       <div key={file._id}>
         <FileItem file={file} />
