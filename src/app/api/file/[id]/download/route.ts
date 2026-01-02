@@ -11,7 +11,7 @@ export const GET = async (req: Request, { params }: any) => {
 
         const fileItem = await FileItemModel.findById(id);
         if (!fileItem) return NextResponse.json({ error: "Could not find file" }, { status: 404 });
-
+        if(fileItem.isFolder) return NextResponse.json({error: "Folders cannot be downloaded"});
         // get the actual file
         const file = await FileModel.findById(fileItem.file);
         if(!file) return NextResponse.json({error: "File could not be found"}, {status: 404});
