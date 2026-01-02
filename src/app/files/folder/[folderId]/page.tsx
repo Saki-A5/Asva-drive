@@ -60,16 +60,36 @@ const FolderPage = ({ params }: PageProps) => {
 
   // Create folder trigger
   const handleCreateFolder = async (name: string) => {
-    if (!name) return;
+  if (!name) return;
 
-    await axios.post('/api/file/folder', {
+  try {
+    setCreating(true);
+
+    console.log("Creating folder:", {
       folderName: name,
       parentFolderId: folderId,
     });
 
+    const res = await axios.post('/api/file/folder', {
+      folderName: name,
+      parentFolderId: folderId,
+    });
+
+    console.log("Create folder response:", res.data);
+
     setShowCreateFolder(false);
     fetchFolderContents();
-  };
+  } catch (err: any) {
+    console.error(
+      "Create folder failed:",
+      err.response?.data || err.message
+    );
+    alert(err.response?.data?.message || "Failed to create folder");
+  } finally {
+    setCreating(false);
+  }
+};
+
 
   return (
     <div className="p-6">
