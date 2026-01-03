@@ -18,6 +18,7 @@ export default function PermissionsManager({ role = 'user', allowLocationForUser
     microphone,
     location,
     notifications,
+    calendar,
     fileSystem,
     storage,
     storageInfo,
@@ -26,6 +27,7 @@ export default function PermissionsManager({ role = 'user', allowLocationForUser
     requestCameraAndMicrophone,
     requestLocation,
     requestNotifications,
+    requestCalendar,
     requestFileSystem,
     requestPersistentStorage,
     refresh,
@@ -201,6 +203,28 @@ export default function PermissionsManager({ role = 'user', allowLocationForUser
               disabled={notifications === 'granted' || notifications === 'unsupported'}
             >
               Request Notifications
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Calendar Permission (allowed for all) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {getStatusIcon(calendar)}
+              Calendar
+            </CardTitle>
+            <CardDescription>Status: {calendar}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={requestCalendar}
+              variant="outline"
+              size="sm"
+              className="w-full"
+              disabled={calendar === 'granted' || calendar === 'unsupported'}
+            >
+              Request Calendar Access
             </Button>
           </CardContent>
         </Card>
