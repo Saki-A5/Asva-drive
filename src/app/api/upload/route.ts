@@ -13,6 +13,9 @@ import { NextResponse } from 'next/server';
 import Notification from '@/models/notificationSchema';
 import { sendPush } from '@/lib/sendPush';
 import Token from '@/models/notificationToken';
+import College from '@/models/colleges';
+import FileItemModel from '@/models/fileItem';
+import { createRootIfNotExists } from '@/lib/fileUtil';
 
 // upload a file
 export const POST = async (req: Request) => {
@@ -22,26 +25,52 @@ export const POST = async (req: Request) => {
     // const {user, error, status} = await requireRole(req, ['admin']);
     // if(error) return NextResponse.json({message: "Unauthorized"}, {status});
 
-    const user = await User.findOne({email: 'demo@gmail.com'});
+    const user = await User.findOne({ email: 'asvasoftwareteam@gmail.com' });
 
     const formData = await req.formData();
     const folderId = formData.get("folderId") as string;
-    const email = formData.get("email") as string;
+
+    let targetFolder;
+
+// CASE 1: folderId explicitly provided (subfolder upload)
+if (folderId && Types.ObjectId.isValid(folderId)) {
+  targetFolder = await FileItemModel.findById(folderId);
+  if (!targetFolder) {
+    return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
+  }
+}
+
+// CASE 2: NO folderId → ROOT upload
+if (!targetFolder) {
+  targetFolder = await FileItemModel.findOne({
+    ownerId: user.collegeId,
+    isRoot: true,
+  });
+
+  if (!targetFolder) {
+    targetFolder = await FileItemModel.create({
+      filename: '/',
+      isFolder: true,
+      parentFolderId: null,
+      ownerId: user.collegeId,
+      ownerType: 'College',
+      isRoot: true,
+    });
+  }
+}
+
     const file = formData.get("file") as File || null;
     const tags = (formData.get("tags") as string)?.split(",") || [];
 
     console.log(file);
 
     // Validation
-    if (!folderId) {
-      return NextResponse.json({ error: "Missing folderId" }, { status: 400 });
-    }
-    const folder = await FileModel.findOne({
-      _id: new Types.ObjectId(folderId.toString()),
-      ownerId: new Types.ObjectId(user._id.toString()),
-      isFolder: true
-    });
-    if (!folder) return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
+    // if (!folderId) {
+    //   return NextResponse.json({ error: "Missing folderId" }, { status: 400 });
+    // }
+    // const folder = await FileItemModel.findById(folderId);
+    // if (!folder) return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
+    // i commented line sixety seven to seventy two to allow root uploads
 
     if (!file) {
       return NextResponse.json({ error: "Missing file" }, { status: 400 });
@@ -56,25 +85,39 @@ export const POST = async (req: Request) => {
       file.name,
       fileBuffer,
       new Types.ObjectId(folderId),
-      user.collegeId,
+      new Types.ObjectId(user.collegeId), // i changed this to collegeId from college
       tags,
     );
 
-    if (!result) return NextResponse.json({ message: "Error uploading file" }, { status: 500 })
+    if (!result) return NextResponse.json({ message: "Error uploading file" }, { status: 500 });
 
     const cFile = await FileModel.create({
       filename: file.name,
       cloudinaryUrl: result.public_id,
-      parentFolderId: folder._id,
-      ownerId: new Types.ObjectId(user._id),
+      parentFolderId: targetFolder._id,
+      ownerId: new Types.ObjectId(user.collegeId),
       resourceType: result.resource_type, // default for now
       mimeType: file.type,
       sizeBytes: result.bytes,
-      tags: tags
+      tags: tags,
+      college: user.collegeId,
+      uploadedBy: new Types.ObjectId(user._id)
     });
 
     await cFile.save();
-   
+
+    const fileItem = await FileItemModel.create({
+      filename: file.name, 
+      // parentFolderId: new Types.ObjectId(folderId),
+      parentFolderId: targetFolder._id,
+      ownerId: new Types.ObjectId(cFile.ownerId), 
+      ownerType: 'College', 
+      file: new Types.ObjectId(cFile._id)
+    });
+
+    await fileItem.save();
+    const pFileItem = await FileItemModel.findById(fileItem._id).populate("file");
+
     // in app notifications
     await Notification.create({
       userId: user._id,
@@ -101,26 +144,26 @@ export const POST = async (req: Request) => {
           folderId,
         },
       });
-     } catch (e) {
+    } catch (e) {
       console.log("Error sending push notification:", e);
-     }
+    }
 
 
     // Enqueue indexing job (worker will fetch document by id and index)
-    await indexQueue.add(
-      'index-file',
-      { id: cFile._id.toString() },
-      {
-        attempts: 5,
-        backoff: { type: 'exponential', delay: 1000 },
-        removeOnComplete: true,
-        jobId: `file-${cFile._id.toString()}`,
-      }
-    )
+    // await indexQueue.add(
+    //   'index-file',
+    //   { id: cFile._id.toString() },
+    //   {
+    //     attempts: 5,
+    //     backoff: { type: 'exponential', delay: 1000 },
+    //     removeOnComplete: true,
+    //     jobId: `file-${cFile._id.toString()}`,
+    //   }
+    // )
 
     return NextResponse.json({
       message: "File uploaded successfully",
-      file: cFile
+      file: pFileItem
     }, { status: 200 });
   }
   catch (e) {
@@ -130,3 +173,14 @@ export const POST = async (req: Request) => {
     }, { status: 500 })
   }
 }
+
+// import { NextResponse } from "next/server";
+
+// export const GET = async () => {
+//   return NextResponse.json({ message: "Upload route alive" });
+// };
+
+// export const POST = async (req: Request) => {
+//   return NextResponse.json({ message: "POST upload hit" });
+// };
+

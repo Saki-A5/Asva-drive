@@ -144,10 +144,11 @@ export async function deleteAssets(publicIds: string[]): Promise<{ succeeded: bo
     }
 }
 
-export async function renameAsset(publicId: string, parentFolderId: Types.ObjectId, newFilename: string) {
+export async function  renameAsset(publicId: string, parentFolderId: Types.ObjectId, newFilename: string, resourceType: string): Promise<string> {
     try {
         const formattedFilename = formatFilename(newFilename, parentFolderId.toString());
-        const result = await cloudinary.uploader.rename(publicId, formattedFilename);
+        const result = await cloudinary.uploader.rename(publicId, formattedFilename, {resource_type: resourceType, type: 'authenticated'});
+        return result.public_id;
     }
     catch (e:any) {
         throw new Error(e.message || 'Error renaming file');

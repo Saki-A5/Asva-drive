@@ -18,24 +18,30 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-
 import { uploadToServer } from '@/utils/uploadToServer';
 
 type UploadingFile = {
   name: string;
   progress: number;
+  file: File;
 };
 
-const Upload = () => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+interface UploadProps {
+  folderId?: string;
+}
 
+const Upload = ({ folderId }: UploadProps) => {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<UploadingFile[]>([]);
   const [description, setDescription] = useState('');
+  const [progress, setProgress] = useState(0);
+  const [uploading, setUploading] = useState(false);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
@@ -49,29 +55,41 @@ const Upload = () => {
     }));
 
     // Add new files to state (instead of replacing)
-    setFiles((prev) => [...prev, ...newFiles]);
+    setFiles(newFiles);
 
     for (const f of newFiles) {
       setLoading(true);
       const response = await uploadToServer({
         file: f.file,
-        folderId: 'default-folder-id',
+        folderId,
         email: 'user@example.com',
+        onProgress: (percent) => {
+          setFiles((prev) =>
+            prev.map((p) => (p.name === f.name ? { ...p, percent } : p))
+          );
+        },
       });
       console.log(response);
-
-      // Update progress to 100% when done
-      setFiles((prev) =>
-        prev.map((p) => (p.name === f.name ? { ...p, progress: 100 } : p))
-      );
       setLoading(false);
     }
   };
 
   return (
     <Dialog
-      open={open}
-      onOpenChange={setOpen}>
+  open={open}
+  onOpenChange={(val) => {
+    setOpen(val);
+
+    if (!val) {
+      setFiles([]);
+      setDescription('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }}
+>
+
       {/* Trigger */}
       <DialogTrigger asChild>
         <Button
@@ -86,16 +104,22 @@ const Upload = () => {
 
       <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto rounded-xl [&>button]:hidden dark:bg-[#1A1E26]">
         <DialogHeader className="flex flex-row items-center justify-between border-b-[#D9D9D961] border-b-[1px] pb-5 rounded-b-2xl dark:rounded-b-none dark:border-b-0">
-          <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-            <div className="px-3 py-3 rounded-full border border-[#D9D9D999]">
-              <UploadCloud className="text-[#000000] dark:text-white" />
-            </div>
-            Upload Files
-          </DialogTitle>
-          <X
-            className="h-6 w-6 cursor-pointer text-[#00000080] dark:text-white"
-            onClick={() => setOpen(false)}
-          />
+          <DialogHeader className="flex flex-row items-center justify-between ...">
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <div className="px-3 py-3 rounded-full border border-[#D9D9D999]">
+                <UploadCloud className="text-[#000000] dark:text-white" />
+                </div>
+                Upload Files
+                </DialogTitle>
+                <DialogDescription>
+                  Select one or more files 
+                </DialogDescription>
+                <X
+                className="h-6 w-6 cursor-pointer text-[#00000080] dark:text-white"
+                onClick={() => setOpen(false)}
+                />
+          </DialogHeader>
+
         </DialogHeader>
 
         <div
@@ -187,6 +211,14 @@ const Upload = () => {
             );
           })}
         </div>
+        <div className="mt-4 flex justify-end gap-2">
+  <Button
+    variant="secondary"
+    onClick={() => setOpen(false)}
+  >
+    Okay
+  </Button>
+</div>
       </DialogContent>
     </Dialog>
   );

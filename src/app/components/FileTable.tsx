@@ -54,9 +54,14 @@ export type FileItem = {
 interface FileTableProps {
   files: FileItem[];
   header?: string;
+  onDeleteClick?: (item: FileItem) => void;
 }
 
-export default function FileTable({ files }: FileTableProps) {
+export default function FileTable({
+  files,
+  header,
+  onDeleteClick,
+}: FileTableProps) {
   // useState to control the layout onClick
   const [layout, setLayout] = useState('flex');
 
@@ -66,6 +71,8 @@ export default function FileTable({ files }: FileTableProps) {
         files={files}
         layout={layout}
         setLayout={setLayout}
+        header={header}
+        onDeleteClick={onDeleteClick}
       />
     </SelectionProvider>
   );
@@ -76,6 +83,7 @@ interface FileTableContentProps {
   layout: string;
   setLayout: React.Dispatch<React.SetStateAction<string>>;
   header?: string;
+  onDeleteClick?: (item: FileItem) => void;
 }
 
 type SortKeyType = 'name' | 'author' | 'size' | 'modified';
@@ -85,6 +93,7 @@ function FileTableContent({
   layout,
   setLayout,
   header,
+  onDeleteClick,
 }: FileTableContentProps) {
   const { selectedItems, clearSelection } = useSelection();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -222,6 +231,7 @@ function FileTableContent({
               <FileGrid
                 file={file}
                 key={file.id}
+                onDeleteClick={onDeleteClick}
               />
             ))}
           </div>
@@ -250,6 +260,7 @@ function FileTableContent({
                     <FileTableRow
                       key={file.id}
                       file={file}
+                      onDeleteClick={onDeleteClick}
                     />
                   ))}
                 </TableBody>
@@ -285,6 +296,7 @@ function FileTableContent({
                 <MobileFileRow
                   key={file.id}
                   file={file}
+                  onDeleteClick={onDeleteClick}
                 />
               ))}
             </div>
