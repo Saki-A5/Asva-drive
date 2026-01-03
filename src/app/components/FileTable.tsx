@@ -26,7 +26,8 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { parseDate, parseSize } from '@/utils/sort';
 import { FileItem } from '@/types/File';
 import { FileTableRow, MobileFileRow } from './FileTableRow';
@@ -306,7 +307,7 @@ const handleOpenItem = (file: FileItem) => {
         </div>
       )}
 
-      {/* {files.map(
+      {files.map(
         (file) =>
           selectedItems.includes(file.id) && (
             <Sheet
@@ -316,6 +317,9 @@ const handleOpenItem = (file: FileItem) => {
               <SheetContent
                 side="right"
                 className="w-[80vw] max-w-[360px] sm:w-[360px] md:w-[480px] overflow-y-auto">
+                  <VisuallyHidden>
+                    <SheetTitle>File details</SheetTitle>
+                  </VisuallyHidden>
                 <div className="mt-6 flex flex-col items-center w-full px-4 sm:px-6">
                   <div className="w-full max-w-[224px] aspect-square flex flex-col border rounded-[15px] justify-center items-center">
                     <Fileicon
@@ -369,7 +373,7 @@ const handleOpenItem = (file: FileItem) => {
               </SheetContent>
             </Sheet>
           )
-      )} */}
+      )}
     </div>
   );
 }

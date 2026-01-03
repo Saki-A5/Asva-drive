@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import {useParams, useRouter } from 'next/navigation';
 import CreateFolder from '@/app/components/CreateFolder';
 import FolderItem from '@/app/components/FolderItem';
@@ -13,7 +13,7 @@ import Upload from '@/app/components/Upload';
 
 
 interface PageProps {
-  params: { folderId: string };
+  params: Promise<{ folderId: string }>;
 }
 
 interface Folder {
@@ -28,7 +28,7 @@ interface File {
 
 const FolderPage = ({ params }: PageProps) => {
   const router = useRouter();
-  const folderId = params.folderId;
+const {folderId }= use(params)
   
 
   const [folders, setFolders] = useState<Folder[]>([]);
