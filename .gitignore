@@ -41,6 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 secrets/
+asva-core/
 
 # virtual env
 asva-core/
@@ -48,3 +49,5 @@ asva-core/
 # Environment variables
 .env*
 
+# Scraps local notes
+.scraps/

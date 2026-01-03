@@ -1,8 +1,11 @@
+import axios from 'axios';
+
 export interface UploadParams {
   file: File;
-  folderId: string;
+  folderId?: string;
   email: string;
   tags?: string[];
+  onProgress?: (percent: number) => void;
 }
 
 export interface UploadResponse {
@@ -14,7 +17,7 @@ export interface UploadResponse {
 export async function uploadToServer(
   params: UploadParams
 ): Promise<UploadResponse> {
-  const { file, folderId, email, tags = [] } = params;
+  const { file, folderId, email, tags = [], onProgress } = params;
 
   try {
     const formData = new FormData();
@@ -22,22 +25,22 @@ export async function uploadToServer(
     formData.append('file', file);
     formData.append('filename', file.name);
     formData.append('mimetype', file.type);
-    formData.append('folderId', folderId);
+    if (folderId) formData.append('folderId', folderId);
     formData.append('email', email);
     formData.append('tags', tags.join(','));
 
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
+    const res = await axios.post('/api/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (event) => {
+        if (!event.total) return;
+        const percent = Math.round((event.loaded * 100) / event.total);
+        onProgress?.(percent);
+      },
     });
 
-    const data = await res.json();
-    return data;
+    return res.data;
   } catch (error) {
     console.error('Upload error:', error);
-    return {
-      message: 'Upload failed',
-      error: 'NETWORK_ERROR',
-    };
+    return { message: 'Upload failed', error: 'NETWORK_ERROR' };
   }
 }

@@ -17,7 +17,7 @@ export async function GET() {
     }
 
     // Verify token and get user info
-    const decodedToken = await adminAuth.verifyIdToken(token);
+    const decodedToken = await adminAuth.verifySessionCookie(token, true);
     const { email } = decodedToken;
 
     if (!email) {

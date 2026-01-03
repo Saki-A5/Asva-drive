@@ -8,12 +8,14 @@ import {
   requestCameraAndMicrophonePermission,
   requestLocationPermission,
   requestNotificationPermission,
+  requestCalendarPermission,
   requestFileSystemPermission,
   requestPersistentStorage as requestPersistentStoragePermission,
   checkCameraPermission,
   checkMicrophonePermission,
   checkLocationPermission,
   checkNotificationPermission,
+  checkCalendarPermission,
   checkStoragePermission,
   checkFileSystemSupport,
   getAllPermissionStatuses,
@@ -31,6 +33,7 @@ export interface UsePermissionsReturn {
   microphone: PermissionStatus;
   location: PermissionStatus;
   notifications: PermissionStatus;
+  calendar: PermissionStatus;
   fileSystem: boolean;
   storage: PermissionStatus;
   storageInfo: { quota: number; usage: number; usageDetails?: any } | null;
@@ -41,6 +44,7 @@ export interface UsePermissionsReturn {
   requestCameraAndMicrophone: () => Promise<void>;
   requestLocation: () => Promise<void>;
   requestNotifications: () => Promise<void>;
+  requestCalendar: () => Promise<void>;
   requestFileSystem: () => Promise<void>;
   requestPersistentStorage: () => Promise<void>;
   
@@ -61,6 +65,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): UsePermissi
   const [microphone, setMicrophone] = useState<PermissionStatus>('prompt');
   const [location, setLocation] = useState<PermissionStatus>('prompt');
   const [notifications, setNotifications] = useState<PermissionStatus>('prompt');
+  const [calendar, setCalendar] = useState<PermissionStatus>('prompt');
   const [fileSystem, setFileSystem] = useState<boolean>(false);
   const [storage, setStorage] = useState<PermissionStatus>('prompt');
   const [storageInfo, setStorageInfo] = useState<{ quota: number; usage: number; usageDetails?: any } | null>(null);
@@ -76,6 +81,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): UsePermissi
       setMicrophone(statuses.microphone);
       setLocation(statuses.location);
       setNotifications(statuses.notifications);
+      setCalendar(statuses.calendar);
       setFileSystem(statuses.fileSystem);
       setStorage(statuses.storage);
       
@@ -155,6 +161,18 @@ export function usePermissions(options: UsePermissionsOptions = {}): UsePermissi
     setNotifications(result.status);
   }, []);
 
+  const requestCalendar = useCallback(async () => {
+    setError(null);
+    const result = await requestCalendarPermission();
+    if (result.error) {
+      setError(result.error);
+    }
+    setCalendar(result.status);
+    // Refresh calendar status after request
+    const calendarStatus = await checkCalendarPermission();
+    setCalendar(calendarStatus);
+  }, []);
+
   const requestFileSystem = useCallback(async () => {
     if (!isAdmin) {
       setError('Only admins can request file system access.');
@@ -193,6 +211,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): UsePermissi
     microphone,
     location,
     notifications,
+    calendar,
     fileSystem,
     storage,
     storageInfo,
@@ -201,6 +220,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): UsePermissi
     requestCameraAndMicrophone,
     requestLocation,
     requestNotifications,
+    requestCalendar,
     requestFileSystem,
     requestPersistentStorage,
     refresh,

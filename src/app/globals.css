@@ -132,4 +132,17 @@ body {
   .flex-between {
     @apply flex justify-between items-center;
   }
+  .scrollbar-hide {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
+}
+
+/* Force enable pointer events when modal is closed */
+body[style*='pointer-events: none'] {
+  pointer-events: auto !important;
 }

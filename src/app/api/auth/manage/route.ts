@@ -16,8 +16,8 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
     
-    // Verify Firebase ID token
-    const decodedToken = await adminAuth.verifyIdToken(token);
+    // Verify Firebase session cookie
+    const decodedToken = await adminAuth.verifySessionCookie(token, true);
     const { email } = decodedToken as { email?: string };
 
     if (!email) {
@@ -26,19 +26,36 @@ export async function PUT(req: Request) {
 
     const body = await req.json();
     // Whitelist fields that can be updated
-    const allowed: string[] = [];
+    const allowed: string[] = ['name', 'college', 'department', 'currentLevel', 'matricNumber', 'avatarStyle', 'avatarSeed'];
     const updates: any = {};
+    const unsetFields: any = {};
+    
     for (const key of allowed) {
-      if (body[key] !== undefined) updates[key] = body[key];
+      if (body[key] !== undefined) {
+        if (body[key] === null) {
+          // Use $unset to remove the field when null is provided
+          unsetFields[key] = "";
+        } else {
+          updates[key] = body[key];
+        }
+      }
     }
 
-    if (Object.keys(updates).length === 0) {
+    if (Object.keys(updates).length === 0 && Object.keys(unsetFields).length === 0) {
       return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
     }
 
     await dbConnect();
 
-    const updated = await User.findOneAndUpdate({ email }, { $set: updates }, { new: true });
+    const updateQuery: any = {};
+    if (Object.keys(updates).length > 0) {
+      updateQuery.$set = updates;
+    }
+    if (Object.keys(unsetFields).length > 0) {
+      updateQuery.$unset = unsetFields;
+    }
+
+    const updated = await User.findOneAndUpdate({ email }, updateQuery, { new: true });
 
     if (!updated) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -64,7 +81,7 @@ export async function DELETE() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const decodedToken = await adminAuth.verifyIdToken(token);
+    const decodedToken = await adminAuth.verifySessionCookie(token, true);
     const { uid, email } = decodedToken as { uid?: string; email?: string };
 
     if (!email) {

@@ -1,6 +1,6 @@
 /**
  * Comprehensive device permissions utility for web applications
- * Handles: Camera, Microphone, Location, Notifications, File System, and Storage permissions
+ * Handles: Camera, Microphone, Location, Notifications, Calendar, File System, and Storage permissions
  */
 
 export type PermissionStatus = 'granted' | 'denied' | 'prompt' | 'unsupported';
@@ -178,6 +178,85 @@ export async function checkNotificationPermission(): Promise<PermissionStatus> {
 }
 
 /**
+ * Calendar Permission
+ * Note: The Calendar API is experimental and is not widely supported.
+ * This implementation checks for support and provides a way to request calendar access.
+ * In practice, calendar integration often uses Web Share API or calendar:// URLs.
+ */
+export async function requestCalendarPermission(): Promise<PermissionResult> {
+  try {
+    // Check if Calendar API is supported
+    const calendar = (navigator as any).calendar;
+    
+    if (!calendar) {
+      // Calendar API not available, but we can still allow calendar access
+      // through other means (Web Share API, calendar links, etc.)
+      return { status: 'prompt' };
+    }
+
+    // If Calendar API is available, request permission
+    try {
+      if (calendar.createEvent) {
+        // Check permission status first
+        const permissionStatus = await checkCalendarPermission();
+        if (permissionStatus === 'granted') {
+          return { status: 'granted' };
+        }
+        // Permission not granted yet, return current status
+        return { status: permissionStatus };
+      }
+      return { status: 'unsupported', error: 'Calendar API methods not available' };
+    } catch (error: any) {
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        return { status: 'denied', error: 'Calendar permission denied' };
+      }
+      return { status: 'denied', error: error.message || 'Failed to request calendar permission' };
+    }
+  } catch (error: any) {
+    return { status: 'denied', error: error.message || 'Failed to request calendar permission' };
+  }
+}
+
+export async function checkCalendarPermission(): Promise<PermissionStatus> {
+  try {
+    // Check if Calendar API is supported
+    const calendar = (navigator as any).calendar;
+    
+    if (!calendar) {
+      // Calendar API not available, but calendar access might be possible
+      // through Web Share API or other methods
+      // Check if Web Share API is available as an alternative
+      if ('share' in navigator) {
+        return 'prompt'; // Can use Web Share API for calendar events
+      }
+      return 'unsupported';
+    }
+
+    // Check permission using Permissions API if available
+    if ('permissions' in navigator) {
+      try {
+        const permissionStatus = await navigator.permissions.query({ name: 'calendar' as PermissionName });
+        return permissionStatus.state as PermissionStatus;
+      } catch {
+        // Permissions API doesn't support calendar, check if API methods exist
+      }
+    }
+
+    // If Calendar API exists but Permissions API doesn't support it,
+    // check if the API methods are available
+    if (calendar && calendar.createEvent) {
+      // API is available, but we can't check permission status
+      // Return 'prompt' as default
+      return 'prompt';
+    }
+
+    return 'unsupported';
+  } catch {
+    return 'unsupported';
+  }
+}
+
+/**
  * File System Permission (File System Access API)
  */
 export async function requestFileSystemPermission(): Promise<PermissionResult> {
@@ -298,14 +377,16 @@ export async function getAllPermissionStatuses(): Promise<{
   microphone: PermissionStatus;
   location: PermissionStatus;
   notifications: PermissionStatus;
+  calendar: PermissionStatus;
   fileSystem: boolean;
   storage: PermissionStatus;
 }> {
-  const [camera, microphone, location, notifications, fileSystem, storage] = await Promise.all([
+  const [camera, microphone, location, notifications, calendar, fileSystem, storage] = await Promise.all([
     checkCameraPermission(),
     checkMicrophonePermission(),
     checkLocationPermission(),
     checkNotificationPermission(),
+    checkCalendarPermission(),
     Promise.resolve(checkFileSystemSupport()),
     checkStoragePermission().then(result => result.status)
   ]);
@@ -315,6 +396,7 @@ export async function getAllPermissionStatuses(): Promise<{
     microphone,
     location,
     notifications,
+    calendar,
     fileSystem,
     storage
   };

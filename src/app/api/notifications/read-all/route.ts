@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import Notification from "@/models/notificationSchema";
 
-const PATCH = async (req: Request) => {
+export const PATCH = async (req: Request) => {
   const { userId } = await req.json();
 
   if (!userId) return NextResponse.json({ error: "User ID is required" }, { status: 400 });
@@ -20,5 +20,3 @@ const PATCH = async (req: Request) => {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 };
-
-export default PATCH;

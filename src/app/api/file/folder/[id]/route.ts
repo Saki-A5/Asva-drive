@@ -1,119 +1,155 @@
 import dbConnect from "@/lib/dbConnect";
-import FileModel from "@/models/files";
+import { fileQueue } from "@/lib/queue";
+import { requireRole } from "@/lib/roles";
+import FileItemModel from "@/models/fileItem";
+import FileModel, { FileInterface } from "@/models/files";
 import User from "@/models/users";
-import { Types } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import { NextResponse } from "next/server";
 
 export const runtime = 'nodejs';
 
-async function getAllDescendantIds(folderId: Types.ObjectId) {
-  const descendants = [];
+export async function getAllDescendantIds(folderId: Types.ObjectId) {
+  const descendantFolderItems = [];
+  const descendantFileItems = [];
   const queue = [folderId];
-  
+
   while (queue.length > 0) {
     const currentId = queue.shift();
-    
+
     // Find all children of current folder
-    const children = await FileModel.find({ 
-      parentFolderId: currentId 
+    const children = await FileItemModel.find({
+      parentFolderId: currentId
     }).select('_id isFolder');
 
     for (const child of children) {
-      descendants.push(child._id);
       if (child.isFolder) {
+        descendantFolderItems.push(child._id);
         queue.push(child._id); // Add folders to queue for further traversal
+      } else {
+        descendantFileItems.push(child._id);
       }
     }
   }
-  
-  return descendants;
+
+  return { descendantFolderItems, descendantFileItems };
 }
 
-async function deleteFileOrFolder(fileId: Types.ObjectId) {
-  const file = await FileModel.findById(fileId);
-  
-  if (!file) {
-    throw new Error('File not found');
-  }
-  
-  if (file.isFolder) {
-    // Get all descendant IDs
-    const descendantIds = await getAllDescendantIds(fileId);
-    
-    // Bulk soft delete all descendants
-    await FileModel.updateMany(
-      { _id: { $in: descendantIds } },
-      { isDeleted: true, deletedAt: new Date() }
-    );
-  }
-  
-  // Delete/soft delete the folder itself
-  await FileModel.findByIdAndUpdate(fileId, { 
-    isDeleted: true,
-    deletedAt: new Date() 
-  });
-  
-  return { success: true };
-}
+async function deleteFolder(folderId: Types.ObjectId): Promise<{ success: boolean, permanentlyDeleted: boolean }> {
+  const folder = await FileItemModel.findById(folderId);
 
+  const { descendantFileItems: fileItems, descendantFolderItems: folderItems } = await getAllDescendantIds(folderId);
+
+  if (fileItems.concat(folderItems).length === 0) { // if there are no contents in this folder, permanently delete it
+    await FileItemModel.deleteOne(folderId);
+    return { success: true, permanentlyDeleted: true }
+  }
+
+  // if the folder is owned by a "user", it contains reference files and should be deleted permanently
+  if ((folder!).ownerType === "User") {
+    await FileItemModel.deleteMany({ _id: { $in: fileItems.concat([...folderItems, folderId]) } }) // delete all children files and folders along with the parent folder
+    return { success: true, permanentlyDeleted: true }
+  };
+
+  // for non reference files
+  // soft delete children fileItems and the folder Item
+  await FileItemModel.updateMany({ _id: { $in: fileItems.concat([...folderItems, folderId]) } }, { $set: { isDeleted: true, deletedAt: Date.now() } });
+
+  // soft delete the actual files
+  const files = await FileItemModel.find({ _id: { $in: fileItems }, isReference: false }).select("file") as { file: Types.ObjectId }[];
+  const fileIds = files.map(file => file.file);
+  // soft delete the actual files
+  if (files.length > 0) await FileModel.updateMany({_id: {$in: fileIds}}, { $set: { isDeleted: true, deletedAt: Date.now() } });
+
+  return {
+    success: true, 
+    permanentlyDeleted: false
+  }
+  
+}
 
 // get the contents of a folder
-export const GET = async(req: Request, {params}: any) => {
-    // const cookieStore = await cookies();
-    // const token = cookieStore.get('token')?.value;
+export const GET = async (req: Request, { params }: any) => {
+  // const cookieStore = await cookies();
+  // const token = cookieStore.get('token')?.value;
 
-    // if(!token) return NextResponse.json({error: "Not Authenticated"}, {status: 401});
+  // if(!token) return NextResponse.json({error: "Not Authenticated"}, {status: 401});
 
-    // const decodedToken = await adminAuth.verifyIdToken(token);
-    // const {email} = decodedToken;
+  // const decodedToken = await adminAuth.verifyIdToken(token);
+  // const {email} = decodedToken;
 
-    const email = 'demo@gmail.com'; // substitute for now
-    const user = await User.findOne({email});
-    
+  const email = 'demo@gmail.com'; // substitute for now
+  const user = await User.findOne({ email });
 
-    await dbConnect();
 
-    const {id} = await params;
-    const folderId = new Types.ObjectId(id as string);
+  await dbConnect();
 
-    const folder = await FileModel.findOne({_id: folderId, isFolder: true, ownerId: user._id});
-    if(!folder) return NextResponse.json({message: "Folder not Found"}, {status: 404});
+  const { id } = await params;
+  const folderId = new Types.ObjectId(id as string);
 
-     const contents = await FileModel.find({
-            parentFolderId: folderId,
-            ownerId: user._id
-    });
+  // if the user is an admin, they are accessing college files, if the user is a "user" they are accessing user files
+  const ownerId = user.role === "admin" ? user.collegeId : user._id;
 
-    return NextResponse.json({contents});
-}
+  const folder = await FileItemModel.findOne({ _id: folderId, isFolder: true, ownerId });
+  if (!folder) return NextResponse.json({ error: "Folder not Found" }, { status: 404 });
+  if (!folder.isFolder) return NextResponse.json({ error: "This is not a folder" }, { status: 400 })
 
-// delete a folder and its contens
-export const DELETE = async(req: Request, {params}: any) => {
-    try {
-        // const cookieStore = await cookies();
-        // const token = cookieStore.get('token')?.value;
+  const contents = await FileItemModel.find({
+    parentFolderId: folderId,
+    ownerId
+  });
 
-        // if(!token) return NextResponse.json({error: "Not Authenticated"}, {status: 401});
-
-        // const decodedToken = await adminAuth.verifyIdToken(token);
-        // const {email} = decodedToken;
-
-        const email = "demo@gmail.com";
-        const user = await User.findOne({email});
-
-        await dbConnect();
-
-        const {id} = await params;
-
-        const folderId = new Types.ObjectId(id);
-        const folder = await FileModel.findOne({_id: folderId, isFolder: true, ownerId: user._id});
-        if(!folder) return NextResponse.json({message: "No Folder Found"}, {status: 404});
-
-        await deleteFileOrFolder(folderId);
-
-        return NextResponse.json({message: "Successfully Deleted Folder"}, {status: 200});
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({message: (error as Error).message || "Internal Server Error"}, {status: 500});
+   const breadcrumbs: { _id: string; filename: string }[] = [];
+    let currentFolder: any = folder;
+    while (currentFolder) {
+      breadcrumbs.unshift({ _id: currentFolder._id.toString(), filename: currentFolder.filename });
+      if (!currentFolder.parentFolderId) break;
+      currentFolder = await FileItemModel.findById(currentFolder.parentFolderId);
     }
+
+  return NextResponse.json({ contents, breadcrumbs });
+} 
+
+// delete a folder and its contents
+export const DELETE = async (req: Request, { params }: any) => {
+  try {
+    await dbConnect();
+    // const { user, error, status } = await requireRole(req, ['admin', 'user']);
+
+    // if (error) return NextResponse.json({ error }, { status });
+
+    const user = await User.findOne({email: 'asvasoftwareteam@gmail.com'}); // comment this and uncomment the code block above in production
+    const ownerId = user.role === "admin" ? user.collegeId : user._id;
+
+    const { id } = await params;
+
+    const folderId = new Types.ObjectId(id);
+    const folder = await FileItemModel.findOne({ _id: folderId, isFolder: true, ownerId: ownerId });
+    if (!folder) return NextResponse.json({ error: "No Folder Found" }, { status: 404 });
+    if (!folder.isFolder) return NextResponse.json({ error: "This is not a folder" }, { status: 400 })
+
+    const { permanentlyDeleted } = await deleteFolder(folderId);
+    const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW) || 28;
+    const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
+    if (!permanentlyDeleted) { // only add folders to the queue if they have not been permanently deleted
+      await fileQueue.add(
+        'delete-folder',
+        {
+          id: folderId
+        },
+        {
+          delay,
+          attempts: 5,
+          backoff: { type: 'exponential', delay: 1000 },
+          removeOnComplete: true,
+          jobId: `delete-folder-${folderId}`
+        }
+      )
+    }
+
+    return NextResponse.json({ message: "Successfully Deleted Folder" }, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: (error as Error).message || "Internal Server Error" }, { status: 500 });
+  }
 }
