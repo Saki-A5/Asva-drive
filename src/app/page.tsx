@@ -105,6 +105,7 @@ const darkerGrotesque = Darker_Grotesque({
   weight: ["300", "400", "500", "600", "700", "800", "900"], // all Tailwind-supported weights
 });
 
+
 const Home = () => {
   const { setTheme } = useTheme();
   const [openBar, setOpenBar] = useState(false);
