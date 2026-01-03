@@ -93,7 +93,7 @@ function FileTableContent({
 
 const handleOpenItem = (file: FileItem) => {
   if (file.type === "folder") {
-    router.push(`/folder/${file.id}`);
+    router.push(`/files/folder/${file.id}`);
   } else {
     router.push(`/file/${file.id}`); // optional
   }

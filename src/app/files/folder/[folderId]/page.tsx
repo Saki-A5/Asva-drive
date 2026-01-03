@@ -28,7 +28,7 @@ interface File {
 
 const FolderPage = ({ params }: PageProps) => {
   const router = useRouter();
-  const { folderId } = params;
+  const folderId = params.folderId;
 
   const [folders, setFolders] = useState<Folder[]>([]);
   const [files, setFiles] = useState<File[]>([]);
@@ -41,6 +41,7 @@ const FolderPage = ({ params }: PageProps) => {
   const fetchFolderContents = async () => {
   try {
     setLoading(true);
+    if (!folderId) return;
     const res = await axios.get(`/api/file/folder/${folderId}`);
     const allContents = res.data.contents || [];
     setFolders(allContents.filter((c: any) => c.isFolder));
@@ -55,6 +56,7 @@ const FolderPage = ({ params }: PageProps) => {
 
 
   useEffect(() => {
+    if (!folderId) return;
     fetchFolderContents();
   }, [folderId]);
 

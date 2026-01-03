@@ -2,7 +2,6 @@
 
 import { useHighlightable } from '@/hooks/useHighlightable';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { useRouter } from 'next/navigation';
 import {
   Tooltip,
   TooltipTrigger,
@@ -32,7 +31,7 @@ interface RowProps {
 
 export function FileTableRow({ file, onDeleteClick, onOpen }: RowProps) {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
-  const router = useRouter()
+  
 
   return (
     <>
