@@ -19,7 +19,7 @@ import {
   ArrowDown,
 } from 'lucide-react';
 import { SelectionProvider, useSelection } from '@/context/SelectionContext';
-
+import { useRouter } from 'next/navigation';
 import {
   Tooltip,
   TooltipTrigger,
@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { parseDate, parseSize } from '@/utils/sort';
-
+import { FileItem } from '@/types/File';
 import { FileTableRow, MobileFileRow } from './FileTableRow';
 import FileTableHeader from './FileTableHeader';
 import FileGrid from './FileGrid';
@@ -38,16 +38,6 @@ import AuthorCell from './AuthorCell';
 
 const SORT_COOKIE_KEY = 'file_table_sort';
 
-export type FileItem = {
-  id: string;
-  name: string;
-  type: string;
-  items?: string;
-  author: string;
-  size: string;
-  modified: string;
-  sharedUsers: string[];
-};
 
 interface FileTableProps {
   files: FileItem[];
@@ -98,6 +88,17 @@ function FileTableContent({
 
   const [sortKey, setSortKey] = useState<SortKeyType>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const router = useRouter();
+
+const handleOpenItem = (file: FileItem) => {
+  if (file.type === "folder") {
+    router.push(`/folder/${file.id}`);
+  } else {
+    router.push(`/file/${file.id}`); // optional
+  }
+};
+
 
   function handleSort(key: SortKeyType) {
     if (sortKey === key) {
@@ -230,6 +231,7 @@ function FileTableContent({
                 file={file}
                 key={file.id}
                 onDeleteClick={onDeleteClick}
+                onOpen ={handleOpenItem}
               />
             ))}
           </div>
@@ -259,6 +261,7 @@ function FileTableContent({
                       key={file.id}
                       file={file}
                       onDeleteClick={onDeleteClick}
+                      onOpen ={handleOpenItem}
                     />
                   ))}
                 </TableBody>
@@ -295,6 +298,7 @@ function FileTableContent({
                   key={file.id}
                   file={file}
                   onDeleteClick={onDeleteClick}
+                  onOpen ={handleOpenItem}
                 />
               ))}
             </div>
