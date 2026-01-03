@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import {useParams, useRouter } from 'next/navigation';
 import CreateFolder from '@/app/components/CreateFolder';
 import FolderItem from '@/app/components/FolderItem';
 import axios from 'axios';
@@ -29,6 +29,7 @@ interface File {
 const FolderPage = ({ params }: PageProps) => {
   const router = useRouter();
   const folderId = params.folderId;
+  
 
   const [folders, setFolders] = useState<Folder[]>([]);
   const [files, setFiles] = useState<File[]>([]);
