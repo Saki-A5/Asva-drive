@@ -74,9 +74,14 @@ const Loginpage = () => {
                 <span className="text-center">Sign in with Google</span>
                 <img src="/google.png" alt="google"/>
             </Button>
+            <div className="flex w-full justify-center items-center gap-1 mt-6">
+                <hr className="md:w-[15%] [@media(min-width:640px)_and_(max-width:768px)]:w-[22%] [@media(min-width:300px)_and_(max-width:640px)]:w-[30%]"/>
+                <p>or</p>
+                <hr className="md:w-[15%] [@media(min-width:640px)_and_(max-width:768px)]:w-[22%] [@media(min-width:300px)_and_(max-width:640px)]:w-[30%]"/>
+            </div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}
-                className="w-4/5 mx-auto sm:w-3/5 md:w-2/5 mt-14"
+                className="w-4/5 mx-auto sm:w-3/5 md:w-2/5 mt-6"
                 >
                 <FormField 
                 control={form.control}
