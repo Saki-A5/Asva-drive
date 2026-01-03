@@ -34,7 +34,7 @@ const sidelinks: SideItem[] = [
   { href: '/shared', label: 'Shared with me', icon: Share2 },
   {
     label: 'Colleges',
-    links: Object.values(COLLEGE_META).map(meta => ({
+    links: Object.values(COLLEGE_META).map((meta) => ({
       href: `/colleges/${meta.slug}`,
       label: meta.label,
       icon: Folder,
@@ -181,6 +181,17 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
 
         {/* Bottom section */}
         <div className="mt-auto pt-4">
+          {/* events (only in open mode) */}
+          {user?.role === 'admin' && mode === 'open' && (
+            <Link
+              href="/events"
+              className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition">
+              <Star className="h-5 w-5" />
+              <span className="font-semibold">Events</span>
+            </Link>
+          )}
+        </div>
+        <div className="pt-2">
           {/* trash (only in open mode) */}
           {user?.role === 'admin' && mode === 'open' && (
             <Link
