@@ -6,12 +6,13 @@ import Sidenav from '../components/Sidenav';
 import Loginnav from '../components/Loginnav';
 import Upload from '../components/Upload';
 import Create from '../components/Create';
-import FileTable, { FileItem } from '../components/FileTable';
+import FileTable from '../components/FileTable';
 import { Button } from '@/components/ui/button';
 import useCurrentUser from '@/hooks/useCurrentUser';
 import Floating from '../components/Floating';
 import SortFilters from '../components/SortFilter';
 import CreateFolder from '../components/CreateFolder';
+import { FileItem } from '@/types/File';
 
 interface Fileitem {
   _id: string;

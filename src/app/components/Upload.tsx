@@ -56,24 +56,21 @@ const Upload = ({ folderId }: UploadProps) => {
 
     // Add new files to state (instead of replacing)
     setFiles(newFiles);
+    setUploading(true);
 
-    for (const f of newFiles) {
-      setLoading(true);
-      const response = await uploadToServer({
+    await Promise.all(newFiles.map((f) => uploadToServer({
         file: f.file,
         folderId,
         email: 'user@example.com',
-        onProgress: (percent) => {
+        onProgress: (progress) => {
           setFiles((prev) =>
-            prev.map((p) => (p.name === f.name ? { ...p, percent } : p))
+            prev.map((p) => (p.name === f.name ? { ...p, progress } : p))
           );
         },
-      });
-      console.log(response);
-      setLoading(false);
-    }
-  };
-
+      })
+    ));
+    setUploading(false);
+  }
   return (
     <Dialog
   open={open}
@@ -224,4 +221,4 @@ const Upload = ({ folderId }: UploadProps) => {
   );
 };
 
-export default Upload;
+export default Upload

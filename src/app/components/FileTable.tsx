@@ -19,16 +19,17 @@ import {
   ArrowDown,
 } from 'lucide-react';
 import { SelectionProvider, useSelection } from '@/context/SelectionContext';
-
+import { useRouter } from 'next/navigation';
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { parseDate, parseSize } from '@/utils/sort';
-
+import { FileItem } from '@/types/File';
 import { FileTableRow, MobileFileRow } from './FileTableRow';
 import FileTableHeader from './FileTableHeader';
 import FileGrid from './FileGrid';
@@ -39,16 +40,6 @@ import SelectionActionBar from './SelectionActionBar';
 
 const SORT_COOKIE_KEY = 'file_table_sort';
 
-export type FileItem = {
-  id: string;
-  name: string;
-  type: string;
-  items?: string;
-  author: string;
-  size: string;
-  modified: string;
-  sharedUsers: string[];
-};
 
 interface FileTableProps {
   files: FileItem[];
@@ -99,6 +90,17 @@ function FileTableContent({
 
   const [sortKey, setSortKey] = useState<SortKeyType>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const router = useRouter();
+
+const handleOpenItem = (file: FileItem) => {
+  if (file.type === "folder") {
+    router.push(`/files/folder/${file.id}`);
+  } else {
+    router.push(`/file/${file.id}`); // optional
+  }
+};
+
 
   function handleSort(key: SortKeyType) {
     if (sortKey === key) {
@@ -231,6 +233,7 @@ function FileTableContent({
                 file={file}
                 key={file.id}
                 onDeleteClick={onDeleteClick}
+                onOpen ={handleOpenItem}
               />
             ))}
           </div>
@@ -260,6 +263,7 @@ function FileTableContent({
                       key={file.id}
                       file={file}
                       onDeleteClick={onDeleteClick}
+                      onOpen ={handleOpenItem}
                     />
                   ))}
                 </TableBody>
@@ -296,6 +300,7 @@ function FileTableContent({
                   key={file.id}
                   file={file}
                   onDeleteClick={onDeleteClick}
+                  onOpen ={handleOpenItem}
                 />
               ))}
             </div>
@@ -303,7 +308,7 @@ function FileTableContent({
         </div>
       )}
 
-      {/* {files.map(
+      {files.map(
         (file) =>
           selectedItems.includes(file.id) && (
             <Sheet
@@ -313,6 +318,9 @@ function FileTableContent({
               <SheetContent
                 side="right"
                 className="w-[80vw] max-w-[360px] sm:w-[360px] md:w-[480px] overflow-y-auto">
+                  <VisuallyHidden>
+                    <SheetTitle>File details</SheetTitle>
+                  </VisuallyHidden>
                 <div className="mt-6 flex flex-col items-center w-full px-4 sm:px-6">
                   <div className="w-full max-w-[224px] aspect-square flex flex-col border rounded-[15px] justify-center items-center">
                     <Fileicon
@@ -366,7 +374,7 @@ function FileTableContent({
               </SheetContent>
             </Sheet>
           )
-      )} */}
+      )}
     </div>
   );
 }

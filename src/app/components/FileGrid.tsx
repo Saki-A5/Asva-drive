@@ -17,26 +17,18 @@ import { MoreHorizontal, Trash2 } from 'lucide-react';
 import Fileicon from './Fileicon';
 import { useSelection } from '@/context/SelectionContext';
 import { useHighlightable } from '@/hooks/useHighlightable';
-
-export interface FileItem {
-  id: string;
-  name: string;
-  type: string;
-  sharing?: string;
-  size: string;
-  modified?: string;
-  sharedUsers?: string[];
-}
+import { FileItem } from '@/types/File';
 
 interface FileGridItemProps {
   file: FileItem;
-  onDeleteClick?: (item: FileItem) => void; // Added prop
+  onDeleteClick?: (item: FileItem) => void;
+  onOpen: (item: FileItem) => void;
 }
 
 export const capitalizeFirstLetter = (str: string) =>
   str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
 
-const FileGridItem: React.FC<FileGridItemProps> = ({ file, onDeleteClick }) => {
+const FileGridItem: React.FC<FileGridItemProps> = ({ file, onDeleteClick, onOpen }) => {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
   const { selectedItems } = useSelection();
 
@@ -45,6 +37,7 @@ const FileGridItem: React.FC<FileGridItemProps> = ({ file, onDeleteClick }) => {
   return (
     <div
       {...eventHandlers}
+      onDoubleClick={() => onOpen(file)}
       className={`flex flex-col items-start p-4 rounded-xl shadow-sm transition h-[200px] gap-3 w-full cursor-pointer touch-none select-none
         ${
           selected

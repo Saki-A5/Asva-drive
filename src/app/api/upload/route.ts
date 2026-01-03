@@ -150,16 +150,16 @@ if (!targetFolder) {
 
 
     // Enqueue indexing job (worker will fetch document by id and index)
-    // await indexQueue.add(
-    //   'index-file',
-    //   { id: cFile._id.toString() },
-    //   {
-    //     attempts: 5,
-    //     backoff: { type: 'exponential', delay: 1000 },
-    //     removeOnComplete: true,
-    //     jobId: `file-${cFile._id.toString()}`,
-    //   }
-    // )
+    await indexQueue.add(
+      'index-file',
+      { id: cFile._id.toString() },
+      {
+        attempts: 5,
+        backoff: { type: 'exponential', delay: 1000 },
+        removeOnComplete: true,
+        jobId: `file-${cFile._id.toString()}`,
+      }
+    )
 
     return NextResponse.json({
       message: "File uploaded successfully",
