@@ -1,5 +1,6 @@
 export const runtime = 'nodejs';
 
+import dbConnect from "@/lib/dbConnect";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import FileItemModel from "@/models/fileItem";
 import FileModel from "@/models/files";
@@ -8,6 +9,7 @@ import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 
 export const POST = async (req: Request) => {
+    await dbConnect()
     const cookies = req.headers.get('cookie') || '';
     const match = cookies.match(/token=([^;]+)/);
     const sessionCookie = match ? match[1] : null;
@@ -29,20 +31,42 @@ export const POST = async (req: Request) => {
     const ownerType = user.role === "admin" ? "College" : "User";
 
     const { folderName, parentFolderId } = await req.json();
-    if (!folderName || !parentFolderId) return NextResponse.json({ message: "folder name, parentFolderId and ownerId are compulsory" }, { status: 400 });
+    // const parentId = parentFolderId ? new Types.ObjectId(parentFolderId): null
+    // if (!folderName || !parentFolderId) return NextResponse.json({ message: "folder name, parentFolderId and ownerId are compulsory" }, { status: 400 });
+    if (!folderName || !folderName.trim()) {
+    return NextResponse.json({ message: "folderName is required" }, { status: 400 });
+  } // just added
 
     try {
-        const parentFolder = await FileItemModel.findOne({
-            _id: new Types.ObjectId(parentFolderId)
-        });
-        if (!parentFolder) return NextResponse.json({
-            message: 'Parent Folder not Found'
-        }, { status: 404 });
+        // const parentFolder = await FileItemModel.findOne({
+        //     _id: new Types.ObjectId(parentFolderId)
+        // });
+        // if (!parentFolder) return NextResponse.json({
+        //     message: 'Parent Folder not Found'
+        // }, { status: 404 });
+
+        let parentFolder = null;
+        if (parentFolderId) {
+            if (!Types.ObjectId.isValid(parentFolderId)) {
+                return NextResponse.json({ message: "Invalid parentFolderId" }, { status: 400 });
+            }
+
+            parentFolder = await FileItemModel.findById(parentFolderId);
+            if (!parentFolder) {
+                return NextResponse.json({ message: "Parent folder not found" }, { status: 404 });
+            }
+        }
+
+        const ownerId = user.role === "admin" ? user.collegeId : user._id;
+        if(!parentFolder) parentFolder = await FileItemModel.findOne({ownerId, isRoot: true, filename: '/'});
+        if(!parentFolder) return NextResponse.json({message: "This user doesn not have a root folder"}, {status: 404});
 
         const folder = await FileItemModel.create({
-            filename: folderName,
+            // filename: folderName,
+            filename: folderName.trim(),
             isFolder: true,
-            parentFolderId: parentFolderId,
+            // parentFolderId: parentFolderId,
+            parentFolderId: parentFolder ? parentFolder._id : null,
             ownerId,
             ownerType
         });
@@ -51,8 +75,7 @@ export const POST = async (req: Request) => {
             message: 'Folder successfully created',
             data: { folderId: folder._id }
         })
-    }
-    catch (e: any) {
+    } catch (e: any) {
         return NextResponse.json({
             message: e.message
         }, { status: 404 })

@@ -8,10 +8,10 @@ import Upload from '../components/Upload';
 import Create from '../components/Create';
 import FileTable, { FileItem } from '../components/FileTable';
 import { Button } from '@/components/ui/button';
-import { ChevronDown } from 'lucide-react';
 import useCurrentUser from '@/hooks/useCurrentUser';
 import Floating from '../components/Floating';
 import SortFilters from '../components/SortFilter';
+import CreateFolder from '../components/CreateFolder';
 
 interface Fileitem {
   _id: string;
@@ -31,19 +31,15 @@ interface MyFilesProps {
 const MyFiles = ({ folderId }: MyFilesProps) => {
   const [myFiles, setMyFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const handleCreateFolder = () => {
-    console.log('Create folder clicked');
-  }
+
+  const [showCreateFolder, setShowCreateFolder] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const { user } = useCurrentUser();
 
-  const userId = user?._id;
-
-  useEffect(() => {
   const getFiles = async () => {
     try {
       setLoading(true);
-
       const res = await axios.get('/api/file'); 
       const items: Fileitem[] = res.data?.data ?? [];
 
@@ -75,17 +71,46 @@ const MyFiles = ({ folderId }: MyFilesProps) => {
 
       setMyFiles(mapped);
     } catch (error) {
-  console.error('Error fetching files:', error);
-  // setMyFiles(dummyFiles);
-}
-finally {
-  setLoading(false);
-}
+      console.error('Error fetching files:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  getFiles();
-}, []);
+  useEffect(() => {
+    getFiles();
+  }, []);
 
+  // --------------- FOLDER CREATION ----------------
+
+  // Show input when user clicks "Create → Folder"
+  const handleCreateFolderClick = () => {
+    setShowCreateFolder(true);
+  };
+
+  // Call API to create folder
+  const handleCreateFolder = async (name: string) => {
+    if (!name || !user) return;
+
+    setCreating(true);
+
+    try {
+      const res = await axios.post('/api/file/folder', {
+        folderName: name,
+        parentFolderId: folderId || null,
+      });
+
+      console.log('Folder created:', res.data);
+
+      // Refresh file list
+      await getFiles();
+    } catch (err) {
+      console.error('Error creating folder:', err);
+    } finally {
+      setCreating(false);
+      setShowCreateFolder(false);
+    }
+  };
 
   return (
     <Sidenav>
@@ -96,14 +121,31 @@ finally {
           <h1 className="font-bold text-xl whitespace-nowrap">My Files</h1>
 
           <div className="hidden sm:flex space-x-2 gap-y-2">
-            {user?.role === 'admin' && <Upload/>}
-            <Create onCreateFolderClick={handleCreateFolder}/>
+            {user?.role === 'admin' && <Upload />}
+            <Create
+              onCreateFolderClick={handleCreateFolderClick}
+              creating={creating}
+            />
           </div>
+
           <Floating />
         </div>
 
         <SortFilters />
 
+        {/* Show folder input if clicked */}
+        {showCreateFolder && (
+          <div className="mt-4">
+            <CreateFolder
+              parentFolderId={folderId || null}
+              onCreate={handleCreateFolder}
+              onCancel={() => setShowCreateFolder(false)}
+              creating={creating}
+            />
+          </div>
+        )}
+
+        {/* File Table */}
         <div className="space-y-8 flex-1 min-h-0 mt-6">
           {loading ? (
             <div className="text-gray-500">Loading files...</div>
@@ -119,4 +161,3 @@ finally {
 };
 
 export default MyFiles;
-

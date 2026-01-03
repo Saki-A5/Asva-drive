@@ -141,3 +141,8 @@ body {
     display: none; /* Chrome, Safari */
   }
 }
+
+/* Force enable pointer events when modal is closed */
+body[style*='pointer-events: none'] {
+  pointer-events: auto !important;
+}

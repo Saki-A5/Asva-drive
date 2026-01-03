@@ -15,7 +15,6 @@ import { sendPush } from '@/lib/sendPush';
 import Token from '@/models/notificationToken';
 import College from '@/models/colleges';
 import FileItemModel from '@/models/fileItem';
-import FileItem from '@/app/components/FileItem';
 import { createRootIfNotExists } from '@/lib/fileUtil';
 
 // upload a file
@@ -69,8 +68,9 @@ if (!targetFolder) {
     // if (!folderId) {
     //   return NextResponse.json({ error: "Missing folderId" }, { status: 400 });
     // }
-    const folder = await FileItemModel.findById(folderId);
-    if (!folder) return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
+    // const folder = await FileItemModel.findById(folderId);
+    // if (!folder) return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
+    // i commented line sixety seven to seventy two to allow root uploads
 
     if (!file) {
       return NextResponse.json({ error: "Missing file" }, { status: 400 });
@@ -85,7 +85,7 @@ if (!targetFolder) {
       file.name,
       fileBuffer,
       new Types.ObjectId(folderId),
-      new Types.ObjectId(user.college),
+      new Types.ObjectId(user.collegeId), // i changed this to collegeId from college
       tags,
     );
 
@@ -94,7 +94,7 @@ if (!targetFolder) {
     const cFile = await FileModel.create({
       filename: file.name,
       cloudinaryUrl: result.public_id,
-      parentFolderId: folder._id,
+      parentFolderId: targetFolder._id,
       ownerId: new Types.ObjectId(user.collegeId),
       resourceType: result.resource_type, // default for now
       mimeType: file.type,
@@ -173,3 +173,14 @@ if (!targetFolder) {
     }, { status: 500 })
   }
 }
+
+// import { NextResponse } from "next/server";
+
+// export const GET = async () => {
+//   return NextResponse.json({ message: "Upload route alive" });
+// };
+
+// export const POST = async (req: Request) => {
+//   return NextResponse.json({ message: "POST upload hit" });
+// };
+
