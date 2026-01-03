@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+
 import { useHighlightable } from '@/hooks/useHighlightable';
 import { TableCell, TableRow } from '@/components/ui/table';
 import {
@@ -21,25 +21,23 @@ import AuthorCell from './AuthorCell';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Share2, Link, UserPlus, Trash2 } from 'lucide-react';
 import Fileicon from './Fileicon';
-import { MoreVertical } from 'lucide-react';
+import { FileItem } from '@/types/File';
 
-type FileItem = {
-  id: string;
-  name: string;
-  type: string;
-  author: string;
-  size: string;
-  modified: string;
-  sharedUsers: string[];
-};
+interface RowProps {
+  file: FileItem;
+  onDeleteClick?: (item: FileItem) => void;
+  onOpen: (file: FileItem) => void;
+}
 
-export function FileTableRow({ file }: { file: FileItem }) {
+export function FileTableRow({ file, onDeleteClick, onOpen }: RowProps) {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
+  
 
   return (
     <>
       <TableRow
         {...eventHandlers}
+        onDoubleClick={() => onOpen(file)}
         className={`
     transition cursor-pointer !border-b-0 select-none touch-none
     ${isSelected ? 'bg-[#0AFEF236] hover:bg-[#0AFEF236]' : 'hover:bg-muted/40'}
@@ -115,10 +113,11 @@ export function FileTableRow({ file }: { file: FileItem }) {
                   </DropdownMenuSub>
 
                   <DropdownMenuItem
-                    className="text-red-600 focus:text-red-600"
+                    className="text-red-600 focus:text-red-600 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log('Delete', file.id);
+                      // TRIGGER THE DELETE MODAL
+                      onDeleteClick?.(file);
                     }}>
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
@@ -139,19 +138,18 @@ export function FileTableRow({ file }: { file: FileItem }) {
   );
 }
 
-export function MobileFileRow({ file }: { file: FileItem }) {
-  // Uses your custom hook for selection logic
+export function MobileFileRow({ file, onDeleteClick, onOpen }: RowProps) {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
 
   return (
     <div
       {...eventHandlers}
+      onClick={() => onOpen(file)}
       className={`
         flex items-center justify-between p-4 transition cursor-pointer select-none touch-none
         ${isSelected ? 'bg-[#0AFEF236]' : 'hover:bg-muted/40'}
       `}>
       <div className="flex items-center gap-4 overflow-hidden">
-        {/* Consistent Icon with Desktop */}
         <div className="flex-shrink-0">
           <Fileicon
             type={file.type}
@@ -164,7 +162,6 @@ export function MobileFileRow({ file }: { file: FileItem }) {
             {file.name}
           </span>
 
-          {/* Metadata Subtitle - Similar to Drive layout */}
           <div className="flex items-center gap-1 text-[12px] text-muted-foreground font-normal">
             <span className="truncate max-w-[80px]">{file.author}</span>
             <span>•</span>
@@ -175,17 +172,27 @@ export function MobileFileRow({ file }: { file: FileItem }) {
         </div>
       </div>
 
-      {/* Action Button - Using your primary colors */}
       <div className="flex-shrink-0 ml-2">
-        <button
-          className="p-2 hover:bg-black/5 rounded-full transition-colors"
-          onClick={(e) => {
-            e.stopPropagation();
-            // This button's click behavior is handled by your SelectionContext
-            // and the useEffect that opens the Sheet in the parent
-          }}>
-          <MoreHorizontal className="w-5 h-5 dark:text-[#0AFEF2] text-[#050E3F]" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="p-2 hover:bg-black/5 rounded-full transition-colors"
+              onClick={(e) => e.stopPropagation()}>
+              <MoreHorizontal className="w-5 h-5 dark:text-[#0AFEF2] text-[#050E3F]" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              className="text-red-600 focus:text-red-600"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteClick?.(file);
+              }}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Permanently
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import {useParams, useRouter } from 'next/navigation';
 import CreateFolder from '@/app/components/CreateFolder';
 import FolderItem from '@/app/components/FolderItem';
 import axios from 'axios';
@@ -28,7 +28,8 @@ interface File {
 
 const FolderPage = ({ params }: PageProps) => {
   const router = useRouter();
-  const { folderId } = params;
+  const folderId = params.folderId;
+  
 
   const [folders, setFolders] = useState<Folder[]>([]);
   const [files, setFiles] = useState<File[]>([]);
@@ -41,6 +42,7 @@ const FolderPage = ({ params }: PageProps) => {
   const fetchFolderContents = async () => {
   try {
     setLoading(true);
+    if (!folderId) return;
     const res = await axios.get(`/api/file/folder/${folderId}`);
     const allContents = res.data.contents || [];
     setFolders(allContents.filter((c: any) => c.isFolder));
@@ -55,6 +57,7 @@ const FolderPage = ({ params }: PageProps) => {
 
 
   useEffect(() => {
+    if (!folderId) return;
     fetchFolderContents();
   }, [folderId]);
 

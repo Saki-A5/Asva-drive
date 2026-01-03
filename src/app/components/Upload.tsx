@@ -22,12 +22,12 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-
 import { uploadToServer } from '@/utils/uploadToServer';
 
 type UploadingFile = {
   name: string;
   progress: number;
+  file: File;
 };
 
 interface UploadProps {
@@ -35,13 +35,13 @@ interface UploadProps {
 }
 
 const Upload = ({ folderId }: UploadProps) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<UploadingFile[]>([]);
   const [description, setDescription] = useState('');
-
+  const [progress, setProgress] = useState(0);
+  const [uploading, setUploading] = useState(false);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
@@ -55,7 +55,7 @@ const Upload = ({ folderId }: UploadProps) => {
     }));
 
     // Add new files to state (instead of replacing)
-    setFiles((prev) => [...prev, ...newFiles]);
+    setFiles(newFiles);
 
     for (const f of newFiles) {
       setLoading(true);
@@ -63,21 +63,33 @@ const Upload = ({ folderId }: UploadProps) => {
         file: f.file,
         folderId,
         email: 'user@example.com',
+        onProgress: (percent) => {
+          setFiles((prev) =>
+            prev.map((p) => (p.name === f.name ? { ...p, percent } : p))
+          );
+        },
       });
       console.log(response);
-
-      // Update progress to 100% when done
-      setFiles((prev) =>
-        prev.map((p) => (p.name === f.name ? { ...p, progress: 100 } : p))
-      );
       setLoading(false);
     }
   };
 
   return (
     <Dialog
-      open={open}
-      onOpenChange={setOpen}>
+  open={open}
+  onOpenChange={(val) => {
+    setOpen(val);
+
+    if (!val) {
+      setFiles([]);
+      setDescription('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }}
+>
+
       {/* Trigger */}
       <DialogTrigger asChild>
         <Button
@@ -199,6 +211,14 @@ const Upload = ({ folderId }: UploadProps) => {
             );
           })}
         </div>
+        <div className="mt-4 flex justify-end gap-2">
+  <Button
+    variant="secondary"
+    onClick={() => setOpen(false)}
+  >
+    Okay
+  </Button>
+</div>
       </DialogContent>
     </Dialog>
   );
