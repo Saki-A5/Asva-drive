@@ -144,7 +144,7 @@ export function MobileFileRow({ file, onDeleteClick, onOpen }: RowProps) {
   return (
     <div
       {...eventHandlers}
-      onClick={() => onOpen(file)}
+      onDoubleClick={() => onOpen(file)}
       className={`
         flex items-center justify-between p-4 transition cursor-pointer select-none touch-none
         ${isSelected ? 'bg-[#0AFEF236]' : 'hover:bg-muted/40'}
