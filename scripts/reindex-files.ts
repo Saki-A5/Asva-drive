@@ -34,13 +34,12 @@ async function reindexFiles({ clear = false, batchSize = 500 } = {}) {
       tags: file.tags || [],
       text: file.extractedText || '',
       cloudinaryUrl: file.cloudinaryUrl || '',
-      isFolder: file.isFolder,
-      parentFolderId: file.parentFolderId?.toString?.() || null,
-      isRoot: file.isRoot,
+      uploadedBy: file.uploadedBy?.toString?.() || '',
+      indexed: file.indexed,
+      resourceType: file.resourceType,
       isDeleted: file.isDeleted,
       deletedAt: file.deletedAt,
-      createdAt: file.createdAt?.toISOString(),
-      updatedAt: file.updatedAt?.toISOString(),
+      
     }))
     await index.addDocuments(docs)
     indexed += docs.length

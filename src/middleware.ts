@@ -2,8 +2,25 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
 
+  const publicPaths = ["/", "/login", "/signup", "/api/auth"];
+
+  if (publicPaths.some(route => pathname.startsWith(route))) {
+    return NextResponse.next();
+  }
+
+
+  //  Landing page logic
+  if (pathname === "/") {
+    if (token) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+    return NextResponse.next();
+  }
+
+  //  Protected routes
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
@@ -13,6 +30,7 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/dashboard/:path*",
     "/recent/:path*",
     "/starred/:path*",
@@ -20,6 +38,6 @@ export const config = {
     "/trash/:path*",
     "/shared/:path*",
     "/settings/:path*",
-    "/admin/:path*", 
+    "/admin/:path*",
   ],
 };

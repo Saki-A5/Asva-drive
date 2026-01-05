@@ -13,13 +13,16 @@ interface Props {
   onMarkAsRead: (id: string) => void;
 }
 
-export default function NotificationDropdown({ notifications, onMarkAsRead }: Props) {
+export default function NotificationDropdown({
+  notifications,
+  onMarkAsRead,
+}: Props) {
   return (
     <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white shadow-lg rounded-lg z-50">
       {notifications.length === 0 ? (
         <p className="p-4 text-gray-500">No notifications</p>
       ) : (
-        notifications.map((n) => (
+        notifications.map(n => (
           <div
             key={n._id}
             className={`p-3 border-b cursor-pointer hover:bg-gray-100 ${

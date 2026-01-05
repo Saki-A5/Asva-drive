@@ -41,6 +41,7 @@ asva_ai_assistant/.env
 next-env.d.ts
 
 secrets/
+asva-core/
 
 # virtual env
 asva-core/
@@ -48,3 +49,5 @@ asva-core/
 # Environment variables
 asva_ai_assistant/.env
 
+# Scraps local notes
+.scraps/

@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Table, TableBody } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   MoreHorizontal,
   LayoutGrid,
@@ -9,41 +15,42 @@ import {
   Download,
   Star,
   Trash2,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { SelectionProvider, useSelection } from '@/context/SelectionContext';
-
+import { useRouter } from 'next/navigation';
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
-
-import FileTableRow from './FileTableRow';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { parseDate, parseSize } from '@/utils/sort';
+import { FileItem } from '@/types/File';
+import { FileTableRow, MobileFileRow } from './FileTableRow';
 import FileTableHeader from './FileTableHeader';
 import FileGrid from './FileGrid';
 import Fileicon from './Fileicon';
-import SharingCell from './SharingCell';
 import SelectionActionBar from './SelectionActionBar';
+import AuthorCell from './AuthorCell';
 
-export type FileItem = {
-  id: string;
-  name: string;
-  type: string;
-  items?: string;
-  author: string;
-  size: string;
-  modified: string;
-  sharedUsers: string[];
-};
+const SORT_COOKIE_KEY = 'file_table_sort';
+
 
 interface FileTableProps {
   files: FileItem[];
   header?: string;
+  onDeleteClick?: (item: FileItem) => void;
 }
 
-export default function FileTable({ files }: FileTableProps) {
+export default function FileTable({
+  files,
+  header,
+  onDeleteClick,
+}: FileTableProps) {
   // useState to control the layout onClick
   const [layout, setLayout] = useState('flex');
 
@@ -53,6 +60,8 @@ export default function FileTable({ files }: FileTableProps) {
         files={files}
         layout={layout}
         setLayout={setLayout}
+        header={header}
+        onDeleteClick={onDeleteClick}
       />
     </SelectionProvider>
   );
@@ -63,17 +72,97 @@ interface FileTableContentProps {
   layout: string;
   setLayout: React.Dispatch<React.SetStateAction<string>>;
   header?: string;
+  onDeleteClick?: (item: FileItem) => void;
 }
+
+type SortKeyType = 'name' | 'author' | 'size' | 'modified';
 
 function FileTableContent({
   files,
   layout,
   setLayout,
   header,
+  onDeleteClick,
 }: FileTableContentProps) {
   const { selectedItems, clearSelection } = useSelection();
-
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  const [sortKey, setSortKey] = useState<SortKeyType>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const router = useRouter();
+
+const handleOpenItem = (file: FileItem) => {
+  if (file.type === "folder") {
+    router.push(`/files/folder/${file.id}`);
+  } else {
+    router.push(`/file/${file.id}`); // optional
+  }
+};
+
+
+  function handleSort(key: SortKeyType) {
+    if (sortKey === key) {
+      // same column → toggle direction
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      // new column → start ascending
+      setSortKey(key);
+      setSortDirection('asc');
+    }
+  }
+
+  const sortedFiles = [...files].sort((a, b) => {
+    if (!sortKey) return 0;
+
+    let aValue: any = a[sortKey];
+    let bValue: any = b[sortKey];
+
+    if (sortKey === 'size') {
+      aValue = parseSize(a.size);
+      bValue = parseSize(b.size);
+    }
+
+    if (sortKey === 'modified') {
+      aValue = parseDate(a.modified).getTime();
+      bValue = parseDate(b.modified).getTime();
+    }
+
+    if (typeof aValue === 'string') {
+      return sortDirection === 'asc'
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+
+    return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+  });
+
+  useEffect(() => {
+    const cookie = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`${SORT_COOKIE_KEY}=`));
+
+    if (!cookie) return;
+
+    try {
+      const value = JSON.parse(decodeURIComponent(cookie.split('=')[1]));
+      if (value.sortKey && value.sortDirection) {
+        setSortKey(value.sortKey);
+        setSortDirection(value.sortDirection);
+      }
+    } catch {
+      // ignore corrupted cookie
+      console.error('Cookie corrupted');
+    }
+  }, []);
+
+  useEffect(() => {
+    const value = JSON.stringify({ sortKey, sortDirection });
+
+    document.cookie = `${SORT_COOKIE_KEY}=${encodeURIComponent(
+      value
+    )}; path=/; max-age=31536000`;
+  }, [sortKey, sortDirection]);
 
   useEffect(() => {
     if (selectedItems.length === 1) {
@@ -126,7 +215,6 @@ function FileTableContent({
         </div>
       </div>
 
-      {/* conditional here */}
       {layout === 'grid' ? (
         <section className="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-card">
           <SelectionActionBar
@@ -139,43 +227,84 @@ function FileTableContent({
             // onMove={handleMove}
           />
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {files.map((file) => (
+            {sortedFiles.map((file) => (
               <FileGrid
                 file={file}
                 key={file.id}
+                onDeleteClick={onDeleteClick}
+                onOpen ={handleOpenItem}
               />
             ))}
           </div>
         </section>
       ) : (
-        <>
+        <div className="flex flex-col flex-1 min-h-0 rounded-2xl">
           <SelectionActionBar
             count={selectedItems.length}
             onClear={clearSelection}
-            // onDelete={handleDelete}
-            // onDownload={handleDownload}
-            // onShare={handleShare}
-            // onGetLink={handleGetLink}
-            // onMove={handleMove}
           />
 
-          <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden">
+          <div className="hidden md:flex flex-col flex-1 min-h-0">
+            <div className="overflow-hidden">
+              <Table className="table-fixed min-w-[550px] w-full">
+                <FileTableHeader
+                  onSort={handleSort}
+                  sortKey={sortKey}
+                  sortDirection={sortDirection}
+                />
+              </Table>
+            </div>
             <div className="flex-1 overflow-y-auto">
-              <Table>
-                <FileTableHeader />
-
+              <Table className="table-fixed min-w-[550px] w-full">
                 <TableBody>
-                  {files.map((file) => (
+                  {sortedFiles.map((file) => (
                     <FileTableRow
                       key={file.id}
                       file={file}
+                      onDeleteClick={onDeleteClick}
+                      onOpen ={handleOpenItem}
                     />
                   ))}
                 </TableBody>
               </Table>
             </div>
           </div>
-        </>
+          <div className="flex md:hidden flex-col flex-1 min-h-0">
+            <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 overflow-x-auto no-scrollbar whitespace-nowrap bg-background/50 sticky top-0 z-10">
+              {(['name', 'author', 'size', 'modified'] as SortKeyType[]).map(
+                (key) => (
+                  <button
+                    key={key}
+                    onClick={() => handleSort(key)}
+                    className={`text-sm font-semibold flex items-center gap-1 px-2 py-1 rounded-md transition-colors ${
+                      sortKey === key
+                        ? 'text-[#050E3F] dark:text-[#0AFEF2] bg-muted'
+                        : 'text-muted-foreground'
+                    }`}>
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                    {sortKey === key &&
+                      (sortDirection === 'asc' ? (
+                        <ArrowUp className="w-3 h-3" />
+                      ) : (
+                        <ArrowDown className="w-3 h-3" />
+                      ))}
+                  </button>
+                )
+              )}
+            </div>
+
+            <div className="flex-1 overflow-y-auto divide-y divide-gray-50/10">
+              {sortedFiles.map((file) => (
+                <MobileFileRow
+                  key={file.id}
+                  file={file}
+                  onDeleteClick={onDeleteClick}
+                  onOpen ={handleOpenItem}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {files.map(
@@ -188,6 +317,9 @@ function FileTableContent({
               <SheetContent
                 side="right"
                 className="w-[80vw] max-w-[360px] sm:w-[360px] md:w-[480px] overflow-y-auto">
+                  <VisuallyHidden>
+                    <SheetTitle>File details</SheetTitle>
+                  </VisuallyHidden>
                 <div className="mt-6 flex flex-col items-center w-full px-4 sm:px-6">
                   <div className="w-full max-w-[224px] aspect-square flex flex-col border rounded-[15px] justify-center items-center">
                     <Fileicon
