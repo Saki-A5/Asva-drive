@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, LogOut } from 'lucide-react';
+import { ArrowLeft, LogOut, PanelLeftOpen } from 'lucide-react';
 import axios from 'axios';
 import { getAuth, signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ import * as openPeeps from '@dicebear/open-peeps';
 import { getAvatarUrl as getAvatarUrlUtil, AvatarStyle } from '@/utils/avatar';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { X } from 'lucide-react';
+import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 
 type SettingsSection = 'general' | 'account' | 'permissions' | 'avatar';
 
@@ -67,6 +68,7 @@ export default function SettingsPage() {
   const [savingAvatar, setSavingAvatar] = useState(false);
   const [selectedAvatarStyle, setSelectedAvatarStyle] = useState<AvatarStyle>('lorelei');
   const [selectedAvatarSeed, setSelectedAvatarSeed] = useState<string>('');
+  const [sheetOpen, setSheetOpen] = useState(false);
   
   // General settings state
   const [startPage, setStartPage] = useState<'dashboard' | 'files'>('dashboard');
@@ -422,7 +424,6 @@ export default function SettingsPage() {
   const renderAccount = () => (
     <div className="space-y-8">
       <section className="border p-4 rounded-xl border-border/100 bg-card">
-        <h2 className="text-lg font-bold mb-4">Account</h2>
         <div className="space-y-6 text-sm">
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground">Matriculation Number</p>
@@ -515,7 +516,6 @@ export default function SettingsPage() {
   const renderPermissions = () => (
     <div className="space-y-4">
       <section className="border p-4 rounded-xl border-border/100 bg-card">
-        <h2 className="text-lg font-bold mb-2">Permissions</h2>
         <p className="text-sm text-muted-foreground mb-4">
           Manage device permissions for camera, microphone, location, notifications, file system,
           and storage.
@@ -532,7 +532,6 @@ export default function SettingsPage() {
   const renderAvatar = () => (
     <div className="space-y-8">
       <section className="border p-4 rounded-xl border-border/100 bg-card">
-        <h2 className="text-lg font-bold mb-4">Avatar Customization</h2>
         <p className="text-sm text-muted-foreground mb-6">
           Choose an avatar style that represents you. Your avatar will be generated based on your email or name.
         </p>
@@ -657,11 +656,93 @@ export default function SettingsPage() {
     </div>
   );
 
+  // Get section title for display
+  const getSectionTitle = (section: SettingsSection): string => {
+    const titles: Record<SettingsSection, string> = {
+      avatar: 'Avatar',
+      general: 'General',
+      account: 'Account',
+      permissions: 'Permissions',
+    };
+    return titles[section];
+  };
+
+  // Settings navigation component (used in both desktop and mobile)
+  const settingsNav = (onItemClick?: () => void) => (
+    <>
+      {/* Back to Dashboard */}
+      <Link
+        href="/dashboard"
+        className="flex items-center gap-2 font-semibold rounded-lg text-[10px] px-2 py-1 hover:bg-accent hover:text-accent-foreground transition mb-4"
+        onClick={onItemClick}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        <span className="text-sm">Back</span>
+      </Link>
+
+      {/* Settings Navigation */}
+      <nav className="flex flex-col space-y-1">
+        <button
+          onClick={() => {
+            setActiveSection('avatar');
+            onItemClick?.();
+          }}
+          className={`flex items-center gap-2 font-semibold rounded-lg text-[10px] px-2 py-1 transition ${
+            activeSection === 'avatar'
+              ? 'bg-accent text-accent-foreground'
+              : 'hover:bg-accent hover:text-accent-foreground'
+          }`}
+        >
+          <span className="text-sm">Avatar</span>
+        </button>
+        <button
+          onClick={() => {
+            setActiveSection('general');
+            onItemClick?.();
+          }}
+          className={`flex items-center gap-2 font-semibold rounded-lg text-[10px] px-2 py-1 transition ${
+            activeSection === 'general'
+              ? 'bg-accent text-accent-foreground'
+              : 'hover:bg-accent hover:text-accent-foreground'
+          }`}
+        >
+          <span className="text-sm">General</span>
+        </button>
+        <button
+          onClick={() => {
+            setActiveSection('account');
+            onItemClick?.();
+          }}
+          className={`flex items-center gap-2 font-semibold rounded-lg text-[10px] px-2 py-1 transition ${
+            activeSection === 'account'
+              ? 'bg-accent text-accent-foreground'
+              : 'hover:bg-accent hover:text-accent-foreground'
+          }`}
+        >
+          <span className="text-sm">Account</span>
+        </button>
+        <button
+          onClick={() => {
+            setActiveSection('permissions');
+            onItemClick?.();
+          }}
+          className={`flex items-center gap-2 font-semibold rounded-lg text-[10px] px-2 py-1 transition ${
+            activeSection === 'permissions'
+              ? 'bg-accent text-accent-foreground'
+              : 'hover:bg-accent hover:text-accent-foreground'
+          }`}
+        >
+          <span className="text-sm">Permissions</span>
+        </button>
+      </nav>
+    </>
+  );
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-[#02427E] to-[#05081A]">
-      {/* Left Sidebar - Settings Navigation */}
+      {/* Left Sidebar - Settings Navigation (Desktop) */}
       <div className="hidden lg:flex flex-col border-r border-border/80 bg-gradient-to-br from-[#02427E] to-[#05081A] p-4 text-white transition-all duration-300 w-56">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2">
           <Link
             href="/dashboard"
             className="flex items-center">
@@ -678,110 +759,51 @@ export default function SettingsPage() {
             </span>
           </Link>
         </div>
-
-        {/* Back to Dashboard */}
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2 font-semibold rounded-lg text-[10px] px-2 py-1 hover:bg-accent hover:text-accent-foreground transition mb-4"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="text-sm">Back</span>
-        </Link>
-
-        {/* Settings Navigation */}
-        <nav className="flex flex-col space-y-1">
-          <button
-            onClick={() => setActiveSection('avatar')}
-            className={`flex items-center gap-2 font-semibold rounded-lg text-[10px] px-2 py-1 transition ${
-              activeSection === 'avatar'
-                ? 'bg-accent text-accent-foreground'
-                : 'hover:bg-accent hover:text-accent-foreground'
-            }`}
-          >
-            <span className="text-sm">Avatar</span>
-          </button>
-          <button
-            onClick={() => setActiveSection('general')}
-            className={`flex items-center gap-2 font-semibold rounded-lg text-[10px] px-2 py-1 transition ${
-              activeSection === 'general'
-                ? 'bg-accent text-accent-foreground'
-                : 'hover:bg-accent hover:text-accent-foreground'
-            }`}
-          >
-            <span className="text-sm">General</span>
-          </button>
-          <button
-            onClick={() => setActiveSection('account')}
-            className={`flex items-center gap-2 font-semibold rounded-lg text-[10px] px-2 py-1 transition ${
-              activeSection === 'account'
-                ? 'bg-accent text-accent-foreground'
-                : 'hover:bg-accent hover:text-accent-foreground'
-            }`}
-          >
-            <span className="text-sm">Account</span>
-          </button>
-          <button
-            onClick={() => setActiveSection('permissions')}
-            className={`flex items-center gap-2 font-semibold rounded-lg text-[10px] px-2 py-1 transition ${
-              activeSection === 'permissions'
-                ? 'bg-accent text-accent-foreground'
-                : 'hover:bg-accent hover:text-accent-foreground'
-            }`}
-          >
-            <span className="text-sm">Permissions</span>
-          </button>
-        </nav>
+        <div className="mb-4">
+          <h2 className="text-sm font-semibold text-white/80 pl-2">Settings</h2>
+        </div>
+        {settingsNav()}
       </div>
+
+      {/* Mobile Sheet Navigation */}
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute top-5.5 left-4 lg:hidden z-10">
+            <PanelLeftOpen className="h-6 w-6" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent
+          side="left"
+          className="w-64 bg-gradient-to-b from-[#02427E] to-[#05081A] p-4 text-white">
+          <div className="flex items-center justify-between mb-2">
+            <Link
+              href="/dashboard"
+              className="flex font-bold items-center">
+              <Image
+                src="/asva logo.png"
+                alt="ASVA Logo"
+                width={24}
+                height={24}
+                className="h-6 w-6"
+              />
+              <span className="pl-2">ASVA HUB</span>
+            </Link>
+          </div>
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold text-white/80 pl-2">Settings</h2>
+          </div>
+          {settingsNav(() => setSheetOpen(false))}
+        </SheetContent>
+      </Sheet>
 
       {/* Main Content Area */}
       <main className="flex-1 bg-background text-foreground mr-2 rounded-2xl shadow-lg lg:px-4 pl-12 pb-12 overflow-hidden flex flex-col">
         <div className="px-6 flex flex-col flex-1 min-h-0 overflow-y-auto">
           <div className="flex items-center gap-4 mb-6 pt-6">
-            <h1 className="font-bold text-xl">Settings</h1>
-          </div>
-
-          {/* Mobile navigation */}
-          <div className="lg:hidden mb-6 flex gap-2 border-b pb-4">
-            <button
-              onClick={() => setActiveSection('avatar')}
-              className={`px-4 py-2 text-sm rounded-lg transition-colors ${
-                activeSection === 'avatar'
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:bg-accent'
-              }`}
-            >
-              Avatar
-            </button>
-            <button
-              onClick={() => setActiveSection('general')}
-              className={`px-4 py-2 text-sm rounded-lg transition-colors ${
-                activeSection === 'general'
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:bg-accent'
-              }`}
-            >
-              General
-            </button>
-            <button
-              onClick={() => setActiveSection('account')}
-              className={`px-4 py-2 text-sm rounded-lg transition-colors ${
-                activeSection === 'account'
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:bg-accent'
-              }`}
-            >
-              Account
-            </button>
-            <button
-              onClick={() => setActiveSection('permissions')}
-              className={`px-4 py-2 text-sm rounded-lg transition-colors ${
-                activeSection === 'permissions'
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:bg-accent'
-              }`}
-            >
-              Permissions
-            </button>
+            <h1 className="font-bold text-xl">{getSectionTitle(activeSection)}</h1>
           </div>
 
           <div className="space-y-8">
