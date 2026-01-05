@@ -31,7 +31,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env
+asva_ai_assistant/.env
 
 # vercel
 .vercel
@@ -46,5 +46,5 @@ secrets/
 asva-core/
 
 # Environment variables
-.env*
+asva_ai_assistant/.env
 

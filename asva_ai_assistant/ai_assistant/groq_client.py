@@ -6,8 +6,8 @@ Handles all interactions with Groq's fast inference API
 import asyncio
 import httpx
 from typing import Optional, Dict, Any, AsyncIterator, List
-from datetime import datetime
 import logging
+from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +46,7 @@ class GroqClient:
         self.max_retries = max_retries
         self.client = httpx.AsyncClient(
             timeout=timeout,
+            http2=False,
             headers={
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json"
@@ -65,7 +66,7 @@ class GroqClient:
     async def generate_completion(
         self,
         messages: List[Dict[str, str]],
-        model: str = "llama-3.3-70b-versatile",
+        model: str = settings.GROQ_MODEL,
         temperature: float = 0.7,
         max_tokens: int = 2048,
         top_p: float = 1.0,
@@ -141,7 +142,7 @@ class GroqClient:
     async def generate_streaming(
         self,
         messages: List[Dict[str, str]],
-        model: str = "llama-3.3-70b-versatile",
+        model: str = settings.GROQ_MODEL,
         temperature: float = 0.7,
         max_tokens: int = 2048,
         **kwargs
@@ -201,7 +202,7 @@ class GroqClient:
             logger.exception("Error in streaming generation")
             raise GroqAPIError(f"Streaming error: {str(e)}")
 
-    async def count_tokens(self, text: str, model: str = "llama-3.3-70b-versatile") -> int:
+    async def count_tokens(self, text: str, model: str = settings.GROQ_MODEL) -> int:
         """
         Estimate token count for a given text.
 

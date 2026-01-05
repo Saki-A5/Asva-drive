@@ -1,9 +1,8 @@
 """
-Mode Handler
-Implements specialized learning modes: Socratic, Inventor, and Explainer
+Mode handler implements socratic, explainer and inventor learning modes
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Optional, List, Dict, Any
 from enum import Enum
 import logging
 
@@ -11,28 +10,19 @@ logger = logging.getLogger(__name__)
 
 
 class LearningMode(str, Enum):
-    """Available learning modes"""
-    SOCRATIC = "socratic"
-    INVENTOR = "inventor"
-    EXPLAINER = "explainer"
-    DEFAULT = "default"
+    """ Specialized learning modes """
+    EXPLAINER, INVENTOR, SOCRATIC, DEFAULT = "explainer", "inventor", "socratic", "default"
 
 
 class ComplexityLevel(str, Enum):
-    """Complexity levels for explanations"""
-    BEGINNER = "beginner"
-    INTERMEDIATE = "intermediate"
-    ADVANCED = "advanced"
+    """ Levels for explanation """
+    BEGINNER, ADVANCE, INTERMEDIATE = "beginner", "advance", "intermediate"
 
 
 class ProjectType(str, Enum):
-    """Types of projects for Inventor mode"""
-    WEB = "web"
-    MOBILE = "mobile"
-    DATA = "data"
-    HARDWARE = "hardware"
-    AI_ML = "ai_ml"
-    GENERAL = "general"
+    """ Different types of project for the inventor mode """
+    WEB, CYBER_SECURE, DATA, AI_ML, MOBILE = 'web', 'cyber_secure', 'data', 'ai_ml', 'mobile'
+    HARDWARE, GENERAL = 'hardware', 'general'
 
 
 class ModeHandler:
@@ -174,7 +164,7 @@ Guidelines:
 - Connect to broader theoretical frameworks
 - Assume basic foundational knowledge""",
 
-            ComplexityLevel.ADVANCED: """
+            ComplexityLevel.ADVANCE: """
 - Use technical terminology appropriately
 - Discuss edge cases and nuances
 - Reference academic literature
