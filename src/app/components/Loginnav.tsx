@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { getAvatarUrl, AvatarStyle } from '@/utils/avatar';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import SearchBar from './SearchBar';
+import { L } from 'node_modules/@upstash/redis/zmscore-0SAuWM0q.mjs';
 
 type User = {
   id: string;
@@ -137,7 +138,7 @@ const Loginnav = () => {
               className="w-40">
               <DropdownMenuItem>
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <Link href="/settings">Settings</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>

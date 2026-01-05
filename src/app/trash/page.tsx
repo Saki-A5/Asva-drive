@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Sidenav from '../components/Sidenav';
 import Loginnav from '../components/Loginnav';
-import FileTable, { FileItem } from '../components/FileTable';
+import FileTable from '../components/FileTable';
+import { FileItem } from '@/types/File';
 import useCurrentUser from '@/hooks/useCurrentUser';
 import SortFilters from '../components/SortFilter';
 import DeleteModal from '../components/DeleteModal'; // Assuming you saved the modal here
