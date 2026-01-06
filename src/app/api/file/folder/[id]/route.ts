@@ -107,7 +107,7 @@ export const GET = async (req: Request, { params }: any) => {
       currentFolder = await FileItemModel.findById(currentFolder.parentFolderId);
     }
 
-  return NextResponse.json({ contents, breadcrumbs });
+  return NextResponse.json({ contents, breadcrumbs, folderName: folder.filename });
 } 
 
 // delete a folder and its contents
