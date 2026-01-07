@@ -130,7 +130,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
       <Loginnav />
 
       <div className="px-6 flex flex-col flex-1 min-h-0">
-        {breadcrumbs.length > 0 && <Breadcrumbs folders={breadcrumbs} />}
+        {folderId && breadcrumbs.length > 0 && <Breadcrumbs folders={breadcrumbs} />}
 
         {/* Header */}
         <div className="flex-between gap-2 mt-2">

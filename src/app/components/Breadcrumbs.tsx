@@ -13,10 +13,8 @@ interface BreadcrumbsProps {
 const Breadcrumbs = ({ folders }: BreadcrumbsProps) => {
   const router = useRouter();
 
-  const fullPath = [...folders]
-  if (!fullPath.some(f => f.filename === '/')) {
-    fullPath.unshift({_id: 'root', filename: "/"})
-  }
+  if (!folders || folders.length === 0) return null;
+  const fullPath = [{ _id: 'root', filename: 'My Files' }, ...folders.filter(folder => folder.filename !== '/')];
   return (
     <Breadcrumb >
     <BreadcrumbList className="flex items-center gap-1">

@@ -43,17 +43,19 @@ export function FileTableRow({ file, onDeleteClick, onOpen }: RowProps) {
     ${isSelected ? 'bg-[#0AFEF236] hover:bg-[#0AFEF236]' : 'hover:bg-muted/40'}
   `}>
         <TableCell className="w-[40%] text-left rounded-l-lg">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 overflow-hidden">
             <Fileicon
               type={file.type}
               isSheetPage={false}
             />
-            <span className="font-medium">{file.name}</span>
+            <span className="font-medium truncate" title={file.name}>{file.name}</span>
           </div>
         </TableCell>
 
-        <TableCell className="w-[20%] text-left">
+        <TableCell className="w-[20%] text-left overflow-hidden">
+          <span className='truncate' title={file.author}>
           <AuthorCell author={file.author} />
+          </span>
         </TableCell>
 
         <TableCell className="w-[15%] text-left text-muted-foreground">
