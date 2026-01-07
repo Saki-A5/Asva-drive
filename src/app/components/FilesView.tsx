@@ -25,10 +25,12 @@ interface ApiItem {
   _id: string;
   filename: string;
   isFolder: boolean;
+  ownerId: { name?: string; email?: string };
   file?: {
-    size: number;
+    sizeBytes: number;
     mimeType: string;
     updatedAt: string;
+    uploadedBy?: { email?: string; name?: string };
   };
 }
 
@@ -59,12 +61,13 @@ const FilesView = ({ folderId }: FilesViewProps) => {
       const name = res.data.folderName ?? null;
 
       const mapped: FileItem[] = (data as ApiItem[]).map((item) => {
+        // const author = item.ownerId?.name ?? item.ownerId?.email ?? 'SMS';
         if (item.isFolder) {
           return {
             id: item._id,
             name: item.filename,
             type: 'folder',
-            author: 'SMS',
+            author: item.file?.uploadedBy?.email ?? 'SMS',
             size: '—',
             modified: '—',
             sharedUsers: [],
@@ -75,8 +78,8 @@ const FilesView = ({ folderId }: FilesViewProps) => {
           id: item._id,
           name: item.filename,
           type: item.file?.mimeType.split('/')[0] ?? 'file',
-          author: 'SMS',
-          size: `${((item.file?.size ?? 0) / (1024 * 1024)).toFixed(1)} MB`,
+          author: item.file?.uploadedBy?.email ?? 'SMS',
+          size: item.file?.sizeBytes ? `${(item.file?.sizeBytes / (1024 * 1024)).toFixed(1)} MB` : '—',
           modified: item.file?.updatedAt
             ? new Date(item.file.updatedAt).toDateString()
             : '—',

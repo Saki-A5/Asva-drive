@@ -97,7 +97,9 @@ export const GET = async (req: Request, { params }: any) => {
   const contents = await FileItemModel.find({
     parentFolderId: folderId,
     ownerId
-  });
+  })
+  .populate('uploadedBy', 'email name')
+  .populate("file", "sizeBytes mimeType");
 
    const breadcrumbs: { _id: string; filename: string }[] = [];
     let currentFolder: any = folder;
