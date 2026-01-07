@@ -1,8 +1,8 @@
 "use client";
 
 import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import "react-pdf/dist/esm/Page/TextLayer.css";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
 import { useState } from "react";
 
 pdfjs.GlobalWorkerOptions.workerSrc =
