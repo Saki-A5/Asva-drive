@@ -96,7 +96,7 @@ const handleOpenItem = (file: FileItem) => {
   if (file.type === "folder") {
     router.push(`/files/folder/${file.id}`);
   } else {
-    router.push(`/file/${file.id}`); // optional
+    router.push(`/files/${file.id}`);
   }
 };
 
