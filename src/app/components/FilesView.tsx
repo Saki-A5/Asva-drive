@@ -25,7 +25,7 @@ interface ApiItem {
   _id: string;
   filename: string;
   isFolder: boolean;
-  ownerId: { name?: string; email?: string };
+  ownerId: string;
   file?: {
     sizeBytes: number;
     mimeType: string;
@@ -67,7 +67,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
             id: item._id,
             name: item.filename,
             type: 'folder',
-            author: item.file?.uploadedBy?.email ?? 'SMS',
+            author: '_',
             size: '—',
             modified: '—',
             sharedUsers: [],
@@ -78,7 +78,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
           id: item._id,
           name: item.filename,
           type: item.file?.mimeType.split('/')[0] ?? 'file',
-          author: item.file?.uploadedBy?.email ?? 'SMS',
+          author: item.file?.uploadedBy?.name ?? item.file?.uploadedBy?.email ?? 'SMS',
           size: item.file?.sizeBytes ? `${(item.file?.sizeBytes / (1024 * 1024)).toFixed(1)} MB` : '—',
           modified: item.file?.updatedAt
             ? new Date(item.file.updatedAt).toDateString()

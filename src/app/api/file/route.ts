@@ -5,6 +5,7 @@ import dbConnect from '@/lib/dbConnect';
 import FileItemModel from '@/models/fileItem';
 import { adminAuth } from '@/lib/firebaseAdmin';
 import User from '@/models/users';
+import path from "path";
 
 export const GET = async (req: Request) => {
   try {
@@ -49,8 +50,14 @@ export const GET = async (req: Request) => {
       ownerId,
       parentFolderId: rootFolder._id,
     })
-    .populate('uploadedBy', 'email name')
-    .populate("file", "sizeBytes mimeType");
+    .populate({
+      path: "file",
+      select: "sizeBytes mimeType updatedAt uploadedBy",
+      populate: {
+        path: "uploadedBy",
+        select: "email name"
+      }
+    })
 
     return NextResponse.json({
       message: 'Files fetched',

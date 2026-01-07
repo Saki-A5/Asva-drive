@@ -98,9 +98,14 @@ export const GET = async (req: Request, { params }: any) => {
     parentFolderId: folderId,
     ownerId
   })
-  .populate('uploadedBy', 'email name')
-  .populate("file", "sizeBytes mimeType");
-
+  .populate({
+      path: "file",
+      select: "sizeBytes mimeType updatedAt uploadedBy",
+      populate: {
+        path: "uploadedBy",
+        select: "email name"
+      }
+    })
    const breadcrumbs: { _id: string; filename: string }[] = [];
     let currentFolder: any = folder;
     while (currentFolder) {
