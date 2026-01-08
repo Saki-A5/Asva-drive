@@ -303,7 +303,7 @@ const Home = () => {
               className={` ${darkerGrotesque.className}
   font-semibold
   text-3xl md:text-4xl lg:text-[96px]
-  leading-tight lg:leading-[81px]
+  leading-none lg:leading-[81px]
   text-center text-white mb-3 sm:mb-5
 `}
             >
@@ -356,7 +356,7 @@ const Home = () => {
             }}
             className="
     relative
-    w-[90%] sm:w-[80%] lg:w-[840px]
+    w-[87%] sm:w-[80%] lg:w-[840px]
     aspect-[14/9]
     rounded-[15px]
     border border-white
@@ -538,12 +538,12 @@ const Home = () => {
         </motion.div>
       </section>
 
-      <section className="bg-[radial-gradient(ellipse_at_center,#02427E_0%,#050E3F_100%)] overflow-hidden relative">
+      <section className="bg-[radial-gradient(ellipse_at_center,#02427E_0%,#050E3F_100%)] overflow-hidden relative p-4">
         <div className="hidden lg:block absolute w-[300px] h-[300px] top-10 right-[74px] rounded-full bg-[#0AFEF2] blur-[184px] [@media(min-width:1024px)_and_(max-width:1200px)]:right-[20px]" />
 
         <div className="hidden lg:block absolute w-[300px] h-[250px] top-44 left-[74px] rounded-full bg-[#0AFEF2] blur-[184px] [@media(min-width:1024px)_and_(max-width:1200px)]:left-[20px]" />
         <div className="w-full flex p-3 md:p-5 lg:p-10 flex-wrap mb-32">
-          <h1 className="w-full lg:w-[50%] font-bold text-3xl lg:text-[65px] text-white mb-5 text-center lg:text-left">
+          <h1 className="w-full lg:w-[50%] font-bold text-2xl lg:text-[65px] text-white mb-5 text-center lg:text-left">
             Frequently <br />
             Asked Questions
           </h1>
@@ -584,7 +584,7 @@ const Home = () => {
           </Accordion>
         </div>
         <footer className="w-full relative">
-          <div className="absolute -bottom-[50px] lg:-bottom-24 flex flex-col justify-center w-full">
+          <div className="absolute -bottom-[65px] lg:-bottom-[110px] flex flex-col justify-center w-full">
             <p className="text-sm md:text-base text-[#FFFFFF6B] font-medium text-center lg:-mb-20">
               Copyright ASVA 2025. All rights reserved.
             </p>
