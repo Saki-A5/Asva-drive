@@ -1,10 +1,9 @@
-import { Breadcrumb, BreadcrumbItem } from "@/components/ui/breadcrumb";
-import { ChevronRight } from "lucide-react";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbSeparator, BreadcrumbLink, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { useRouter } from "next/navigation";
 
 interface Folder {
   _id: string;
-  name: string;
+  filename: string;
 }
 
 interface BreadcrumbsProps {
@@ -14,18 +13,39 @@ interface BreadcrumbsProps {
 const Breadcrumbs = ({ folders }: BreadcrumbsProps) => {
   const router = useRouter();
 
+  if (!folders || folders.length === 0) return null;
+  const fullPath = [{ _id: 'root', filename: 'My Files' }, ...folders.filter(folder => folder.filename !== '/')];
   return (
-    <Breadcrumb>
-  <BreadcrumbItem onClick={() => router.push("/files")}>My Files</BreadcrumbItem>
-  {folders.map((f) => (
-    <BreadcrumbItem
-      key={f._id}
-      onClick={() => router.push(`/files/folder/${f._id}`)}
-    >
-      {f.name}
-    </BreadcrumbItem>
-  ))}
-</Breadcrumb>
+    <Breadcrumb >
+    <BreadcrumbList className="flex items-center gap-1">
+    {fullPath.map((folder, index) => {
+      const isLast = index === fullPath.length - 1
+
+      return (
+        <span key={folder._id} className="flex items-center gap-1">
+          <BreadcrumbItem>{isLast ? (
+            <BreadcrumbPage className="font-semibold">
+              {folder.filename}
+              </BreadcrumbPage>
+              ) : (
+            <BreadcrumbLink
+              onClick={() => {
+                if (folder._id === 'root') {
+              router.push('/files')
+            } else {
+              router.push(`/files/folder/${folder._id}`)
+            }
+              }}>
+              {folder.filename}
+              </BreadcrumbLink>
+          )}
+          </BreadcrumbItem>
+          {!isLast && (<BreadcrumbSeparator><span className="mx-1">{'>'}</span></BreadcrumbSeparator>)}
+        </span>
+      );
+    })}
+    </BreadcrumbList>
+    </Breadcrumb>
   );
 };
 

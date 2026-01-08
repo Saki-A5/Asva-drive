@@ -4,8 +4,8 @@ import { Types } from 'mongoose';
 import dbConnect from '@/lib/dbConnect';
 import FileItemModel from '@/models/fileItem';
 import { adminAuth } from '@/lib/firebaseAdmin';
-import { ro } from 'date-fns/locale';
 import User from '@/models/users';
+import path from "path";
 
 export const GET = async (req: Request) => {
   try {
@@ -49,7 +49,15 @@ export const GET = async (req: Request) => {
     const files = await FileItemModel.find({
       ownerId,
       parentFolderId: rootFolder._id,
-    }).populate("file");
+    })
+    .populate({
+      path: "file",
+      select: "sizeBytes mimeType updatedAt uploadedBy",
+      populate: {
+        path: "uploadedBy",
+        select: "email name"
+      }
+    })
 
     return NextResponse.json({
       message: 'Files fetched',

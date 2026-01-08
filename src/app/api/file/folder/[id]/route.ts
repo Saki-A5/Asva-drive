@@ -97,8 +97,15 @@ export const GET = async (req: Request, { params }: any) => {
   const contents = await FileItemModel.find({
     parentFolderId: folderId,
     ownerId
-  });
-
+  })
+  .populate({
+      path: "file",
+      select: "sizeBytes mimeType updatedAt uploadedBy",
+      populate: {
+        path: "uploadedBy",
+        select: "email name"
+      }
+    })
    const breadcrumbs: { _id: string; filename: string }[] = [];
     let currentFolder: any = folder;
     while (currentFolder) {
@@ -107,7 +114,7 @@ export const GET = async (req: Request, { params }: any) => {
       currentFolder = await FileItemModel.findById(currentFolder.parentFolderId);
     }
 
-  return NextResponse.json({ contents, breadcrumbs });
+  return NextResponse.json({ contents, breadcrumbs, folderName: folder.filename });
 } 
 
 // delete a folder and its contents
