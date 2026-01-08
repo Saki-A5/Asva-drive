@@ -43,7 +43,7 @@ const FilePage = () => {
           size: fileItem.file.size,
           modified: fileItem.file.modified,
           sharedUsers: [],
-          signedUrl: data.signedUrl,
+          signedUrl: fileItem.file.resourceType === "application/pdf" ? `/api/file/${id}/pdf` : data.signedUrl,
           folderPath: fileItem.folderPath || [],
         });
 
