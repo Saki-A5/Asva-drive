@@ -161,8 +161,8 @@ export function getAssetDeliveryUrl(publicId: string, options: ConfigAndUrlOptio
         type: options.type,
         sign_url: options.sign_url,
         secure: options.secure,
-        expires_at: options.expires_at,
-        attachment: options.attachment,
+        expires_at: options.expires_at || null,
+        attachment: options.attachment || false,
     });
 
     return signedUrl;

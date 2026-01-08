@@ -1,11 +1,12 @@
 import { uploadEventFlier, uploadFile } from "@/lib/cloudinary";
 import dbConnect from "@/lib/dbConnect";
 import { adminAuth } from "@/lib/firebaseAdmin";
+import College from "@/models/colleges";
 import EventModel from "@/models/events";
-import FileModel from "@/models/files";
+import FileModel, { FileInterface } from "@/models/files";
 import User from "@/models/users";
-import { Types } from "mongoose";
-import { NextResponse } from "next/server";
+import { HydratedDocument, Types } from "mongoose";
+import { NextRequest, NextResponse } from "next/server";
 import { file } from "zod";
 
 export const runtime = 'nodejs';
@@ -79,5 +80,21 @@ export const POST = async (req: Request) => {
     catch (err: any) {
         console.log(err);
         return NextResponse.json({ error: err.message || 'An Error Occurred' }, { status: 500 });
+    }
+}
+
+export const GET = async (req: NextRequest) => {
+    try{
+        const collegeId = req.nextUrl.searchParams.get("collegeId");
+        const college = await College.findById(collegeId);
+        if(!college) return NextResponse.json({error: "Could not find the college with that ID"}, {status: 404});
+        
+        const events = await EventModel.find({collegeId: college._id}).populate<{flierFile: HydratedDocument<FileInterface>}>("flierFile");
+
+        return NextResponse.json({message: "Events fetched successfully", events});
+    }
+    catch(e:any){
+        console.error(e);
+        return NextResponse.json({error: e.message || "An Error Occurred"}, {status: 500});
     }
 }
