@@ -27,11 +27,16 @@ interface RowProps {
   file: FileItem;
   onDeleteClick?: (item: FileItem) => void;
   onOpen: (file: FileItem) => void;
+  onRenameClick?: (item: FileItem) => void;
 }
 
-export function FileTableRow({ file, onDeleteClick, onOpen }: RowProps) {
+export function FileTableRow({
+  file,
+  onDeleteClick,
+  onOpen,
+  onRenameClick,
+}: RowProps) {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
-  
 
   return (
     <>
@@ -44,18 +49,22 @@ export function FileTableRow({ file, onDeleteClick, onOpen }: RowProps) {
   `}>
         <TableCell className="w-[40%] text-left rounded-l-lg">
           <div className="flex items-center gap-3 overflow-hidden">
-            <Fileicon
-              type={file.type}
-              isSheetPage={false}
-            />
-            <span className="font-medium truncate" title={file.name}>{file.name}</span>
+            <div className="flex-shrink-0">
+              <Fileicon
+                type={file.type}
+                isSheetPage={false}
+              />
+            </div>
+
+            <span
+              className="font-medium truncate block max-w-[200px] lg:max-w-[300px]"
+              title={file.name}>
+              {file.name}
+            </span>
           </div>
         </TableCell>
-
-        <TableCell className="w-[20%] text-left overflow-hidden">
-          <span className='truncate' title={file.author}>
+        <TableCell className="w-[20%] text-left">
           <AuthorCell author={file.author} />
-          </span>
         </TableCell>
 
         <TableCell className="w-[15%] text-left text-muted-foreground">
@@ -140,7 +149,12 @@ export function FileTableRow({ file, onDeleteClick, onOpen }: RowProps) {
   );
 }
 
-export function MobileFileRow({ file, onDeleteClick, onOpen }: RowProps) {
+export function MobileFileRow({
+  file,
+  onDeleteClick,
+  onOpen,
+  onRenameClick,
+}: RowProps) {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
 
   return (
@@ -148,7 +162,7 @@ export function MobileFileRow({ file, onDeleteClick, onOpen }: RowProps) {
       {...eventHandlers}
       onDoubleClick={() => onOpen(file)}
       className={`
-        flex items-center justify-between p-4 transition cursor-pointer select-none touch-none
+        flex items-center justify-between p-4 transition cursor-pointer select-none touch-pan-y
         ${isSelected ? 'bg-[#0AFEF236]' : 'hover:bg-muted/40'}
       `}>
       <div className="flex items-center gap-4 overflow-hidden">
@@ -191,7 +205,7 @@ export function MobileFileRow({ file, onDeleteClick, onOpen }: RowProps) {
                 onDeleteClick?.(file);
               }}>
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete Permanently
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

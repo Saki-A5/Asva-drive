@@ -7,7 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogOverlay, // Import Overlay
+  DialogOverlay,
   DialogPortal,
 } from '@/components/ui/dialog';
 
@@ -31,14 +31,11 @@ const DeleteModal = ({
         if (!open) onClose();
       }}>
       <DialogPortal>
-        {/* The Overlay must be present to handle click-outside properly */}
         <DialogOverlay className="fixed inset-0 z-50 bg-black/80" />
         <DialogContent
           className="fixed left-[50%] top-[50%] z-50 w-[95vw] max-w-md translate-x-[-50%] translate-y-[-50%] rounded-2xl border-none bg-[#1A1E26] p-8 text-white shadow-lg duration-200"
-          // This prevents the "blocked" feel if the modal closes weirdly
           onInteractOutside={onClose}
           onEscapeKeyDown={onClose}>
-          {/* Custom Close Button */}
           <button
             onClick={onClose}
             className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none">
