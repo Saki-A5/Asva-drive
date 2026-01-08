@@ -27,7 +27,7 @@ import {
   TooltipProvider,
 } from '@/components/ui/tooltip';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { parseDate, parseSize } from '@/utils/sort';
 import { FileItem } from '@/types/File';
 import { FileTableRow, MobileFileRow } from './FileTableRow';
@@ -39,17 +39,18 @@ import SelectionActionBar from './SelectionActionBar';
 
 const SORT_COOKIE_KEY = 'file_table_sort';
 
-
 interface FileTableProps {
   files: FileItem[];
   header?: string;
   onDeleteClick?: (item: FileItem) => void;
+  onRenameClick?: (item: FileItem) => void;
 }
 
 export default function FileTable({
   files,
   header,
   onDeleteClick,
+  onRenameClick,
 }: FileTableProps) {
   // useState to control the layout onClick
   const [layout, setLayout] = useState('flex');
@@ -62,6 +63,7 @@ export default function FileTable({
         setLayout={setLayout}
         header={header}
         onDeleteClick={onDeleteClick}
+        onRenameClick={onRenameClick}
       />
     </SelectionProvider>
   );
@@ -73,6 +75,7 @@ interface FileTableContentProps {
   setLayout: React.Dispatch<React.SetStateAction<string>>;
   header?: string;
   onDeleteClick?: (item: FileItem) => void;
+  onRenameClick?: (item: FileItem) => void;
 }
 
 type SortKeyType = 'name' | 'author' | 'size' | 'modified';
@@ -83,6 +86,7 @@ function FileTableContent({
   setLayout,
   header,
   onDeleteClick,
+  onRenameClick,
 }: FileTableContentProps) {
   const { selectedItems, clearSelection } = useSelection();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -92,14 +96,13 @@ function FileTableContent({
 
   const router = useRouter();
 
-const handleOpenItem = (file: FileItem) => {
-  if (file.type === "folder") {
-    router.push(`/files/folder/${file.id}`);
-  } else {
-    router.push(`/file/${file.id}`); // optional
-  }
-};
-
+  const handleOpenItem = (file: FileItem) => {
+    if (file.type === 'folder') {
+      router.push(`/files/folder/${file.id}`);
+    } else {
+      router.push(`/files/${file.id}`);
+    }
+  };
 
   function handleSort(key: SortKeyType) {
     if (sortKey === key) {
@@ -115,26 +118,28 @@ const handleOpenItem = (file: FileItem) => {
   const sortedFiles = [...files].sort((a, b) => {
     if (!sortKey) return 0;
 
-    let aValue: any = a[sortKey];
-    let bValue: any = b[sortKey];
+    let aValue: any;
+    let bValue: any;
 
     if (sortKey === 'size') {
       aValue = parseSize(a.size);
       bValue = parseSize(b.size);
-    }
-
-    if (sortKey === 'modified') {
+    } else if (sortKey === 'modified') {
       aValue = parseDate(a.modified).getTime();
       bValue = parseDate(b.modified).getTime();
+    } else {
+      aValue = (a[sortKey] || '').toString().toLowerCase();
+      bValue = (b[sortKey] || '').toString().toLowerCase();
     }
 
-    if (typeof aValue === 'string') {
-      return sortDirection === 'asc'
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue);
-    }
+    // Handle equal values to maintain stability
+    if (aValue === bValue) return 0;
 
-    return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+    if (sortDirection === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
   });
 
   useEffect(() => {
@@ -175,7 +180,8 @@ const handleOpenItem = (file: FileItem) => {
   console.log(selectedItems);
 
   return (
-    <div className="border border-gray-200 rounded-2xl p-2 md:p-5 flex flex-col h-full min-h-0 text-base font-semibold">
+    <div className="border border-gray-200 rounded-2xl p-2 md:p-5 flex flex-col h-fit md:h-full text-base font-semibold">
+      {' '}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">{header}</h2>
         <div className="flex justify-end items-center gap-0">
@@ -214,7 +220,6 @@ const handleOpenItem = (file: FileItem) => {
           </TooltipProvider>
         </div>
       </div>
-
       {layout === 'grid' ? (
         <section className="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-card">
           <SelectionActionBar
@@ -232,7 +237,8 @@ const handleOpenItem = (file: FileItem) => {
                 file={file}
                 key={file.id}
                 onDeleteClick={onDeleteClick}
-                onOpen ={handleOpenItem}
+                onOpen={handleOpenItem}
+                onRenameClick={onRenameClick}
               />
             ))}
           </div>
@@ -262,14 +268,15 @@ const handleOpenItem = (file: FileItem) => {
                       key={file.id}
                       file={file}
                       onDeleteClick={onDeleteClick}
-                      onOpen ={handleOpenItem}
+                      onOpen={handleOpenItem}
+                      onRenameClick={onRenameClick}
                     />
                   ))}
                 </TableBody>
               </Table>
             </div>
           </div>
-          <div className="flex md:hidden flex-col flex-1 min-h-0">
+          <div className="flex md:hidden flex-col">
             <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 overflow-x-auto no-scrollbar whitespace-nowrap bg-background/50 sticky top-0 z-10">
               {(['name', 'author', 'size', 'modified'] as SortKeyType[]).map(
                 (key) => (
@@ -293,20 +300,22 @@ const handleOpenItem = (file: FileItem) => {
               )}
             </div>
 
-            <div className="flex-1 overflow-y-auto divide-y divide-gray-50/10">
-              {sortedFiles.map((file) => (
-                <MobileFileRow
-                  key={file.id}
-                  file={file}
-                  onDeleteClick={onDeleteClick}
-                  onOpen ={handleOpenItem}
-                />
-              ))}
+            <div className="flex-1 overflow-y-auto touch-pan-y min-h-0">
+              <div className="divide-y divide-gray-50/10">
+                {sortedFiles.map((file) => (
+                  <MobileFileRow
+                    key={file.id}
+                    file={file}
+                    onDeleteClick={onDeleteClick}
+                    onOpen={handleOpenItem}
+                    onRenameClick={onRenameClick}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
       )}
-
       {files.map(
         (file) =>
           selectedItems.includes(file.id) && (
@@ -317,9 +326,9 @@ const handleOpenItem = (file: FileItem) => {
               <SheetContent
                 side="right"
                 className="w-[80vw] max-w-[360px] sm:w-[360px] md:w-[480px] overflow-y-auto">
-                  <VisuallyHidden>
-                    <SheetTitle>File details</SheetTitle>
-                  </VisuallyHidden>
+                <VisuallyHidden>
+                  <SheetTitle>File details</SheetTitle>
+                </VisuallyHidden>
                 <div className="mt-6 flex flex-col items-center w-full px-4 sm:px-6">
                   <div className="w-full max-w-[224px] aspect-square flex flex-col border rounded-[15px] justify-center items-center">
                     <Fileicon

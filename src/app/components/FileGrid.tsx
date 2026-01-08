@@ -23,12 +23,18 @@ interface FileGridItemProps {
   file: FileItem;
   onDeleteClick?: (item: FileItem) => void;
   onOpen: (item: FileItem) => void;
+  onRenameClick?: (item: FileItem) => void;
 }
 
 export const capitalizeFirstLetter = (str: string) =>
   str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
 
-const FileGridItem: React.FC<FileGridItemProps> = ({ file, onDeleteClick, onOpen }) => {
+const FileGridItem: React.FC<FileGridItemProps> = ({
+  file,
+  onDeleteClick,
+  onOpen,
+  onRenameClick,
+}) => {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
   const { selectedItems } = useSelection();
 
@@ -73,7 +79,7 @@ const FileGridItem: React.FC<FileGridItemProps> = ({ file, onDeleteClick, onOpen
                   onDeleteClick?.(file);
                 }}>
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete Permanently
+                Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
