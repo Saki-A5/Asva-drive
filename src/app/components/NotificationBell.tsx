@@ -13,21 +13,25 @@ interface Notification {
   createdAt: string;
 }
 
+interface NotificationResponse {
+  data: Notification[]
+}
+
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
 
-  // 🔹 Fetch notifications once
+  // Fetch notifications once
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await axios.get<Notification[]>("/api/notifications", {
-          withCredentials: true, // 🔐 important
+        const res = await axios.get<NotificationResponse>("/api/notifications", {
+          withCredentials: true, // important
         });
 
-        setNotifications(res.data);
-        setUnreadCount(res.data.filter(n => !n.read).length);
+        setNotifications(res.data.data);
+        setUnreadCount(res.data.data.filter(n => !n.read).length);
       } catch (err) {
         console.error("Failed to fetch notifications", err);
       }
@@ -36,7 +40,7 @@ const NotificationBell = () => {
     fetchNotifications();
   }, []);
 
-  // 🔹 Mark single notification as read
+  // Mark single notification as read
   const markAsRead = async (id: string) => {
     try {
       await axios.patch(
@@ -57,6 +61,23 @@ const NotificationBell = () => {
     }
   };
 
+const markAllAsRead = async () => {
+  try {
+    await axios.patch(
+      "/api/notifications/read-all",
+      {},
+      { withCredentials: true }
+    );
+
+    // Update local state
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setUnreadCount(0);
+  } catch (err) {
+    console.error("Failed to mark all as read", err);
+  }
+};
+
+
   return (
     <div className="relative">
       <button
@@ -76,6 +97,7 @@ const NotificationBell = () => {
         <NotificationDropdown
           notifications={notifications}
           onMarkAsRead={markAsRead}
+          onMarkAllAsRead={markAllAsRead}
         />
       )}
     </div>
