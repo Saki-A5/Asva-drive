@@ -23,7 +23,7 @@ export const PATCH = async (req: Request, { params }: any) => {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     if (!id) {
       return NextResponse.json({ error: "Notification ID is required" }, { status: 400 });
     }

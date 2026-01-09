@@ -18,7 +18,7 @@ import Link from 'next/link';
 import { getAvatarUrl, AvatarStyle } from '@/utils/avatar';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import SearchBar from './SearchBar';
-import { L } from 'node_modules/@upstash/redis/zmscore-0SAuWM0q.mjs';
+import NotificationBell from './NotificationBell';
 
 type User = {
   id: string;
@@ -112,8 +112,8 @@ const Loginnav = () => {
             <Settings className="hidden md:flex h-6 w-6 mt-2 text-foreground cursor-pointer" />
           </Link>
           {/* notifications */}
-          <Bell className="h-6 w-6 mt-2 text-foreground cursor-pointer" />
-          {/* <NotificationBell /> */}
+          {/* <Bell className="h-6 w-6 mt-2 text-foreground cursor-pointer" /> */}
+          <NotificationBell />
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

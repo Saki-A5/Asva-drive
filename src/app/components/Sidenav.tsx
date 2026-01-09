@@ -217,7 +217,6 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
           </div>
         )}
       </div>
-
       {/* mobile view */}
       <Sheet>
         <SheetTrigger asChild>
@@ -230,7 +229,7 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
         </SheetTrigger>
         <SheetContent
           side="left"
-          className="w-64 bg-gradient-to-b from-[#02427E] to-[#05081A] p-4 text-white">
+          className="w-64 bg-gradient-to-b from-[#02427E] to-[#05081A] p-4 text-white flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <Link
               href="/dashboard"
@@ -245,13 +244,45 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
               <span className="pl-2">ASVA HUB</span>
             </Link>
           </div>
-          {desktopview()}
+
+          <div className="flex-1 overflow-y-auto">{desktopview()}</div>
+
+          {/* Bottom section for Mobile */}
+          <div className="mt-auto pt-4 space-y-2">
+            {user?.role === 'admin' && (
+              <>
+                <Link
+                  href="/events"
+                  className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition">
+                  <Star className="h-5 w-5" />
+                  <span className="font-semibold">Events</span>
+                </Link>
+                <Link
+                  href="/trash"
+                  className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition">
+                  <Trash2 className="h-5 w-5" />
+                  <span className="font-semibold">Trash</span>
+                </Link>
+              </>
+            )}
+
+            {/* Storage box for Mobile */}
+            <div className="mt-4 bg-white/10 p-3 rounded-xl">
+              <div className="flex items-center mb-2 text-sm">
+                <Cloud className="h-4 w-4 text-white/80" />
+                <span className="pl-2 font-semibold">Storage</span>
+              </div>
+              <div className="w-full bg-white/20 h-2 rounded-full overflow-hidden">
+                <div className="bg-white h-2 w-[30%] rounded-full"></div>
+              </div>
+              <p className="text-xs mt-1 text-white/80">5.0 GB of 20 GB used</p>
+            </div>
+          </div>
         </SheetContent>
       </Sheet>
+
       {/* Main content */}
-      <main
-        className="flex-1 bg-background text-foreground sm:mr-2 rounded-2xl shadow-lg
-sm:pl-12 sm:px-4 pb-12 overflow-y-auto flex flex-col">
+      <main className="flex-1 bg-background text-foreground sm:mr-2 rounded-2xl shadow-lg sm:pl-12 sm:px-4 pb-12 overflow-y-auto flex flex-col h-full touch-pan-y">
         {children}
       </main>
     </div>
