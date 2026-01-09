@@ -26,7 +26,7 @@ export const POST = async (req: Request) => {
     }
 
     // firebase session cookie
-    const expiresIn = 60 * 60 * 24 * 28; // 28 days
+    const expiresIn = 60 * 60 * 24 * 5 * 1000;
     const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
 
     // cookie
