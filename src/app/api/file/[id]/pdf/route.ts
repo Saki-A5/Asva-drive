@@ -8,10 +8,10 @@ import type { FileInterface } from "@/models/files";
 
 export const runtime = "nodejs";
 
-export async function GET(_: Request, { params }: {params: {id: string}}) {
+export async function GET(request: Request, { params }: {params: Promise<{id: string}>}) {
   await dbConnect();
 
-  const id = params.id;
+  const {id} = await params;
   const fileItem = await FileItemModel
   .findById(new Types.ObjectId(id))
   .populate<{ file: FileInterface }>("file");
