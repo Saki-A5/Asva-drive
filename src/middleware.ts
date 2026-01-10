@@ -5,7 +5,7 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
 
-  const publicPaths = ["/", "/login", "/signup", "/api/auth"];
+  const publicPaths = ["/", "/login", "/signup", "/api/auth", "/api/refresh"];
 
   if (publicPaths.some(route => pathname.startsWith(route))) {
     return NextResponse.next();
