@@ -1,4 +1,5 @@
 import { Schema, Types, model, models } from "mongoose";
+import { COLLEGE_IDS } from "./colleges";
 
 const userSchema = new Schema(
   {
@@ -9,7 +10,7 @@ const userSchema = new Schema(
     firebaseUid: { type: String, unique: true, sparse: true },
     authProvider: { type: String, enum: ["google", "email"], default: "email" },
     matricNumber: { type: String },
-    collegeId: { type: String },
+    collegeId: { type: String, enum: Object.values(COLLEGE_IDS), ref: 'College'},
     department: { type: String },
     currentLevel: { type: String },
     avatarStyle: { type: String },

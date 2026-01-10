@@ -22,6 +22,8 @@ export type UploadResult = {
 };
 
 function formatFilename(filename: string, parentFolderId?: string): string {
+    // replace spaces (and other consecutive whitespace) with hyphens and trim ends
+    filename = filename.trim().replace(/\s+/g, '-');
     const ext = filename.split('.').pop()?.toLowerCase() || '';
     const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
     const videoExts = ['mp4', 'webm', 'mov', 'avi', 'mkv'];

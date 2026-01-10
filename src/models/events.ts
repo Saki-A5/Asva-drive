@@ -1,8 +1,9 @@
 import { model, Model, models, Schema, Types } from "mongoose";
+import { COLLEGE_IDS } from "./colleges";
 
 export interface EventInterface {
     name: string, 
-    collegeId: Types.ObjectId, 
+    collegeId: COLLEGE_IDS, 
     flierFile: Types.ObjectId, 
     eventStart: Date, 
     eventEnd: Date,
@@ -11,7 +12,7 @@ export interface EventInterface {
 
 const eventSchema = new Schema<EventInterface>({
     name: {type: String, required: true}, 
-    collegeId: {type: Schema.Types.ObjectId, required: true, ref: 'College'}, 
+    collegeId: {type: String, enum: Object.values(COLLEGE_IDS), required: true, ref: 'College'}, 
     flierFile: {type: Schema.Types.ObjectId, default: null, ref: 'File'}, 
     eventStart: {type: Date, required: true}, 
     eventEnd: {type: Date, required: true}, 

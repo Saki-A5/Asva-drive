@@ -20,10 +20,14 @@ export const GET = async (req: Request, { params }: any) => {
 
     try {
         const signedUrl = getAssetDeliveryUrl(fileItem.file.cloudinaryUrl, {
-            attachment: false,
+            attachment: true,
             resource_type: fileItem.file.resourceType,
-            secure: true
+            sign_url: true,
+            secure: true,
+            expires_at: Math.floor(Date.now() / 1000) + 3600, // default of one hour
+            type: 'authenticated'
         });
+        console.log(signedUrl);
         return NextResponse.json({ message: "Successfully Retrieved Asset", fileItem, signedUrl });
     }
     catch (e: any) {
@@ -56,8 +60,8 @@ export const DELETE = async (req: Request, { params }: any) => {
 
         // soft delete the actual file
         await FileModel.findByIdAndUpdate(fileItem.file, { $set: { isDeleted: true, deletedAt: Date.now() } }),
-        // soft delete the file Item
-        await FileItemModel.updateOne({ file: fileItem.file }, { $set: { isDeleted: true, deletedAt: Date.now() } })
+            // soft delete the file Item
+            await FileItemModel.updateOne({ file: fileItem.file }, { $set: { isDeleted: true, deletedAt: Date.now() } })
 
         // add the deleted file to the deleted queue so that 
         const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW) || 28;
