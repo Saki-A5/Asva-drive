@@ -54,7 +54,7 @@
     "next-cloudinary": "^6.17.0",
     "next-themes": "^0.4.6",
     "nodemailer": "^7.0.11",
-    "pdfjs-dist": "^5.4.530",
+    "pdfjs-dist": "^3.11.174",
     "react": "19.1.0",
     "react-day-picker": "^9.11.1",
     "react-dom": "19.1.0",

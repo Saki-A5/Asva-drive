@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useSelection } from "@/context/SelectionContext";
 
-export function useHighlightable(id: string, delay = 500) {
+export function useHighlightable(id: string, delay = 1500) {
   const { selectedItems, toggleItem } = useSelection();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 

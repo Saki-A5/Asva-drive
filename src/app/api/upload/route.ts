@@ -142,8 +142,37 @@ export const POST = async (req: Request) => {
       read: false,
     });
 
+    const usersToNotify = await User.find({
+      collegeId: user.collegeId
+    })
+    await Notification.insertMany(
+      usersToNotify.map(u=> ({
+        userId: u._id,
+        title: "New File Uploaded",
+        body: `${file.name} has been uploaded to your folder`,
+        type: "FILE_UPLOAD",
+        metadata: {
+          fileId: cFile._id,
+          folderId: targetFolder._id,
+        },
+        read: false,
+      }))
+    )
     // push notifications
     const recipientTokens = await Token.find({ userId: user._id }).distinct("token");
+    if (recipientTokens.length > 0) {
+      await sendPush({
+        tokens: recipientTokens,
+        title: "New File Uploaded",
+        body: `${file.name} has been uploaded to your folder`,
+        data: {
+          fileId: cFile._id.toString(),
+          folderId: targetFolder._id.toString(),
+        },
+      })
+    } else {
+      console.log("No FCM tokens found for user")
+    }
 
     try {
       await sendPush({

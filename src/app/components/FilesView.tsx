@@ -10,12 +10,14 @@ import Upload from '@/app/components/Upload';
 import Create from '@/app/components/Create';
 import CreateFolder from '@/app/components/CreateFolder';
 import FileTable from '@/app/components/FileTable';
-import SortFilters from '@/app/components/SortFilter';
+import SortFilters, { FilterState } from '@/app/components/SortFilter';
 import Floating from '@/app/components/Floating';
 import Breadcrumbs from '@/app/components/Breadcrumbs';
 
 import useCurrentUser from '@/hooks/useCurrentUser';
 import { FileItem } from '@/types/File';
+
+import { isWithinInterval, subDays, startOfDay } from 'date-fns';
 
 interface FilesViewProps {
   folderId?: string;
@@ -44,15 +46,19 @@ const FilesView = ({ folderId }: FilesViewProps) => {
   const [breadcrumbs, setBreadcrumbs] = useState<any[]>([]);
   const [folderName, setFolderName] = useState<string | null>(null);
 
+  const [filters, setFilters] = useState<FilterState>({
+    type: 'All',
+    modified: 'All',
+    source: 'All',
+  });
+
   // ---------------- FETCH FILES ----------------
 
   const fetchFiles = async () => {
     try {
       setLoading(true);
 
-      const url = folderId
-        ? `/api/file/folder/${folderId}`
-        : `/api/file`;
+      const url = folderId ? `/api/file/folder/${folderId}` : `/api/file`;
 
       const res = await axios.get(url);
 
@@ -78,8 +84,13 @@ const FilesView = ({ folderId }: FilesViewProps) => {
           id: item._id,
           name: item.filename,
           type: item.file?.mimeType.split('/')[0] ?? 'file',
-          author: item.file?.uploadedBy?.name ?? item.file?.uploadedBy?.email ?? 'SMS',
-          size: item.file?.sizeBytes ? `${(item.file?.sizeBytes / (1024 * 1024)).toFixed(1)} MB` : '—',
+          author:
+            item.file?.uploadedBy?.name ??
+            item.file?.uploadedBy?.email ??
+            'SMS',
+          size: item.file?.sizeBytes
+            ? `${(item.file?.sizeBytes / (1024 * 1024)).toFixed(1)} MB`
+            : '—',
           modified: item.file?.updatedAt
             ? new Date(item.file.updatedAt).toDateString()
             : '—',
@@ -123,6 +134,63 @@ const FilesView = ({ folderId }: FilesViewProps) => {
     }
   };
 
+  const handleDelete = async (item: FileItem) => {
+    const confirmDelete = confirm(
+      `Are you sure you want to delete ${item.name}?`
+    );
+    if (!confirmDelete) return;
+
+    setItems((prev) => prev.filter((file) => file.id !== item.id));
+
+    try {
+      await axios.delete(`/api/file/${item.id}`);
+      // Refresh the list after deletion
+      await fetchFiles();
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      alert('Failed to delete file');
+    }
+  };
+
+  const handleRename = async (item: FileItem) => {
+    const newName = prompt('Enter new name:', item.name);
+    if (!newName || newName === item.name) return;
+
+    try {
+      await axios.post(`/api/file/${item.id}/rename`, { filename: newName });
+      // Refresh the list after rename
+      await fetchFiles();
+    } catch (error) {
+      console.error('Error renaming file:', error);
+      alert('Failed to rename file');
+    }
+  };
+
+  const filteredItems = items.filter((file) => {
+    if (filters.type !== 'All') {
+      const typeMatch = file.type.toLowerCase() === filters.type.toLowerCase();
+      if (!typeMatch) return false;
+    }
+
+    if (filters.modified !== 'All') {
+      if (file.modified === '—') return false;
+      const fileDate = new Date(file.modified);
+      const now = new Date();
+
+      if (filters.modified === 'Last 7 days') {
+        if (fileDate < subDays(now, 7)) return false;
+      } else if (filters.modified === 'Last 14 days') {
+        if (fileDate < subDays(now, 14)) return false;
+      }
+    }
+
+    if (filters.source !== 'All') {
+      if (file.author !== filters.source) return false;
+    }
+
+    return true;
+  });
+
   // ---------------- RENDER ----------------
 
   return (
@@ -130,7 +198,9 @@ const FilesView = ({ folderId }: FilesViewProps) => {
       <Loginnav />
 
       <div className="px-6 flex flex-col flex-1 min-h-0">
-        {folderId && breadcrumbs.length > 0 && <Breadcrumbs folders={breadcrumbs} />}
+        {folderId && breadcrumbs.length > 0 && (
+          <Breadcrumbs folders={breadcrumbs} />
+        )}
 
         {/* Header */}
         <div className="flex-between gap-2 mt-2">
@@ -139,9 +209,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
           </h1>
 
           <div className="hidden sm:flex space-x-2 gap-y-2">
-            {user?.role === 'admin' && (
-              <Upload folderId={folderId} />
-            )}
+            {user?.role === 'admin' && <Upload folderId={folderId} />}
 
             <Create
               onCreateFolderClick={() => setShowCreateFolder(true)}
@@ -152,7 +220,10 @@ const FilesView = ({ folderId }: FilesViewProps) => {
           <Floating />
         </div>
 
-        <SortFilters />
+        <SortFilters
+          filters={filters}
+          setFilters={setFilters}
+        />
 
         {/* Create Folder Input */}
         {showCreateFolder && (
@@ -172,8 +243,10 @@ const FilesView = ({ folderId }: FilesViewProps) => {
             <div className="text-gray-500">Loading files...</div>
           ) : (
             <FileTable
-              files={items}
-            //   onFolderClick={(id) => router.push(`/files/folder/${id}`)}
+              files={filteredItems}
+              onDeleteClick={handleDelete}
+              onRenameClick={handleRename}
+              //   onFolderClick={(id) => router.push(`/files/folder/${id}`)}
             />
           )}
         </div>
