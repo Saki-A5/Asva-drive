@@ -95,7 +95,7 @@ export const POST = async (req: Request) => {
       file.name,
       fileBuffer,
       new Types.ObjectId(folderId),
-      new Types.ObjectId(user.collegeId), // i changed this to collegeId from college
+      user.collegeId, // i changed this to collegeId from college
       resourceType,
       tags,
     );
@@ -106,7 +106,7 @@ export const POST = async (req: Request) => {
       filename: file.name,
       cloudinaryUrl: result.public_id,
       parentFolderId: targetFolder._id,
-      ownerId: new Types.ObjectId(user.collegeId),
+      ownerId: user.collegeId,
       resourceType: result.resource_type, // default for now
       mimeType: file.type,
       sizeBytes: result.bytes,
@@ -121,7 +121,7 @@ export const POST = async (req: Request) => {
       filename: file.name,
       // parentFolderId: new Types.ObjectId(folderId),
       parentFolderId: targetFolder._id,
-      ownerId: new Types.ObjectId(cFile.ownerId),
+      ownerId: cFile.ownerId,
       ownerType: 'College',
       file: new Types.ObjectId(cFile._id)
     });

@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/users";
 import { adminAuth } from "@/lib/firebaseAdmin";
+import { getCloudinaryResourceType } from "../../upload/route";
 
 export const runtime = 'nodejs';
 
@@ -83,7 +84,8 @@ export const PATCH = async (req: Request, { params }: any) => {
 
         if (flier) {
             const flierBuffer = Buffer.from(await flier.arrayBuffer());
-            const result = await uploadEventFlier(flier.name, flierBuffer, user.collegeId);
+            const resourceType = await getCloudinaryResourceType(flier.type);
+            const result = await uploadEventFlier(flier.name, flierBuffer, user.collegeId, resourceType);
 
             // Delete old flier if exists
             if (event.flierFile) {
