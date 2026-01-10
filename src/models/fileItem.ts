@@ -1,10 +1,11 @@
 import { Model, model, models, Schema, Types } from "mongoose";
+import { COLLEGE_IDS } from "./colleges";
 
 export interface FileItemInterface {
     filename: string, 
     isFolder: boolean, 
     parentFolderId?: Types.ObjectId, 
-    ownerId: Types.ObjectId, 
+    ownerId: Types.ObjectId|COLLEGE_IDS, 
     isRoot: boolean, 
     isDeleted:boolean, 
     deletedAt?: Date, 
@@ -17,7 +18,7 @@ const fileItemSchema = new Schema<FileItemInterface>({
     filename: {type: String, required:true},
     isFolder: {type: Boolean, default: false}, 
     parentFolderId: {type: Types.ObjectId, ref: 'FileItem', default:null},
-    ownerId: {type: Schema.Types.ObjectId, refpath: 'ownerType', required: true},// FileItems are either owned by colleges or users
+    ownerId: {type: Schema.Types.Mixed, refpath: 'ownerType', required: true},// FileItems are either owned by colleges or users
     isRoot: {type: Boolean, default: false},    // indicates whether the folder is a root folder
     isDeleted: {type: Boolean, default: false}, 
     deletedAt: {type: Date, default: null},

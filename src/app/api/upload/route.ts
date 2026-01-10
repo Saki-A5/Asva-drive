@@ -17,6 +17,16 @@ import College from '@/models/colleges';
 import FileItemModel from '@/models/fileItem';
 import { createRootIfNotExists } from '@/lib/fileUtil';
 
+export function getCloudinaryResourceType(mimeType: string) {
+  if (!mimeType) return 'raw';
+
+  const type = mimeType.toLowerCase();
+  if (type.startsWith('image/')) return 'image';
+  if (type.startsWith('video/')) return 'video';  
+  if (type.startsWith('audio/')) return 'video';
+  return 'raw';
+}
+
 // upload a file
 export const POST = async (req: Request) => {
   try {
@@ -32,32 +42,32 @@ export const POST = async (req: Request) => {
 
     let targetFolder;
 
-// CASE 1: folderId explicitly provided (subfolder upload)
-if (folderId && Types.ObjectId.isValid(folderId)) {
-  targetFolder = await FileItemModel.findById(folderId);
-  if (!targetFolder) {
-    return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
-  }
-}
+    // CASE 1: folderId explicitly provided (subfolder upload)
+    if (folderId && Types.ObjectId.isValid(folderId)) {
+      targetFolder = await FileItemModel.findById(folderId);
+      if (!targetFolder) {
+        return NextResponse.json({ error: "Folder does not exist" }, { status: 404 });
+      }
+    }
 
-// CASE 2: NO folderId → ROOT upload
-if (!targetFolder) {
-  targetFolder = await FileItemModel.findOne({
-    ownerId: user.collegeId,
-    isRoot: true,
-  });
+    // CASE 2: NO folderId → ROOT upload
+    if (!targetFolder) {
+      targetFolder = await FileItemModel.findOne({
+        ownerId: user.collegeId,
+        isRoot: true,
+      });
 
-  if (!targetFolder) {
-    targetFolder = await FileItemModel.create({
-      filename: '/',
-      isFolder: true,
-      parentFolderId: null,
-      ownerId: user.collegeId,
-      ownerType: 'College',
-      isRoot: true,
-    });
-  }
-}
+      if (!targetFolder) {
+        targetFolder = await FileItemModel.create({
+          filename: '/',
+          isFolder: true,
+          parentFolderId: null,
+          ownerId: user.collegeId,
+          ownerType: 'College',
+          isRoot: true,
+        });
+      }
+    }
 
     const file = formData.get("file") as File || null;
     const tags = (formData.get("tags") as string)?.split(",") || [];
@@ -79,13 +89,14 @@ if (!targetFolder) {
     const fileArrayBuffer = await file.arrayBuffer();
     const fileBuffer = Buffer.from(fileArrayBuffer);
 
-
+    const resourceType = getCloudinaryResourceType(file.type);
     // Call uploadFile function
     const result = await uploadFile(
       file.name,
       fileBuffer,
       new Types.ObjectId(folderId),
-      new Types.ObjectId(user.collegeId), // i changed this to collegeId from college
+      user.collegeId, // i changed this to collegeId from college
+      resourceType,
       tags,
     );
 
@@ -95,7 +106,7 @@ if (!targetFolder) {
       filename: file.name,
       cloudinaryUrl: result.public_id,
       parentFolderId: targetFolder._id,
-      ownerId: new Types.ObjectId(user.collegeId),
+      ownerId: user.collegeId,
       resourceType: result.resource_type, // default for now
       mimeType: file.type,
       sizeBytes: result.bytes,
@@ -107,11 +118,11 @@ if (!targetFolder) {
     await cFile.save();
 
     const fileItem = await FileItemModel.create({
-      filename: file.name, 
+      filename: file.name,
       // parentFolderId: new Types.ObjectId(folderId),
       parentFolderId: targetFolder._id,
-      ownerId: new Types.ObjectId(cFile.ownerId), 
-      ownerType: 'College', 
+      ownerId: cFile.ownerId,
+      ownerType: 'College',
       file: new Types.ObjectId(cFile._id)
     });
 

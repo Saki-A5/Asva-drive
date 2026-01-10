@@ -27,21 +27,23 @@ export const GET = async (req: Request, { params }: any) => {
       { status: 404 }
     );
 
-  try {
-    const signedUrl = getAssetDeliveryUrl(fileItem.file.cloudinaryUrl, {
-      attachment: false,
-      resource_type: fileItem.file.resourceType,
-      secure: true,
-    });
-    return NextResponse.json({
-      message: 'Successfully Retrieved Asset',
-      fileItem,
-      signedUrl,
-    });
-  } catch (e: any) {
-    return NextResponse.json({ message: e.message }, { status: 500 });
-  }
-};
+    try {
+        const signedUrl = getAssetDeliveryUrl(fileItem.file.cloudinaryUrl, {
+            attachment: true,
+            resource_type: fileItem.file.resourceType,
+            sign_url: true,
+            secure: true,
+            expires_at: Math.floor(Date.now() / 1000) + 3600, // default of one hour
+            type: 'authenticated'
+        });
+        console.log(signedUrl);
+        return NextResponse.json({ message: "Successfully Retrieved Asset", fileItem, signedUrl });
+    }
+    catch (e: any) {
+        return NextResponse.json({ message: e.message }, { status: 500 })
+    }
+
+}
 
 // delete a file
 export const DELETE = async (req: Request, { params }: any) => {

@@ -22,6 +22,8 @@ export type UploadResult = {
 };
 
 function formatFilename(filename: string, parentFolderId?: string): string {
+    // replace spaces (and other consecutive whitespace) with hyphens and trim ends
+    filename = filename.trim().replace(/\s+/g, '-');
     const ext = filename.split('.').pop()?.toLowerCase() || '';
     const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
     const videoExts = ['mp4', 'webm', 'mov', 'avi', 'mkv'];
@@ -34,11 +36,11 @@ function formatFilename(filename: string, parentFolderId?: string): string {
     return `${nameWithoutExt}-${parentFolderId ? parentFolderId : ''}.${ext}`;
 }
 
-export async function uploadFile(filename: string, file: Buffer, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
+export async function uploadFile(filename: string, file: Buffer, folderId: Types.ObjectId, collegeId: string, resourceType: "image" | "video" | "raw" | "auto", tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
 
-export async function uploadFile(filename: string, file: string, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
+export async function uploadFile(filename: string, file: string, folderId: Types.ObjectId, collegeId: string, resourceType: "image" | "video" | "raw" | "auto", tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
 
-export async function uploadFile(filename: string, file: string | Buffer, parentFolderId: Types.ObjectId, collegeId: Types.ObjectId, tags: string[] = [], destFolder: string = ''): Promise<UploadApiResponse | null> {
+export async function uploadFile(filename: string, file: string | Buffer, parentFolderId: Types.ObjectId, collegeId: string, resourceType: "image" | "video" | "raw" | "auto", tags: string[] = [], destFolder: string = ''): Promise<UploadApiResponse | null> {
 
     if (typeof file === 'string' && /^data:.*;base64,/.test(file)) {
         throw new Error('Base64 files are not allowed');
@@ -52,7 +54,7 @@ export async function uploadFile(filename: string, file: string | Buffer, parent
         asset_folder: folderLocation,
         public_id: formattedFilename,
         unique_filename: false,
-        resource_type: 'auto',
+        resource_type: resourceType,
         type: 'authenticated'   // makes sure that access to the folder isn't public
     };
 
@@ -168,7 +170,7 @@ export function getAssetDeliveryUrl(publicId: string, options: ConfigAndUrlOptio
     return signedUrl;
 }
 
-export async function uploadEventFlier(filename: string, file: Buffer, collegeId: Types.ObjectId): Promise<UploadApiResponse | null> {
+export async function uploadEventFlier(filename: string, file: Buffer, collegeId: string, resourceType: "image"|"video"|"raw"|"auto",): Promise<UploadApiResponse | null> {
 
     if (typeof file === 'string' && /^data:.*;base64,/.test(file)) {
         throw new Error('Base64 files are not allowed');
@@ -182,7 +184,7 @@ export async function uploadEventFlier(filename: string, file: Buffer, collegeId
         asset_folder: folderLocation,
         public_id: formattedFilename,
         unique_filename: false,
-        resource_type: 'auto',
+        resource_type: resourceType,
         type: 'authenticated'   // makes sure that access to the folder isn't public
     };
 
