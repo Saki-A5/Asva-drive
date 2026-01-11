@@ -231,7 +231,7 @@ function FileTableContent({
             // onMove={handleMove}
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 touch-pan-y min-h-0">
             {sortedFiles.map((file) => (
               <FileGrid
                 file={file}
