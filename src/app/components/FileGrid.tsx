@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Trash2 } from 'lucide-react';
-import Fileicon from './Fileicon';
-import { useSelection } from '@/context/SelectionContext';
-import { useHighlightable } from '@/hooks/useHighlightable';
-import { FileItem } from '@/types/File';
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Trash2 } from "lucide-react";
+import Fileicon from "./Fileicon";
+import { useSelection } from "@/context/SelectionContext";
+import { useHighlightable } from "@/hooks/useHighlightable";
+import { FileItem } from "@/types/File";
 
 interface FileGridItemProps {
   file: FileItem;
@@ -27,7 +27,7 @@ interface FileGridItemProps {
 }
 
 export const capitalizeFirstLetter = (str: string) =>
-  str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+  str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
 
 const FileGridItem: React.FC<FileGridItemProps> = ({
   file,
@@ -44,11 +44,11 @@ const FileGridItem: React.FC<FileGridItemProps> = ({
     <div
       {...eventHandlers}
       onDoubleClick={() => onOpen(file)}
-      className={`flex flex-col items-start p-4 rounded-xl shadow-sm transition h-[200px] gap-3 w-full cursor-pointer touch-none select-none
+      className={`flex flex-col items-start p-4 rounded-xl shadow-sm transition h-[200px] gap-3 w-full cursor-pointer touch-pan-y select-none
         ${
           selected
-            ? 'bg-[#0AFEF236] border border-blue-400'
-            : 'bg-white dark:bg-neutral-900 hover:shadow-md'
+            ? "bg-[#0AFEF236] border border-blue-400"
+            : "bg-white dark:bg-neutral-900 hover:shadow-md"
         }
       `}>
       <div className="w-full bg-black/10 h-[80%] flex justify-center items-center rounded-md relative">

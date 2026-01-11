@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useHighlightable } from '@/hooks/useHighlightable';
-import { TableCell, TableRow } from '@/components/ui/table';
+import { useHighlightable } from "@/hooks/useHighlightable";
+import { TableCell, TableRow } from "@/components/ui/table";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -16,12 +16,12 @@ import {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
-} from '@/components/ui/dropdown-menu';
-import AuthorCell from './AuthorCell';
-import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Share2, Link, UserPlus, Trash2 } from 'lucide-react';
-import Fileicon from './Fileicon';
-import { FileItem } from '@/types/File';
+} from "@/components/ui/dropdown-menu";
+import AuthorCell from "./AuthorCell";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal, Share2, Link, UserPlus, Trash2 } from "lucide-react";
+import Fileicon from "./Fileicon";
+import { FileItem } from "@/types/File";
 
 interface RowProps {
   file: FileItem;
@@ -45,7 +45,7 @@ export function FileTableRow({
         onDoubleClick={() => onOpen(file)}
         className={`
     transition cursor-pointer !border-b-0 select-none touch-none
-    ${isSelected ? 'bg-[#0AFEF236] hover:bg-[#0AFEF236]' : 'hover:bg-muted/40'}
+    ${isSelected ? "bg-[#0AFEF236] hover:bg-[#0AFEF236]" : "hover:bg-muted/40"}
   `}>
         <TableCell className="w-[40%] text-left rounded-l-lg">
           <div className="flex items-center gap-3 overflow-hidden">
@@ -106,7 +106,7 @@ export function FileTableRow({
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('Share directly', file.id);
+                          console.log("Share directly", file.id);
                         }}>
                         <UserPlus className="mr-2 h-4 w-4" />
                         Share via mail
@@ -115,7 +115,7 @@ export function FileTableRow({
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('Share via link', file.id);
+                          console.log("Share via link", file.id);
                         }}>
                         <Link className="mr-2 h-4 w-4" />
                         Share via link
@@ -163,7 +163,7 @@ export function MobileFileRow({
       onDoubleClick={() => onOpen(file)}
       className={`
         flex items-center justify-between p-4 transition cursor-pointer select-none touch-pan-y
-        ${isSelected ? 'bg-[#0AFEF236]' : 'hover:bg-muted/40'}
+        ${isSelected ? "bg-[#0AFEF236]" : "hover:bg-muted/40"}
       `}>
       <div className="flex items-center gap-4 overflow-hidden">
         <div className="flex-shrink-0">
