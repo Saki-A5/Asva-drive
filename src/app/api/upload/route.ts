@@ -130,21 +130,10 @@ export const POST = async (req: Request) => {
     const pFileItem = await FileItemModel.findById(fileItem._id).populate("file");
 
     // in app notifications
-    await Notification.create({
-      userId: user._id,
-      title: "New File Uploaded",
-      body: `${file.name} has been uploaded to your folder`,
-      type: "FILE_UPLOAD",
-      metadata: {
-        fileId: cFile._id,
-        folderId,
-      },
-      read: false,
-    });
-
     const usersToNotify = await User.find({
       collegeId: user.collegeId
     })
+
     await Notification.insertMany(
       usersToNotify.map(u=> ({
         userId: u._id,
@@ -174,20 +163,6 @@ export const POST = async (req: Request) => {
       console.log("No FCM tokens found for user")
     }
 
-    try {
-      await sendPush({
-        tokens: recipientTokens,
-        title: "New File Uploaded",
-        body: `${file.name} has been uploaded to your folder`,
-        data: {
-          fileId: cFile._id.toString(),
-          folderId,
-        },
-      });
-    } catch (e) {
-      console.log("Error sending push notification:", e);
-    }
-
 
     // Enqueue indexing job (worker will fetch document by id and index)
     await indexQueue.add(
@@ -213,14 +188,3 @@ export const POST = async (req: Request) => {
     }, { status: 500 })
   }
 }
-
-// import { NextResponse } from "next/server";
-
-// export const GET = async () => {
-//   return NextResponse.json({ message: "Upload route alive" });
-// };
-
-// export const POST = async (req: Request) => {
-//   return NextResponse.json({ message: "POST upload hit" });
-// };
-

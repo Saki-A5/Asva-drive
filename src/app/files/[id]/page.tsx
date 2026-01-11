@@ -9,7 +9,7 @@ import AuthorCell from "@/app/components/AuthorCell";
 import Fileicon from "@/app/components/Fileicon";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
-// import * as mammoth from "mammoth";
+import * as mammoth from "mammoth";
 import dynamic from "next/dynamic";
 const PdfViewer = dynamic(() => import("@/app/components/PdfViewer"), {
   ssr: false,
