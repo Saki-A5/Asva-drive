@@ -8,6 +8,7 @@ import User from "@/models/users";
 import { HydratedDocument, Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { file } from "zod";
+import { getCloudinaryResourceType } from "../upload/route";
 
 export const runtime = 'nodejs';
 
@@ -51,7 +52,8 @@ export const POST = async (req: Request) => {
         if (flier) {
             const flierArrayBuffer = await flier.arrayBuffer();
             const flierBuffer = Buffer.from(flierArrayBuffer);
-            const result = await uploadEventFlier(flier.name, flierBuffer, user.collegeId);
+            const resourceType = getCloudinaryResourceType(flier.type);
+            const result = await uploadEventFlier(flier.name, flierBuffer, user.collegeId, resourceType);
 
             const file = await FileModel.create({
                 filename: flier.name, 

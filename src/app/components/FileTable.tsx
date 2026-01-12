@@ -181,7 +181,6 @@ function FileTableContent({
 
   return (
     <div className="border border-gray-200 rounded-2xl p-2 md:p-5 flex flex-col h-fit md:h-full text-base font-semibold">
-      {" "}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">{header}</h2>
         <div className="flex justify-end items-center gap-0">
@@ -194,8 +193,7 @@ function FileTableContent({
                     layout == "flex"
                       ? () => setLayout("grid")
                       : () => setLayout("flex")
-                  }
-                >
+                  }>
                   {layout == "flex" ? (
                     <LayoutGrid className="w-5 h-5" />
                   ) : (
@@ -232,7 +230,8 @@ function FileTableContent({
             // onGetLink={handleGetLink}
             // onMove={handleMove}
           />
-          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 touch-pan-y min-h-0">
             {sortedFiles.map((file) => (
               <FileGrid
                 file={file}
@@ -288,8 +287,7 @@ function FileTableContent({
                       sortKey === key
                         ? "text-[#050E3F] dark:text-[#0AFEF2] bg-muted"
                         : "text-muted-foreground"
-                    }`}
-                  >
+                    }`}>
                     {key.charAt(0).toUpperCase() + key.slice(1)}
                     {sortKey === key &&
                       (sortDirection === "asc" ? (
@@ -321,18 +319,23 @@ function FileTableContent({
       {files.map(
         (file) =>
           selectedItems.includes(file.id) && (
-            <Sheet open={sheetOpen} onOpenChange={setSheetOpen} key={file.id}>
+            <Sheet
+              open={sheetOpen}
+              onOpenChange={setSheetOpen}
+              key={file.id}>
               <SheetContent
                 side="right"
                 className="w-[80vw] max-w-[360px] sm:w-[360px] md:w-[480px] overflow-y-auto"
-                aria-describedby="file-details-title"
-              >
+                aria-describedby="file-details-title">
                 <VisuallyHidden>
                   <SheetTitle id="file-details-title">File details</SheetTitle>
                 </VisuallyHidden>
                 <div className="mt-6 flex flex-col items-center w-full px-4 sm:px-6">
                   <div className="w-[93%] max-w-[224px] flex flex-col border rounded-[15px] justify-center items-center mt-5 h-auto px-2">
-                    <Fileicon type={file.type} isSheetPage={sheetOpen} />
+                    <Fileicon
+                      type={file.type}
+                      isSheetPage={sheetOpen}
+                    />
                     <p className="md:text-[24px] font-semibold text-center text-base mt-3 break-all">
                       {file.name}
                     </p>
@@ -340,21 +343,24 @@ function FileTableContent({
                   <div className="mt-5 flex gap-4">
                     <button
                       aria-label="Download file"
-                      className="bg-[#D9D9D961] p-2 rounded-[3px] dark:bg-white"
-                    >
+                      className="bg-[#D9D9D961] p-2 rounded-[3px] dark:bg-white">
                       <Download className="text-[#050E3F]" />
                     </button>
                     <button
                       aria-label="Star file"
-                      className="bg-[#D9D9D961] p-2 rounded-[3px] dark:bg-white"
-                    >
-                      <Star className="text-[#050E3F]" fill="#050E3F" />
+                      className="bg-[#D9D9D961] p-2 rounded-[3px] dark:bg-white">
+                      <Star
+                        className="text-[#050E3F]"
+                        fill="#050E3F"
+                      />
                     </button>
                     <button
                       aria-label="Delete file"
-                      className="bg-[#D9D9D961] p-2 rounded-[3px] dark:bg-white"
-                    >
-                      <Trash2 className="text-[#050E3F]" fill="#050E3F" />
+                      className="bg-[#D9D9D961] p-2 rounded-[3px] dark:bg-white">
+                      <Trash2
+                        className="text-[#050E3F]"
+                        fill="#050E3F"
+                      />
                     </button>
                   </div>
 

@@ -78,11 +78,11 @@ export const GET = async (req: Request, { params }: any) => {
   // const decodedToken = await adminAuth.verifyIdToken(token);
   // const {email} = decodedToken;
 
-  const email = 'demo@gmail.com'; // substitute for now
+  await dbConnect();
+  const email = 'asvasoftwareteam@gmail.com'; // substitute for now
   const user = await User.findOne({ email });
 
 
-  await dbConnect();
 
   const { id } = await params;
   const folderId = new Types.ObjectId(id as string);
