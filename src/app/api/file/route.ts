@@ -30,8 +30,7 @@ export const GET = async (req: Request) => {
     if (!userEmail) {
       return NextResponse.json({ message: 'missing user id' }, { status: 401 });
     }
-    // const ownerId = user.role === 'admin' ? user.collegeId : user._id;
-    const ownerId = user.role === 'admin' ? user.collegeId : user.collegeId;
+    const ownerId = user.role === 'admin' ? user.collegeId : user._id;
 
     // Fetch files
     let rootFolder = await FileItemModel.findOne({ ownerId, isRoot: true });

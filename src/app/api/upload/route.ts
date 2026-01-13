@@ -36,6 +36,12 @@ export const POST = async (req: Request) => {
     // if(error) return NextResponse.json({message: "Unauthorized"}, {status});
 
     const user = await User.findOne({ email: 'asvasoftwareteam@gmail.com' });
+    if (!user || !user.collegeId) {
+      return NextResponse.json(
+        {error: "user or college not found"},
+        {status: 400}
+      )
+    }
 
     const formData = await req.formData();
     const folderId = formData.get("folderId") as string;
@@ -94,8 +100,7 @@ export const POST = async (req: Request) => {
     const result = await uploadFile(
       file.name,
       fileBuffer,
-      // new Types.ObjectId(folderId),
-      targetFolder._id,
+      new Types.ObjectId(folderId),
       user.collegeId, // i changed this to collegeId from college
       resourceType,
       tags,
@@ -120,8 +125,8 @@ export const POST = async (req: Request) => {
 
     const fileItem = await FileItemModel.create({
       filename: file.name,
-      // parentFolderId: new Types.ObjectId(folderId),
-      parentFolderId: targetFolder._id,
+      isFolder: false,
+      parentFolderId: new Types.ObjectId(folderId),
       ownerId: cFile.ownerId,
       ownerType: 'College',
       file: new Types.ObjectId(cFile._id)
