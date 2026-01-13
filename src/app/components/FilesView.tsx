@@ -209,7 +209,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
           </h1>
 
           <div className="hidden sm:flex space-x-2 gap-y-2">
-            {user?.role === 'admin' && <Upload folderId={folderId} />}
+            {user?.role === 'admin' && <Upload folderId={folderId} onUploadComplete={fetchFiles}/>}
 
             <Create
               onCreateFolderClick={() => setShowCreateFolder(true)}

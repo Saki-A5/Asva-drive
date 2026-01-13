@@ -94,7 +94,8 @@ export const POST = async (req: Request) => {
     const result = await uploadFile(
       file.name,
       fileBuffer,
-      new Types.ObjectId(folderId),
+      // new Types.ObjectId(folderId),
+      targetFolder._id,
       user.collegeId, // i changed this to collegeId from college
       resourceType,
       tags,
