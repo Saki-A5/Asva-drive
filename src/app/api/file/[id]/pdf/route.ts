@@ -28,14 +28,18 @@ const signedUrl = getAssetDeliveryUrl(fileItem.file.cloudinaryUrl, {
   resource_type: "raw",
 });
 
-  const response = await axios.get(signedUrl, {
+  const response = await axios.get<ArrayBuffer>(signedUrl, {
     responseType: "arraybuffer",
   });
 
-  return new NextResponse(response.data, {
+  const buffer = Buffer.from(response.data)
+
+  return new NextResponse(buffer, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": "inline",
+      "Content-Disposition":
+        "inline; filename=" + encodeURIComponent(fileItem.filename ?? "file.pdf"),
+      "Content-Length": response.headers["content-length"] || undefined,
       "Cross-Origin-Resource-Policy": "same-origin",
     },
   });
