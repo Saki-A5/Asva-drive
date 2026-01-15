@@ -66,13 +66,38 @@ const FilesView = ({ folderId }: FilesViewProps) => {
       const crumbs = res.data.breadcrumbs ?? [];
       const name = res.data.folderName ?? null;
 
+      const getFileIconType = (item: ApiItem) => {
+        if (item.isFolder) return 'folder';
+  
+        // prefer mimeType first
+        if (item.file?.mimeType) {
+          const [type, subtype] = item.file.mimeType.split('/');
+          if (type === 'image') return 'image';
+          if (type === 'video') return 'video';
+          if (type === 'audio') return 'audio';
+          return subtype; // e.g., 'pdf', 'plain', etc.
+        }
+
+        // fallback to file extension
+        const ext = item.filename.split('.').pop()?.toLowerCase();
+        if (!ext) return 'file';
+        if (['pdf'].includes(ext)) return 'pdf';
+        if (['doc', 'docx'].includes(ext)) return 'doc';
+        if (['xls', 'xlsx'].includes(ext)) return 'sheet';
+        if (['ppt', 'pptx'].includes(ext)) return 'ppt';
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'image';
+        if (['mp4', 'mov', 'avi'].includes(ext)) return 'video';
+        if (['mp3', 'wav'].includes(ext)) return 'audio';
+        return 'file';
+      }
+
       const mapped: FileItem[] = (data as ApiItem[]).map((item) => {
-        // const author = item.ownerId?.name ?? item.ownerId?.email ?? 'SMS';
         if (item.isFolder) {
           return {
             id: item._id,
             name: item.filename,
-            type: 'folder',
+            // type: 'folder',
+            type: getFileIconType(item),
             author: '_',
             size: '—',
             modified: '—',
@@ -80,10 +105,11 @@ const FilesView = ({ folderId }: FilesViewProps) => {
           };
         }
 
+
         return {
           id: item._id,
           name: item.filename,
-          type: item.file?.mimeType.split('/')[0] ?? 'file',
+          type: getFileIconType(item),
           author:
             item.file?.uploadedBy?.name ??
             item.file?.uploadedBy?.email ??
@@ -209,7 +235,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
           </h1>
 
           <div className="hidden sm:flex space-x-2 gap-y-2">
-            {user?.role === 'admin' && <Upload folderId={folderId} />}
+            {user?.role === 'admin' && <Upload folderId={folderId} onUploadComplete={fetchFiles}/>}
 
             <Create
               onCreateFolderClick={() => setShowCreateFolder(true)}

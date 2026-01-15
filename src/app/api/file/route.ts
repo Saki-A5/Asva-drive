@@ -5,7 +5,6 @@ import dbConnect from '@/lib/dbConnect';
 import FileItemModel from '@/models/fileItem';
 import { adminAuth } from '@/lib/firebaseAdmin';
 import User from '@/models/users';
-import path from 'path';
 
 export const GET = async (req: Request) => {
   try {

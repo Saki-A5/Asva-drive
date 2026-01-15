@@ -18,6 +18,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import Image from "next/image";
+import { Check, X } from "lucide-react";
 
 interface Detailsprop {
   email: string;
@@ -27,10 +28,10 @@ const detailSchema = z
   .object({
     name: z.string().min(2, "Name must be at least two characters"),
     collegeId: z.string().min(1, "Please select your college"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
     confirmpassword: z
       .string()
-      .min(6, "Password must be at least 6 characters"),
+      .min(8, "Password must be at least 8 characters"),
   })
   .refine((data) => data.password === data.confirmpassword, {
     path: ["confirmpassword"],
@@ -40,7 +41,6 @@ const detailSchema = z
 type DetailsFormValues = z.infer<typeof detailSchema>;
 
 const Details = ({ email }: Detailsprop) => {
-
   const form = useForm<DetailsFormValues>({
     resolver: zodResolver(detailSchema),
     defaultValues: {
@@ -69,7 +69,7 @@ const Details = ({ email }: Detailsprop) => {
       const res = await axios.post("/api/auth", {
         idToken,
         name: values.name,
-        collgeId: values.collegeId
+        collgeId: values.collegeId,
       });
       router.push("/dashboard");
     } catch (error: any) {
@@ -82,6 +82,26 @@ const Details = ({ email }: Detailsprop) => {
       }
     }
   };
+
+  const password = form.watch("password");
+  const confirmPassword = form.watch("confirmpassword");
+
+  const passwordChecks = {
+    length: password?.length >= 8,
+    lowercase: /[a-z]/.test(password || ""),
+    uppercase: /[A-Z]/.test(password || ""),
+    number: /\d/.test(password || ""),
+    special: /[^A-Za-z0-9]/.test(password || ""),
+  };
+
+  const passwordsMatch =
+    password && confirmPassword && password === confirmPassword;
+
+  const {
+    formState: { touchedFields },
+  } = form;
+
+  const isPasswordTouched = touchedFields.password;
 
   return (
     <>
@@ -108,7 +128,7 @@ const Details = ({ email }: Detailsprop) => {
                 <FormItem>
                   <div className="mx-auto mt-4 w-4/5">
                     <FormControl>
-                      <Input placeholder="Full Name" {...field} />
+                      <Input placeholder="Full Name" {...field} className="h-11"/>
                     </FormControl>
                   </div>
                   <FormMessage className="text-center mb-4" />
@@ -126,6 +146,7 @@ const Details = ({ email }: Detailsprop) => {
                         type="password"
                         placeholder="Password"
                         {...field}
+                        className="h-11"
                       />
                     </FormControl>
                   </div>
@@ -133,6 +154,51 @@ const Details = ({ email }: Detailsprop) => {
                 </FormItem>
               )}
             />
+            {isPasswordTouched && password && (
+              <div className="mx-auto w-4/5 mt-2 text-sm space-y-1">
+                <p
+                  className={
+                    passwordChecks.length ? "text-green-600 flex items-center gap-1" : "text-red-500 flex items-center gap-1"
+                  }
+                >
+                  {passwordChecks.length ? <Check/> : <X/>}
+                   At least 8 characters
+                </p>
+                <p
+                  className={
+                    passwordChecks.lowercase ? "text-green-600 flex items-center gap-1" : "text-red-500 flex items-center gap-1"
+                  }
+                >
+                  {passwordChecks.lowercase ? <Check/> : <X/>}
+                  One lowercase letter
+                </p>
+                <p
+                  className={
+                    passwordChecks.uppercase ? "text-green-600 flex items-center gap-1" : "text-red-500 flex items-center gap-1"
+                  }
+                >
+                  {passwordChecks.uppercase ? <Check/> : <X/>}
+                  One uppercase letter
+                </p>
+                <p
+                  className={
+                    passwordChecks.number ? "text-green-600 flex items-center gap-1" : "text-red-500 flex items-center gap-1"
+                  }
+                >
+                  {passwordChecks.number ? <Check/> : <X/>}
+                  One number
+                </p>
+                <p
+                  className={
+                    passwordChecks.special ? "text-green-600 flex items-center gap-1" : "text-red-500 flex items-center gap-1"
+                  }
+                >
+                  {passwordChecks.special ? <Check/> : <X/>}
+                  One special character
+                </p>
+              </div>
+            )}
+
             <FormField
               control={form.control}
               name="confirmpassword"
@@ -144,6 +210,7 @@ const Details = ({ email }: Detailsprop) => {
                         type="password"
                         placeholder="Confirm password"
                         {...field}
+                        className="h-11"
                       />
                     </FormControl>
                   </div>
@@ -151,6 +218,16 @@ const Details = ({ email }: Detailsprop) => {
                 </FormItem>
               )}
             />
+            {touchedFields.confirmpassword && confirmPassword && (
+              <p
+                className={`text-center text-sm mt-1 ${
+                  passwordsMatch ? "text-green-600" : "text-red-500"
+                }`}
+              >
+                {passwordsMatch ? "Passwords match" : "Passwords do not match"}
+              </p>
+            )}
+
             <FormField
               control={form.control}
               name="collegeId"
@@ -168,7 +245,15 @@ const Details = ({ email }: Detailsprop) => {
                 </FormItem>
               )}
             />
-            <Button className="mx-auto block mt-4 w-4/5">Create Account</Button>
+            <Button
+              className="mx-auto block mt-4 w-4/5"
+              disabled={
+                !Object.values(passwordChecks).every(Boolean) || !passwordsMatch
+              }
+            >
+              Create Account
+            </Button>
+
             <p className="text-center mt-4 mb-4">
               already have an account?{" "}
               <span>

@@ -8,6 +8,7 @@ type FileNode = {
   _id: string;
   filename: string;
   isFolder: boolean;
+  parentFolderId: string | null;
   children: FileNode[];
 };
 
@@ -28,7 +29,8 @@ function FileTree({ nodes }: { nodes: FileNode[] }) {
 }
 
 const CollegeFiles = () => {
-  const { slug } = useParams();
+  const params = useParams();
+  const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug
   const [tree, setTree] = useState<FileNode[]>([]);
   const [loading, setLoading] = useState(true);
 

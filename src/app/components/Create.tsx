@@ -32,7 +32,9 @@ const Create: FC<CreateProps> = ({ onCreateFolderClick, creating }) => {
 
       <DropdownMenuContent className="w-40">
         <DropdownMenuItem
-          onSelect={onCreateFolderClick}
+          onSelect={(e) => {
+            e.preventDefault()
+            onCreateFolderClick()}}
           disabled={creating}
         >
           Folder
