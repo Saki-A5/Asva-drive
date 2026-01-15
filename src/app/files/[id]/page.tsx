@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Breadcrumbs from "@/app/components/Breadcrumbs";
 import { FileItem } from "@/types/File";
-import { Download, Star, Trash2 } from "lucide-react";
+import { Download, Star, Trash2, Pencil } from "lucide-react";
 import AuthorCell from "@/app/components/AuthorCell";
 import Fileicon from "@/app/components/Fileicon";
 import { Button } from "@/components/ui/button";
@@ -92,6 +92,22 @@ const FilePage = () => {
   const { signedUrl, name, author, size, modified, folderPath, type } =
     fileData;
 
+  const handleRename = async () => {
+    if (!fileData) return;
+    
+    const newName = prompt('Enter new name:', fileData.name);
+    if (!newName || newName === fileData.name) return;
+
+    try {
+      await axios.post(`/api/file/${id}/rename`, { filename: newName });
+      // Update the file data with the new name
+      setFileData(prev => prev ? { ...prev, name: newName } : null);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.error || err.response?.data?.message || "Failed to rename file");
+    }
+  };
+
   const renderPreview = () => {
     if (type.startsWith("image")) {
       return (
@@ -171,6 +187,13 @@ const FilePage = () => {
             size="sm">
             <Download className="mr-2 h-4 w-4" />
             Download
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRename}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Rename
           </Button>
           <Button
             variant="outline"
