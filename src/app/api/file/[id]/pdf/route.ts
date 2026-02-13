@@ -28,6 +28,7 @@ const signedUrl = getAssetDeliveryUrl(fileItem.file.cloudinaryUrl, {
   resource_type: "raw",
 });
 
+try {
   const response = await axios.get<ArrayBuffer>(signedUrl, {
     responseType: "arraybuffer",
   });
@@ -39,8 +40,16 @@ const signedUrl = getAssetDeliveryUrl(fileItem.file.cloudinaryUrl, {
       "Content-Type": "application/pdf",
       "Content-Disposition":
         "inline; filename=" + encodeURIComponent(fileItem.filename ?? "file.pdf"),
-      "Content-Length": response.headers["content-length"] || undefined,
-      "Cross-Origin-Resource-Policy": "same-origin",
+      "Content-Length": buffer.length.toString(),
+      "Cache-Control": "private, max-age=3600",
+      "Accept-Ranges": "bytes",
     },
   });
+} catch (error) {
+  console.error("Error fetching PDF from Cloudinary:", error);
+  return NextResponse.json(
+    { message: "Failed to fetch PDF" },
+    { status: 500 }
+  );
+}
 }
