@@ -44,18 +44,19 @@ const FilePage = () => {
         const fileItem = data.fileItem;
         setFileData({
           id: fileItem._id,
-          name: fileItem.file.name,
+          name: fileItem.file.filename,
           type: fileItem.file.resourceType,
           author: fileItem.file.author,
           size: fileItem.file.size,
           modified: fileItem.file.modified,
           sharedUsers: [],
           signedUrl:
-            fileItem.file.resourceType === "application/pdf"
-              ? `/api/file/${id}/pdf`
-              : data.signedUrl,
+          fileItem.file.resourceType === "application/pdf"
+          ? `/api/file/${id}/pdf`
+          : data.signedUrl,
           folderPath: fileItem.folderPath || [],
         });
+        console.log("fileItem.file: ", fileItem.file)
 
         // Load file contents for text/Word
         const type = fileItem.file.resourceType;
@@ -93,6 +94,8 @@ const FilePage = () => {
     fileData;
 
   const renderPreview = () => {
+    console.log("file type: ", type)
+    console.log("Signed Url: ", signedUrl)
     if (type.startsWith("image")) {
       return (
         <img
@@ -137,7 +140,7 @@ const FilePage = () => {
         <div>Loading content...</div>
       );
     }
-    if (type === "application/pdf") {
+    if (type === "application/pdf" || type==="raw" && name?.toLowerCase().endsWith(".pdf")) {
       return <PdfViewer url={signedUrl} />;
     }
     return (

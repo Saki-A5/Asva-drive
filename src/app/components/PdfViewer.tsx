@@ -33,8 +33,10 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ url }) => {
         const res = await fetch(url, {
           credentials: 'same-origin',
         });
+        console.log("response status: ", res.status)
+        console.log("Content-Type: ", res.headers.get("content-type"))
 
-        if (!res.ok) throw new Error('Failed to fetch PDF');
+        if (!res.ok) throw new Error(`Failed to fetch PDF: ${res.status}`);
 
         const contentType = res.headers.get('Content-Type');
         console.log('Content-Type:', contentType);
