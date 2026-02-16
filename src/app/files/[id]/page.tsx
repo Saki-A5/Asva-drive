@@ -51,7 +51,7 @@ const FilePage = () => {
           modified: fileItem.file.modified,
           sharedUsers: [],
           signedUrl:
-          fileItem.file.resourceType === "application/pdf"
+          fileItem.file.resourceType === "raw" && fileItem.file.filename?.toLowerCase().endsWith(".pdf")
           ? `/api/file/${id}/pdf`
           : data.signedUrl,
           folderPath: fileItem.folderPath || [],
