@@ -13,7 +13,9 @@ export interface FileInterface {
     sizeBytes?: number, 
     tags: string[], 
     isDeleted: boolean, 
-    deletedAt?: Date
+    deletedAt?: Date,
+    createdAt?: Date,   
+    updatedAt?: Date,
 }
 
 const fileSchema = new Schema<FileInterface>({

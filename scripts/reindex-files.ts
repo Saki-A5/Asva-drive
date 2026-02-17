@@ -1,55 +1,63 @@
 import 'dotenv/config'
 import dbConnect from '@/lib/dbConnect'
 import FileModel from '@/models/files'
-import { getClient, ensureIndex } from '@/lib/meilisearch'
+import { algoliaClient, FILES_INDEX } from '@/lib/algolia'
 
 async function reindexFiles({ clear = false, batchSize = 500 } = {}) {
   await dbConnect()
-  const client = getClient()
-  const index = client.index('files')
 
   if (clear) {
-    console.log('Deleting existing MeiliSearch index...')
-    try { await index.delete() } catch (e) { /* ignore if not exists */ }
-    await ensureIndex('files', { primaryKey: 'id' })
-    console.log('Index recreated.')
+    console.log('Clearing existing Algolia index...')
+    try { 
+      await algoliaClient.clearObjects({ indexName: FILES_INDEX }) 
+    } catch (e) { /* ignore if not exists */ }
+    console.log('Index cleared.')
   }
 
   const total = await FileModel.countDocuments({})
   console.log(`Reindexing ${total} files in batches of ${batchSize}...`)
+  
   let offset = 0
   let indexed = 0
+
   while (offset < total) {
     const files = await FileModel.find({})
       .skip(offset)
       .limit(batchSize)
       .lean()
+
     if (!files.length) break
-    const docs = files.map(file => ({
-      id: file._id?.toString?.() || '',
+
+    const objects = files.map(file => ({
+      objectID: file._id?.toString() || '',  
       filename: file.filename,
-      ownerId: file.ownerId?.toString?.() || '',
+      ownerId: file.ownerId?.toString() || '',
       mimeType: file.mimeType,
       sizeBytes: file.sizeBytes,
       tags: file.tags || [],
-      text: file.extractedText || '',
+      extractedText: file.extractedText || '',
       cloudinaryUrl: file.cloudinaryUrl || '',
-      uploadedBy: file.uploadedBy?.toString?.() || '',
-      indexed: file.indexed,
+      uploadedBy: file.uploadedBy?.toString() || '',
       resourceType: file.resourceType,
       isDeleted: file.isDeleted,
       deletedAt: file.deletedAt,
-      
+      createdAt: file.createdAt?.toISOString(),
+      updatedAt: file.updatedAt?.toISOString(),
     }))
-    await index.addDocuments(docs)
-    indexed += docs.length
-    offset += docs.length
+
+    await algoliaClient.saveObjects({ 
+      indexName: FILES_INDEX, 
+      objects 
+    })
+
+    indexed += objects.length
+    offset += objects.length
     console.log(`Indexed ${indexed}/${total}`)
   }
+
   console.log('Reindex complete!')
 }
 
-// Usage: node scripts/reindex-files.js [--clear]
 const clear = process.argv.includes('--clear')
 reindexFiles({ clear }).catch(e => {
   console.error('Reindex failed:', e)
