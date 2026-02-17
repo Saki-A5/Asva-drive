@@ -1,9 +1,13 @@
-import 'dotenv/config'
-import dbConnect from '@/lib/dbConnect'
-import FileModel from '@/models/files'
-import { algoliaClient, FILES_INDEX } from '@/lib/algolia'
+import dotenv from 'dotenv'
+import path from 'path'
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })
 
 async function reindexFiles({ clear = false, batchSize = 500 } = {}) {
+  const { default: dbConnect } = await import('../src/lib/dbConnect.js')
+  const { default: FileModel } = await import('../src/models/files.js')
+  const { algoliaClient, FILES_INDEX } = await import('../src/lib/algolia.js')
+
   await dbConnect()
 
   if (clear) {
@@ -28,7 +32,7 @@ async function reindexFiles({ clear = false, batchSize = 500 } = {}) {
 
     if (!files.length) break
 
-    const objects = files.map(file => ({
+    const objects = files.map((file: any) => ({
       objectID: file._id?.toString() || '',  
       filename: file.filename,
       ownerId: file.ownerId?.toString() || '',
@@ -59,7 +63,7 @@ async function reindexFiles({ clear = false, batchSize = 500 } = {}) {
 }
 
 const clear = process.argv.includes('--clear')
-reindexFiles({ clear }).catch(e => {
+reindexFiles({ clear }).catch((e: any) => {
   console.error('Reindex failed:', e)
   process.exit(1)
 })

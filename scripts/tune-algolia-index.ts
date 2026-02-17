@@ -1,5 +1,7 @@
-import 'dotenv/config'
-import { algoliaClient, FILES_INDEX } from '@/lib/algolia'
+import dotenv from 'dotenv'
+import path from 'path'
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })
+const { algoliaClient, FILES_INDEX } = await import('../src/lib/algolia')
 
 async function tuneAlgoliaIndex() {
 
