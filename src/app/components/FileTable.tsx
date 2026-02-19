@@ -44,6 +44,7 @@ interface FileTableProps {
   header?: string;
   onDeleteClick?: (item: FileItem) => void;
   onRenameClick?: (item: FileItem) => void;
+  onOpen?: (item: FileItem) => void;
 }
 
 export default function FileTable({
@@ -76,6 +77,7 @@ interface FileTableContentProps {
   header?: string;
   onDeleteClick?: (item: FileItem) => void;
   onRenameClick?: (item: FileItem) => void;
+  onOpen?: (item: FileItem) => void;
 }
 
 type SortKeyType = "name" | "author" | "size" | "modified";
@@ -87,6 +89,7 @@ function FileTableContent({
   header,
   onDeleteClick,
   onRenameClick,
+  onOpen,
 }: FileTableContentProps) {
   const { selectedItems, clearSelection } = useSelection();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -97,10 +100,15 @@ function FileTableContent({
   const router = useRouter();
 
   const handleOpenItem = (file: FileItem) => {
-    if (file.type === "folder") {
-      router.push(`/files/folder/${file.id}`);
+    if (onOpen) {
+      onOpen(file); // caller handles it
     } else {
-      router.push(`/files/${file.id}`);
+    // existing default behavior stays untouched
+      if (file.type === "folder") {
+        router.push(`/files/folder/${file.id}`);
+      } else {
+        router.push(`/files/${file.id}`);
+      }
     }
   };
 

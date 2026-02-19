@@ -15,7 +15,6 @@ import { sendPush } from '@/lib/sendPush';
 import Token from '@/models/notificationToken';
 import College from '@/models/colleges';
 import FileItemModel from '@/models/fileItem';
-import { createRootIfNotExists } from '@/lib/fileUtil';
 
 export function getCloudinaryResourceType(mimeType: string) {
   if (!mimeType) return 'raw';
