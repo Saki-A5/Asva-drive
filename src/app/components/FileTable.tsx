@@ -165,7 +165,7 @@ function FileTableContent({
     const value = JSON.stringify({ sortKey, sortDirection });
 
     document.cookie = `${SORT_COOKIE_KEY}=${encodeURIComponent(
-      value
+      value,
     )}; path=/; max-age=31536000`;
   }, [sortKey, sortDirection]);
 
@@ -296,7 +296,7 @@ function FileTableContent({
                         <ArrowDown className="w-3 h-3" />
                       ))}
                   </button>
-                )
+                ),
               )}
             </div>
 
@@ -395,7 +395,7 @@ function FileTableContent({
                 </div>
               </SheetContent>
             </Sheet>
-          )
+          ),
       )}
     </div>
   );
