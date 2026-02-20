@@ -1,4 +1,4 @@
-import { getAsset, getAssetDeliveryUrl } from '@/lib/cloudinary';
+import { getAsset, getAssetDeliveryUrl, deleteAsset } from '@/lib/cloudinary';
 import dbConnect from '@/lib/dbConnect';
 import FileModel, { FileInterface } from '@/models/files';
 import { Types, Schema } from 'mongoose';
@@ -62,7 +62,7 @@ export const DELETE = async (req: Request, { params }: any) => {
     if (!fileItem)
       return NextResponse.json({ message: 'No File Found' }, { status: 404 });
 
-    // if file is a reference file,  delete that reference file
+    // if file is a reference file, delete that reference file permanently
     if (fileItem.isReference) {
       await FileItemModel.findOneAndDelete(fileItemId);
       return NextResponse.json({
@@ -70,30 +70,54 @@ export const DELETE = async (req: Request, { params }: any) => {
       });
     }
 
-    // soft delete the actual file
-    await FileModel.findByIdAndUpdate(fileItem.file, {
-      $set: { isDeleted: true, deletedAt: Date.now() },
-    });
-    // soft delete the file Item
-    await FileItemModel.updateOne(
-      { file: fileItem.file },
-      { $set: { isDeleted: true, deletedAt: Date.now() } }
-    );
+    // Check user role to determine delete type
+    const isAdmin = user.role === 'admin';
+    const fileId = fileItem.file;
 
-    // add the deleted file to the deleted queue so that
-    const fileRestoreWindow = +!process.env.FILE_RESTORE_WINDOW || 28;
-    const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
-    await fileQueue.add(
-      'delete-file',
-      { id: fileItem.file },
-      {
-        delay,
-        attempts: 5,
-        backoff: { type: 'exponential', delay: 1000 },
-        removeOnComplete: true,
-        jobId: `delete-file-${fileItemId}`,
+    if (!fileId) {
+      return NextResponse.json({ message: 'File reference not found' }, { status: 400 });
+    }
+
+    if (isAdmin) {
+      // Admin: soft delete (goes to trash)
+      await FileModel.findByIdAndUpdate(fileId, {
+        $set: { isDeleted: true, deletedAt: Date.now() },
+      });
+      // soft delete the file Item
+      await FileItemModel.updateOne(
+        { file: fileId },
+        { $set: { isDeleted: true, deletedAt: Date.now() } }
+      );
+
+      // add the deleted file to the deleted queue
+      const fileRestoreWindow = +!process.env.FILE_RESTORE_WINDOW || 28;
+      const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
+      await fileQueue.add(
+        'delete-file',
+        { fileId: fileId.toString() },
+        {
+          delay,
+          attempts: 5,
+          backoff: { type: 'exponential', delay: 1000 },
+          removeOnComplete: true,
+          jobId: `delete-file-${fileItemId}`,
+        }
+      );
+    } else {
+      // Normal user: permanent delete
+      const file = await FileModel.findById(fileId);
+      if (file) {
+        // Delete from Cloudinary
+        const deleteResult = await deleteAsset(file.cloudinaryUrl, file.resourceType);
+        if (!deleteResult.succeeded) {
+          throw new Error(deleteResult.error || 'Failed to delete file from storage');
+        }
+        // Delete from MongoDB
+        await FileModel.findByIdAndDelete(fileId);
       }
-    );
+      // Delete all file items referencing this file
+      await FileItemModel.deleteMany({ file: fileId });
+    }
 
     return NextResponse.json({ message: 'Successfully Deleted File' });
   } catch (error) {
