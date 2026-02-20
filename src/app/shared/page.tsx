@@ -8,9 +8,9 @@ import Create from '../components/Create';
 import FileTable from '../components/FileTable';
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
-import { FileItem } from '../components/FileTable';
+import { FileItem } from '@/types/File';
 import useCurrentUser from '@/hooks/useCurrentUser';
-import SortFilters from '../components/SortFilter';
+import SortFilters, {FilterState} from '../components/SortFilter';
 
 interface FileType {
   _id: string;
@@ -24,6 +24,11 @@ interface FileType {
 const Shared = () => {
   const [myFiles, setMyFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<FilterState>({
+      type: 'All',
+      modified: 'All',
+      source: 'All',
+    });
   const handleCreateFolder = () => {
     console.log('Create folder clicked');
   }
@@ -211,7 +216,9 @@ const Shared = () => {
           </div>
         </div>
 
-        <SortFilters />
+        <SortFilters 
+        filters={filters}
+          setFilters={setFilters}/>
 
         <div className="space-y-8 flex-1 min-h-0 mt-6">
           {loading ? (

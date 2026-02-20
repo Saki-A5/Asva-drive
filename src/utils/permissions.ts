@@ -179,63 +179,78 @@ export async function checkNotificationPermission(): Promise<PermissionStatus> {
 
 /**
  * Calendar Permission
- * Note: There's no native browser Calendar API permission.
- * This checks for Web Share API support which can be used to share calendar events,
- * and the ability to create/download .ics files for calendar integration.
- * 
- * On mobile devices:
- * - Web Share API is widely supported and can share to calendar apps
- * - .ics files can be downloaded and opened in calendar apps
- * 
- * On desktop:
- * - .ics files can be downloaded and imported into calendar apps
- * - Web Share API support varies by browser
+ * Note: The Calendar API is experimental and is not widely supported.
+ * This implementation checks for support and provides a way to request calendar access.
+ * In practice, calendar integration often uses Web Share API or calendar:// URLs.
  */
 export async function requestCalendarPermission(): Promise<PermissionResult> {
   try {
-    // Check if we're on a mobile device (better calendar integration support)
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    // Check if Calendar API is supported
+    const calendar = (navigator as any).calendar;
     
-    // Check if Web Share API is available (can be used to share calendar events)
-    if ('share' in navigator) {
-      // Web Share API is available - we can share calendar events
-      // On mobile, this opens the native share sheet with calendar apps
-      // The permission is requested when share() is called, so we return 'prompt'
-      // to indicate it's available but requires user interaction
-      return { 
-        status: 'prompt',
-        // Add helpful message for mobile users
-        ...(isMobile ? {} : {})
-      };
+    if (!calendar) {
+      // Calendar API not available, but we can still allow calendar access
+      // through other means (Web Share API, calendar links, etc.)
+      return { status: 'prompt' };
     }
-    
-    // If Web Share API is not available, we can still create .ics files
-    // (which is always possible, so we return 'granted' for file-based calendar access)
-    // On mobile, .ics files typically open directly in the calendar app
-    return { status: 'granted' };
+
+    // If Calendar API is available, request permission
+    try {
+      if (calendar.createEvent) {
+        // Check permission status first
+        const permissionStatus = await checkCalendarPermission();
+        if (permissionStatus === 'granted') {
+          return { status: 'granted' };
+        }
+        // Permission not granted yet, return current status
+        return { status: permissionStatus };
+      }
+      return { status: 'unsupported', error: 'Calendar API methods not available' };
+    } catch (error: any) {
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        return { status: 'denied', error: 'Calendar permission denied' };
+      }
+      return { status: 'denied', error: error.message || 'Failed to request calendar permission' };
+    }
   } catch (error: any) {
-    return { status: 'denied', error: error.message || 'Failed to check calendar access' };
+    return { status: 'denied', error: error.message || 'Failed to request calendar permission' };
   }
 }
 
 export async function checkCalendarPermission(): Promise<PermissionStatus> {
   try {
-    // Check if we're on a mobile device
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    // Check if Calendar API is supported
+    const calendar = (navigator as any).calendar;
     
-    // Check if Web Share API is available
-    if ('share' in navigator) {
-      // Web Share API is available - can share calendar events
-      // On mobile devices, this is the preferred method as it opens native calendar apps
-      // Since there's no persistent permission state for Web Share API,
-      // we return 'prompt' to indicate it's available
+    if (!calendar) {
+      // Calendar API not available, but calendar access might be possible
+      // through Web Share API or other methods
+      // Check if Web Share API is available as an alternative
+      if ('share' in navigator) {
+        return 'prompt'; // Can use Web Share API for calendar events
+      }
+      return 'unsupported';
+    }
+
+    // Check permission using Permissions API if available
+    if ('permissions' in navigator) {
+      try {
+        const permissionStatus = await navigator.permissions.query({ name: 'calendar' as PermissionName });
+        return permissionStatus.state as PermissionStatus;
+      } catch {
+        // Permissions API doesn't support calendar, check if API methods exist
+      }
+    }
+
+    // If Calendar API exists but Permissions API doesn't support it,
+    // check if the API methods are available
+    if (calendar && calendar.createEvent) {
+      // API is available, but we can't check permission status
+      // Return 'prompt' as default
       return 'prompt';
     }
-    
-    // Web Share API not available, but we can still create .ics files
-    // This is always available and works on both mobile and desktop
-    // On mobile, .ics files typically open directly in the calendar app
-    return 'granted';
+
+    return 'unsupported';
   } catch {
     return 'unsupported';
   }

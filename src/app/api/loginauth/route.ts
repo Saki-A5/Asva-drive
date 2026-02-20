@@ -26,16 +26,17 @@ export const POST = async (req: Request) => {
     }
 
     // firebase session cookie
-    const expiresIn = 60 * 60 * 24 * 28; // 28 days
+    const expiresIn = 60 * 60 * 24 * 5 * 1000;
     const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
 
     // cookie
-    const res = NextResponse.json({ message: "Login successful", user });
+    // const res = NextResponse.json({ message: "Login successful", user });
+    const res = NextResponse.redirect(new URL("/dashboard", req.url));
     res.cookies.set("token", sessionCookie, { 
       httpOnly: true, 
       secure: process.env.NODE_ENV === "production",  
       path: '/',
-      maxAge: 60 * 60 * 24 * 28, 
+      maxAge: expiresIn / 1000, 
       sameSite: 'lax'
     });
 

@@ -9,7 +9,8 @@ import Link from "next/link"
 import {auth, provider} from "@/lib/firebaseClient"
 import axios from "axios"
 import { useRouter } from "next/navigation"
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth"
+import { getRedirectResult, signInWithEmailAndPassword, signInWithRedirect } from "firebase/auth"
+import { useEffect } from "react"
 
 const loginSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -27,18 +28,33 @@ const Loginpage = () => {
 
     const handleGoogleLogIn = async () => {
         try {
-            const result = await signInWithPopup(auth, provider);
-            const token = await result.user.getIdToken();
-        
-            console.log("Google ID Token:", token);
-            // Send token to backend
-            await axios.post("/api/loginauth", { idToken: token });
-            router.push("/dashboard"); 
+            await signInWithRedirect(auth, provider)
         } catch (error:any) {
             console.error("Google login Error: ", error.response?.data || error.message || error);
             alert("Google login failed." );
         }
     };
+
+    useEffect(() => {
+        const handleRedirectResult = async () => {
+            try {
+                const result = await getRedirectResult(auth)
+
+                if (!result) return;
+
+                const user = result.user
+                const idToken = await user.getIdToken();
+                await axios.post("/api/loginauth", {idToken})
+                window.location.href = "/dashboard"
+                // router.push("/dashboard")
+            } catch (error: any) {
+                console.error("Redirect login error:", error)
+                alert("Google login failed")
+            }
+        }
+
+        handleRedirectResult();
+    }, [router])
     const onSubmit = async(values: loginForm) => {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password) ;
@@ -74,9 +90,14 @@ const Loginpage = () => {
                 <span className="text-center">Sign in with Google</span>
                 <img src="/google.png" alt="google"/>
             </Button>
+            <div className="flex w-full justify-center items-center gap-1 mt-6">
+                <hr className="md:w-[15%] [@media(min-width:640px)_and_(max-width:768px)]:w-[22%] [@media(min-width:300px)_and_(max-width:640px)]:w-[30%]"/>
+                <p>or</p>
+                <hr className="md:w-[15%] [@media(min-width:640px)_and_(max-width:768px)]:w-[22%] [@media(min-width:300px)_and_(max-width:640px)]:w-[30%]"/>
+            </div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}
-                className="w-4/5 mx-auto sm:w-3/5 md:w-2/5 mt-14"
+                className="w-4/5 mx-auto sm:w-3/5 md:w-2/5 mt-6"
                 >
                 <FormField 
                 control={form.control}

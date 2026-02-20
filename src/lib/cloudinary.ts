@@ -21,7 +21,9 @@ export type UploadResult = {
     raw?: any;
 };
 
-function formatFilename(filename: string, parentFolderId: string): string {
+function formatFilename(filename: string, parentFolderId?: string): string {
+    // replace spaces (and other consecutive whitespace) with hyphens and trim ends
+    filename = filename.trim().replace(/\s+/g, '-');
     const ext = filename.split('.').pop()?.toLowerCase() || '';
     const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
     const videoExts = ['mp4', 'webm', 'mov', 'avi', 'mkv'];
@@ -29,16 +31,16 @@ function formatFilename(filename: string, parentFolderId: string): string {
     const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
 
     if (imageExts.includes(ext) || videoExts.includes(ext)) {
-        return `${nameWithoutExt}-${parentFolderId}`;   // remove the extension from videos and images (cloudinary requirements)
+        return `${nameWithoutExt}${parentFolderId ? parentFolderId : ''}`;   // remove the extension from videos and images (cloudinary requirements)
     }
-    return `${nameWithoutExt}-${parentFolderId}.${ext}`;
+    return `${nameWithoutExt}-${parentFolderId ? parentFolderId : ''}.${ext}`;
 }
 
-export async function uploadFile(filename: string, file: Buffer, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
+export async function uploadFile(filename: string, file: Buffer, folderId: Types.ObjectId, collegeId: string, resourceType: "image" | "video" | "raw" | "auto", tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
 
-export async function uploadFile(filename: string, file: string, folderId: Types.ObjectId, ownerId: Types.ObjectId, tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
+export async function uploadFile(filename: string, file: string, folderId: Types.ObjectId, collegeId: string, resourceType: "image" | "video" | "raw" | "auto", tags?: string[], destFolder?: string): Promise<UploadApiResponse | null>
 
-export async function uploadFile(filename: string, file: string | Buffer, parentFolderId: Types.ObjectId, collegeId: Types.ObjectId, tags: string[] = [], destFolder: string = ''): Promise<UploadApiResponse | null> {
+export async function uploadFile(filename: string, file: string | Buffer, parentFolderId: Types.ObjectId, collegeId: string, resourceType: "image" | "video" | "raw" | "auto", tags: string[] = [], destFolder: string = ''): Promise<UploadApiResponse | null> {
 
     if (typeof file === 'string' && /^data:.*;base64,/.test(file)) {
         throw new Error('Base64 files are not allowed');
@@ -52,7 +54,7 @@ export async function uploadFile(filename: string, file: string | Buffer, parent
         asset_folder: folderLocation,
         public_id: formattedFilename,
         unique_filename: false,
-        resource_type: 'auto',
+        resource_type: resourceType,
         type: 'authenticated'   // makes sure that access to the folder isn't public
     };
 
@@ -144,26 +146,66 @@ export async function deleteAssets(publicIds: string[]): Promise<{ succeeded: bo
     }
 }
 
-export async function  renameAsset(publicId: string, parentFolderId: Types.ObjectId, newFilename: string, resourceType: string): Promise<string> {
+export async function renameAsset(publicId: string, parentFolderId: Types.ObjectId, newFilename: string, resourceType: string): Promise<string> {
     try {
         const formattedFilename = formatFilename(newFilename, parentFolderId.toString());
-        const result = await cloudinary.uploader.rename(publicId, formattedFilename, {resource_type: resourceType, type: 'authenticated'});
+        const result = await cloudinary.uploader.rename(publicId, formattedFilename, { resource_type: resourceType, type: 'authenticated' });
         return result.public_id;
     }
-    catch (e:any) {
+    catch (e: any) {
         throw new Error(e.message || 'Error renaming file');
     }
 }
 
-export function getAssetDeliveryUrl(publicId: string, options: ConfigAndUrlOptions){
+export function getAssetDeliveryUrl(publicId: string, options: ConfigAndUrlOptions) {
     const signedUrl = cloudinary.url(publicId, {
-        resource_type: options.resource_type, 
-        type: options.type, 
-        sign_url: options.sign_url, 
-        secure: options.secure, 
-        expires_at: options.expires_at, 
-        attachment: options.attachment,
+        resource_type: options.resource_type ?? "raw",
+        type: options.type ?? "authenticated",
+        sign_url: true,
+        secure: true,
+        expires_at: options.expires_at ?? Math.floor(Date.now() / 1000) + 3600,
+        attachment: options.attachment ?? false,
     });
 
     return signedUrl;
+}
+
+export async function uploadEventFlier(filename: string, file: Buffer, collegeId: string, resourceType: "image"|"video"|"raw"|"auto",): Promise<UploadApiResponse | null> {
+
+    if (typeof file === 'string' && /^data:.*;base64,/.test(file)) {
+        throw new Error('Base64 files are not allowed');
+    }
+
+    const folderLocation = `events/${collegeId.toString()}`;
+
+    const formattedFilename = formatFilename(filename);
+    const options: UploadApiOptions = {
+        overwrite: true,
+        asset_folder: folderLocation,
+        public_id: formattedFilename,
+        unique_filename: false,
+        resource_type: resourceType,
+        type: 'authenticated'   // makes sure that access to the folder isn't public
+    };
+
+    try {
+        // Upload binary data using upload_stream
+        const result = await new Promise<UploadApiResponse>((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                options,
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result!);
+                }
+            );
+            uploadStream.end(file);
+        });
+
+        console.log(`result: ${JSON.stringify(result)}`)
+
+        return result;
+    } catch (error) {
+        console.error('Cloudinary upload error:', error);
+        return null;
+    }
 }

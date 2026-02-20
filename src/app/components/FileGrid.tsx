@@ -1,42 +1,40 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Trash2 } from 'lucide-react';
-import Fileicon from './Fileicon';
-import { useSelection } from '@/context/SelectionContext';
-import { useHighlightable } from '@/hooks/useHighlightable';
-
-export interface FileItem {
-  id: string;
-  name: string;
-  type: string;
-  sharing?: string;
-  size: string;
-  modified?: string;
-  sharedUsers?: string[];
-}
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Trash2 } from "lucide-react";
+import Fileicon from "./Fileicon";
+import { useSelection } from "@/context/SelectionContext";
+import { useHighlightable } from "@/hooks/useHighlightable";
+import { FileItem } from "@/types/File";
 
 interface FileGridItemProps {
   file: FileItem;
-  onDeleteClick?: (item: FileItem) => void; // Added prop
+  onDeleteClick?: (item: FileItem) => void;
+  onOpen: (item: FileItem) => void;
+  onRenameClick?: (item: FileItem) => void;
 }
 
 export const capitalizeFirstLetter = (str: string) =>
-  str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+  str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
 
-const FileGridItem: React.FC<FileGridItemProps> = ({ file, onDeleteClick }) => {
+const FileGridItem: React.FC<FileGridItemProps> = ({
+  file,
+  onDeleteClick,
+  onOpen,
+  onRenameClick,
+}) => {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
   const { selectedItems } = useSelection();
 
@@ -45,11 +43,12 @@ const FileGridItem: React.FC<FileGridItemProps> = ({ file, onDeleteClick }) => {
   return (
     <div
       {...eventHandlers}
-      className={`flex flex-col items-start p-4 rounded-xl shadow-sm transition h-[200px] gap-3 w-full cursor-pointer touch-none select-none
+      onDoubleClick={() => onOpen(file)}
+      className={`flex flex-col items-start p-4 rounded-xl shadow-sm transition h-[200px] gap-3 w-full cursor-pointer touch-pan-y select-none
         ${
           selected
-            ? 'bg-[#0AFEF236] border border-blue-400'
-            : 'bg-white dark:bg-neutral-900 hover:shadow-md'
+            ? "bg-[#0AFEF236] border border-blue-400"
+            : "bg-white dark:bg-neutral-900 hover:shadow-md"
         }
       `}>
       <div className="w-full bg-black/10 h-[80%] flex justify-center items-center rounded-md relative">
@@ -80,7 +79,7 @@ const FileGridItem: React.FC<FileGridItemProps> = ({ file, onDeleteClick }) => {
                   onDeleteClick?.(file);
                 }}>
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete Permanently
+                Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

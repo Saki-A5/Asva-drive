@@ -34,4 +34,3 @@ export const COLLEGE_META = {
   },
 };
 
-

@@ -6,7 +6,7 @@ import Loginnav from '../components/Loginnav';
 import Upload from '../components/Upload';
 import Create from '../components/Create';
 import FileTable from '../components/FileTable';
-import { FileItem } from '../components/FileTable';
+import { FileItem } from '@/types/File';
 import axios from 'axios';
 import Floating from '../components/Floating';
 import Fileicon from '../components/Fileicon';

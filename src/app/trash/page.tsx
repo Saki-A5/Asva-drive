@@ -4,14 +4,20 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Sidenav from '../components/Sidenav';
 import Loginnav from '../components/Loginnav';
-import FileTable, { FileItem } from '../components/FileTable';
+import FileTable from '../components/FileTable';
+import { FileItem } from '@/types/File';
 import useCurrentUser from '@/hooks/useCurrentUser';
-import SortFilters from '../components/SortFilter';
+import SortFilters, {FilterState} from '../components/SortFilter';
 import DeleteModal from '../components/DeleteModal'; // Assuming you saved the modal here
 
 const Trash = () => {
   const [trashedFiles, setTrashedFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<FilterState>({
+      type: 'All',
+      modified: 'All',
+      source: 'All',
+    });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<FileItem | null>(null);
 
@@ -126,7 +132,9 @@ const Trash = () => {
           <h1 className="font-bold text-xl whitespace-nowrap">Trash</h1>
         </div>
 
-        <SortFilters />
+        <SortFilters 
+        filters={filters}
+        setFilters={setFilters}/>
 
         <div className="space-y-8 flex-1 min-h-0 mt-6">
           {loading ? (

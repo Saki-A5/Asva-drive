@@ -1,10 +1,9 @@
-import "@/models/files";
+import '@/models/files';
 import { NextResponse } from 'next/server';
 import { Types } from 'mongoose';
 import dbConnect from '@/lib/dbConnect';
 import FileItemModel from '@/models/fileItem';
 import { adminAuth } from '@/lib/firebaseAdmin';
-import { ro } from 'date-fns/locale';
 import User from '@/models/users';
 
 export const GET = async (req: Request) => {
@@ -25,17 +24,20 @@ export const GET = async (req: Request) => {
       true
     );
     const userEmail = decodedToken.email;
-    const user = await User.findOne({email: userEmail});
-  
+    const user = await User.findOne({ email: userEmail });
+
     if (!userEmail) {
       return NextResponse.json({ message: 'missing user id' }, { status: 401 });
     }
-    const ownerId = user.role === "admin" ? user.collegeId : user._id;
+    const ownerId = user.role === 'admin' ? user.collegeId : user._id;
 
     // Fetch files
     let rootFolder = await FileItemModel.findOne({ ownerId, isRoot: true });
     if (!rootFolder) {
-      return NextResponse.json({ message: 'Root folder not found' }, { status: 404 });
+      return NextResponse.json(
+        { message: 'Root folder not found' },
+        { status: 404 }
+      );
       // don't forget to remove the below later and uncommrent the above and change the above let to const
       // rootFolder = await FileItemModel.create({
       //   ownerId: userId,
@@ -49,7 +51,15 @@ export const GET = async (req: Request) => {
     const files = await FileItemModel.find({
       ownerId,
       parentFolderId: rootFolder._id,
-    }).populate("file");
+      isDeleted: { $ne: true }, //so it does not fetch deletd files
+    }).populate({
+      path: 'file',
+      select: 'sizeBytes mimeType updatedAt uploadedBy',
+      populate: {
+        path: 'uploadedBy',
+        select: 'email name',
+      },
+    });
 
     return NextResponse.json({
       message: 'Files fetched',
