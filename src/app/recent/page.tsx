@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { subDays } from "date-fns";
+import { isWithinInterval, subDays, startOfDay } from "date-fns";
 
 import Sidenav from "../components/Sidenav";
 import Loginnav from "../components/Loginnav";
@@ -58,18 +58,17 @@ const Recent = () => {
         sharedUsers: [],
       }));
 
-      // setItems(mapped);
+      setItems(mapped);
 
-      const mockItems = Array(4)
-        .fill(mapped)
-        .flat()
-        .map((item, index) => ({
-          ...item,
-          id: `${item.id}-${index}`, // Ensure each ID is unique so React doesn't complain
-          name: index > 2 ? `Copy of ${item.name} (${index})` : item.name,
-        }));
-
-      setItems(mockItems);
+      // const mockItems = Array(4)
+      //   .fill(mapped)
+      //   .flat()
+      //   .map((item, index) => ({
+      //     ...item,
+      //     id: `${item.id}-${index}`, // Ensure each ID is unique so React doesn't complain
+      //     name: index > 2 ? `Copy of ${item.name} (${index})` : item.name,
+      //   }));
+      // setItems(mockItems);
     } catch (error) {
       console.error("Error fetching recent files:", error);
     } finally {
@@ -81,28 +80,44 @@ const Recent = () => {
     fetchRecentFiles();
   }, []);
 
-  // Filter Logic (Reused from FilesView for consistency)
-  const filteredItems = items.filter((file) => {
-    if (filters.type !== "All") {
-      if (file.type.toLowerCase() !== filters.type.toLowerCase()) return false;
-    }
+  const filteredItems = items
+    .filter((file) => {
+      if (filters.type !== "All") {
+        const typeMatch =
+          file.type.toLowerCase() === filters.type.toLowerCase();
+        if (!typeMatch) return false;
+      }
 
-    if (filters.modified !== "All") {
-      if (file.modified === "—") return false;
-      const fileDate = new Date(file.modified);
-      const now = new Date();
-      if (filters.modified === "Last 7 days" && fileDate < subDays(now, 7))
-        return false;
-      if (filters.modified === "Last 14 days" && fileDate < subDays(now, 14))
-        return false;
-    }
+      if (filters.modified !== "All") {
+        if (file.modified === "—") return false;
+        const fileDate = new Date(file.modified);
+        const now = new Date();
 
-    if (filters.source !== "All") {
-      if (file.author !== filters.source) return false;
-    }
+        if (filters.modified === "Last 7 days") {
+          if (fileDate < subDays(now, 7)) return false;
+        } else if (filters.modified === "Last 14 days") {
+          if (fileDate < subDays(now, 14)) return false;
+        } else if (
+          filters.modified === "Custom Range" &&
+          filters.customRange?.from
+        ) {
+          const start = startOfDay(filters.customRange.from);
+          // If end isn't picked yet, use start as the end to show files for that day
+          const end = filters.customRange.to ? filters.customRange.to : start;
 
-    return true;
-  });
+          if (!isWithinInterval(fileDate, { start, end })) {
+            return false;
+          }
+        }
+      }
+
+      if (filters.source !== "All") {
+        if (file.author !== filters.source) return false;
+      }
+
+      return true;
+    })
+    .slice(0, 10);
 
   return (
     <Sidenav>
