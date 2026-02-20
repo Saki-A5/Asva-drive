@@ -1,7 +1,6 @@
 /**
  * Comprehensive device permissions utility for web applications
  * Handles: Camera, Microphone, Location, Notifications, Calendar, File System, and Storage permissions
- * Handles: Camera, Microphone, Location, Notifications, Calendar, File System, and Storage permissions
  */
 
 export type PermissionStatus = 'granted' | 'denied' | 'prompt' | 'unsupported';
@@ -379,17 +378,14 @@ export async function getAllPermissionStatuses(): Promise<{
   location: PermissionStatus;
   notifications: PermissionStatus;
   calendar: PermissionStatus;
-  calendar: PermissionStatus;
   fileSystem: boolean;
   storage: PermissionStatus;
 }> {
-  const [camera, microphone, location, notifications, calendar, fileSystem, storage] = await Promise.all([
   const [camera, microphone, location, notifications, calendar, fileSystem, storage] = await Promise.all([
     checkCameraPermission(),
     checkMicrophonePermission(),
     checkLocationPermission(),
     checkNotificationPermission(),
-    checkCalendarPermission(),
     checkCalendarPermission(),
     Promise.resolve(checkFileSystemSupport()),
     checkStoragePermission().then(result => result.status)
@@ -400,7 +396,6 @@ export async function getAllPermissionStatuses(): Promise<{
     microphone,
     location,
     notifications,
-    calendar,
     calendar,
     fileSystem,
     storage
