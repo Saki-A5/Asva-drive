@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 import dbConnect from "@/lib/dbConnect";
+import FileModel from "@/models/files";
 import FileItemModel from "@/models/fileItem";
 import { Types } from "mongoose";
 import { v2 as cloudinary } from "cloudinary";
@@ -55,6 +56,8 @@ export async function GET(
     const response = await axios.get<ArrayBuffer>(signedUrl, {
       responseType: "arraybuffer",
     });
+
+    console.log("Array Buffer Achieved");
 
     const buffer = Buffer.from(response.data);
 

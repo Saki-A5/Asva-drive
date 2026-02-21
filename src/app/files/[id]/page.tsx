@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Breadcrumbs from "@/app/components/Breadcrumbs";
 import { FileItem } from "@/types/File";
-import { Download, Star, Trash2 } from "lucide-react";
+import { Download, Star, Trash2, Pencil } from "lucide-react";
 import AuthorCell from "@/app/components/AuthorCell";
 import Fileicon from "@/app/components/Fileicon";
 import { Button } from "@/components/ui/button";
@@ -51,12 +51,13 @@ const FilePage = () => {
           modified: fileItem.file.modified,
           sharedUsers: [],
           signedUrl:
-          fileItem.file.resourceType === "raw" && fileItem.file.filename?.toLowerCase().endsWith(".pdf")
-          ? `/api/file/${id}/pdf`
-          : data.signedUrl,
+            fileItem.file.resourceType === "raw" &&
+            fileItem.file.filename?.toLowerCase().endsWith(".pdf")
+              ? `/api/file/${id}/pdf`
+              : data.signedUrl,
           folderPath: fileItem.folderPath || [],
         });
-        console.log("fileItem.file: ", fileItem.file)
+        console.log("fileItem.file: ", fileItem.file);
 
         // Load file contents for text/Word
         const type = fileItem.file.resourceType;
@@ -93,9 +94,25 @@ const FilePage = () => {
   const { signedUrl, name, author, size, modified, folderPath, type } =
     fileData;
 
+  const handleRename = async () => {
+    if (!fileData) return;
+    
+    const newName = prompt('Enter new name:', fileData.name);
+    if (!newName || newName === fileData.name) return;
+
+    try {
+      await axios.post(`/api/file/${id}/rename`, { filename: newName });
+      // Update the file data with the new name
+      setFileData(prev => prev ? { ...prev, name: newName } : null);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.error || err.response?.data?.message || "Failed to rename file");
+    }
+  };
+
   const renderPreview = () => {
-    console.log("file type: ", type)
-    console.log("Signed Url: ", signedUrl)
+    console.log("file type: ", type);
+    console.log("Signed Url: ", signedUrl);
     if (type.startsWith("image")) {
       return (
         <img
@@ -129,7 +146,10 @@ const FilePage = () => {
         <div>Loading content...</div>
       );
     }
-    if (type === "application/pdf" || type==="raw" && name?.toLowerCase().endsWith(".pdf")) {
+    if (
+      type === "application/pdf" ||
+      (type === "raw" && name?.toLowerCase().endsWith(".pdf"))
+    ) {
       return <PdfViewer url={signedUrl} />;
     }
     return (

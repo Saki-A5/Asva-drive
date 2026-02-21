@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
-import Sidenav from '@/app/components/Sidenav';
-import Loginnav from '@/app/components/Loginnav';
-import Upload from '@/app/components/Upload';
-import Create from '@/app/components/Create';
-import CreateFolder from '@/app/components/CreateFolder';
-import FileTable from '@/app/components/FileTable';
-import SortFilters, { FilterState } from '@/app/components/SortFilter';
-import Floating from '@/app/components/Floating';
-import Breadcrumbs from '@/app/components/Breadcrumbs';
+import Sidenav from "@/app/components/Sidenav";
+import Loginnav from "@/app/components/Loginnav";
+import Upload from "@/app/components/Upload";
+import Create from "@/app/components/Create";
+import CreateFolder from "@/app/components/CreateFolder";
+import FileTable from "@/app/components/FileTable";
+import SortFilters, { FilterState } from "@/app/components/SortFilter";
+import Floating from "@/app/components/Floating";
+import Breadcrumbs from "@/app/components/Breadcrumbs";
 
-import useCurrentUser from '@/hooks/useCurrentUser';
-import { FileItem } from '@/types/File';
+import useCurrentUser from "@/hooks/useCurrentUser";
+import { FileItem } from "@/types/File";
 
-import { isWithinInterval, subDays, startOfDay } from 'date-fns';
+import { isWithinInterval, subDays, startOfDay } from "date-fns";
 
 interface FilesViewProps {
   folderId?: string;
@@ -47,9 +47,9 @@ const FilesView = ({ folderId }: FilesViewProps) => {
   const [folderName, setFolderName] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<FilterState>({
-    type: 'All',
-    modified: 'All',
-    source: 'All',
+    type: "All",
+    modified: "All",
+    source: "All",
   });
 
   // ---------------- FETCH FILES ----------------
@@ -67,29 +67,29 @@ const FilesView = ({ folderId }: FilesViewProps) => {
       const name = res.data.folderName ?? null;
 
       const getFileIconType = (item: ApiItem) => {
-        if (item.isFolder) return 'folder';
-  
+        if (item.isFolder) return "folder";
+
         // prefer mimeType first
         if (item.file?.mimeType) {
-          const [type, subtype] = item.file.mimeType.split('/');
-          if (type === 'image') return 'image';
-          if (type === 'video') return 'video';
-          if (type === 'audio') return 'audio';
+          const [type, subtype] = item.file.mimeType.split("/");
+          if (type === "image") return "image";
+          if (type === "video") return "video";
+          if (type === "audio") return "audio";
           return subtype; // e.g., 'pdf', 'plain', etc.
         }
 
         // fallback to file extension
-        const ext = item.filename.split('.').pop()?.toLowerCase();
-        if (!ext) return 'file';
-        if (['pdf'].includes(ext)) return 'pdf';
-        if (['doc', 'docx'].includes(ext)) return 'doc';
-        if (['xls', 'xlsx'].includes(ext)) return 'sheet';
-        if (['ppt', 'pptx'].includes(ext)) return 'ppt';
-        if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'image';
-        if (['mp4', 'mov', 'avi'].includes(ext)) return 'video';
-        if (['mp3', 'wav'].includes(ext)) return 'audio';
-        return 'file';
-      }
+        const ext = item.filename.split(".").pop()?.toLowerCase();
+        if (!ext) return "file";
+        if (["pdf"].includes(ext)) return "pdf";
+        if (["doc", "docx"].includes(ext)) return "doc";
+        if (["xls", "xlsx"].includes(ext)) return "sheet";
+        if (["ppt", "pptx"].includes(ext)) return "ppt";
+        if (["jpg", "jpeg", "png", "gif"].includes(ext)) return "image";
+        if (["mp4", "mov", "avi"].includes(ext)) return "video";
+        if (["mp3", "wav"].includes(ext)) return "audio";
+        return "file";
+      };
 
       const mapped: FileItem[] = (data as ApiItem[]).map((item) => {
         if (item.isFolder) {
@@ -98,13 +98,12 @@ const FilesView = ({ folderId }: FilesViewProps) => {
             name: item.filename,
             // type: 'folder',
             type: getFileIconType(item),
-            author: '_',
-            size: '—',
-            modified: '—',
+            author: "_",
+            size: "—",
+            modified: "—",
             sharedUsers: [],
           };
         }
-
 
         return {
           id: item._id,
@@ -113,13 +112,13 @@ const FilesView = ({ folderId }: FilesViewProps) => {
           author:
             item.file?.uploadedBy?.name ??
             item.file?.uploadedBy?.email ??
-            'SMS',
+            "SMS",
           size: item.file?.sizeBytes
             ? `${(item.file?.sizeBytes / (1024 * 1024)).toFixed(1)} MB`
-            : '—',
+            : "—",
           modified: item.file?.updatedAt
             ? new Date(item.file.updatedAt).toDateString()
-            : '—',
+            : "—",
           sharedUsers: [],
         };
       });
@@ -128,7 +127,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
       setBreadcrumbs(crumbs);
       setFolderName(name);
     } catch (err) {
-      console.error('Fetch files failed:', err);
+      console.error("Fetch files failed:", err);
     } finally {
       setLoading(false);
     }
@@ -146,7 +145,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
     try {
       setCreating(true);
 
-      await axios.post('/api/file/folder', {
+      await axios.post("/api/file/folder", {
         folderName: name,
         parentFolderId: folderId ?? null,
       });
@@ -154,7 +153,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
       setShowCreateFolder(false);
       fetchFiles();
     } catch (err) {
-      console.error('Create folder failed:', err);
+      console.error("Create folder failed:", err);
     } finally {
       setCreating(false);
     }
@@ -162,7 +161,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
 
   const handleDelete = async (item: FileItem) => {
     const confirmDelete = confirm(
-      `Are you sure you want to delete ${item.name}?`
+      `Are you sure you want to delete ${item.name}?`,
     );
     if (!confirmDelete) return;
 
@@ -173,13 +172,13 @@ const FilesView = ({ folderId }: FilesViewProps) => {
       // Refresh the list after deletion
       await fetchFiles();
     } catch (error) {
-      console.error('Error deleting file:', error);
-      alert('Failed to delete file');
+      console.error("Error deleting file:", error);
+      alert("Failed to delete file");
     }
   };
 
   const handleRename = async (item: FileItem) => {
-    const newName = prompt('Enter new name:', item.name);
+    const newName = prompt("Enter new name:", item.name);
     if (!newName || newName === item.name) return;
 
     try {
@@ -187,37 +186,73 @@ const FilesView = ({ folderId }: FilesViewProps) => {
       // Refresh the list after rename
       await fetchFiles();
     } catch (error) {
-      console.error('Error renaming file:', error);
-      alert('Failed to rename file');
+      console.error("Error renaming file:", error);
+      alert("Failed to rename file");
     }
   };
 
+  // const filteredItems = items.filter((file) => {
+  //   if (filters.type !== 'All') {
+  //     const typeMatch = file.type.toLowerCase() === filters.type.toLowerCase();
+  //     if (!typeMatch) return false;
+  //   }
+
+  //   if (filters.modified !== 'All') {
+  //     if (file.modified === '—') return false;
+  //     const fileDate = new Date(file.modified);
+  //     const now = new Date();
+
+  //     if (filters.modified === 'Last 7 days') {
+  //       if (fileDate < subDays(now, 7)) return false;
+  //     } else if (filters.modified === 'Last 14 days') {
+  //       if (fileDate < subDays(now, 14)) return false;
+  //     }
+  //   }
+
+  //   if (filters.source !== 'All') {
+  //     if (file.author !== filters.source) return false;
+  //   }
+
+  //   return true;
+  // });
+
+  // ---------------- RENDER ----------------
+
   const filteredItems = items.filter((file) => {
-    if (filters.type !== 'All') {
+    if (filters.type !== "All") {
       const typeMatch = file.type.toLowerCase() === filters.type.toLowerCase();
       if (!typeMatch) return false;
     }
 
-    if (filters.modified !== 'All') {
-      if (file.modified === '—') return false;
+    if (filters.modified !== "All") {
+      if (file.modified === "—") return false;
       const fileDate = new Date(file.modified);
       const now = new Date();
 
-      if (filters.modified === 'Last 7 days') {
+      if (filters.modified === "Last 7 days") {
         if (fileDate < subDays(now, 7)) return false;
-      } else if (filters.modified === 'Last 14 days') {
+      } else if (filters.modified === "Last 14 days") {
         if (fileDate < subDays(now, 14)) return false;
+      } else if (
+        filters.modified === "Custom Range" &&
+        filters.customRange?.from
+      ) {
+        const start = startOfDay(filters.customRange.from);
+        // If end isn't picked yet, use start as the end to show files for that day
+        const end = filters.customRange.to ? filters.customRange.to : start;
+
+        if (!isWithinInterval(fileDate, { start, end })) {
+          return false;
+        }
       }
     }
 
-    if (filters.source !== 'All') {
+    if (filters.source !== "All") {
       if (file.author !== filters.source) return false;
     }
 
     return true;
   });
-
-  // ---------------- RENDER ----------------
 
   return (
     <Sidenav>
@@ -231,11 +266,16 @@ const FilesView = ({ folderId }: FilesViewProps) => {
         {/* Header */}
         <div className="flex-between gap-2 mt-2">
           <h1 className="font-bold text-xl whitespace-nowrap">
-            {folderName ?? 'My Files'}
+            {folderName ?? "My Files"}
           </h1>
 
           <div className="hidden sm:flex space-x-2 gap-y-2">
-            {user?.role === 'admin' && <Upload folderId={folderId} onUploadComplete={fetchFiles}/>}
+            {user?.role === "admin" && (
+              <Upload
+                folderId={folderId}
+                onUploadComplete={fetchFiles}
+              />
+            )}
 
             <Create
               onCreateFolderClick={() => setShowCreateFolder(true)}
