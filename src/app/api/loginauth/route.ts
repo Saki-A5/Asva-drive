@@ -30,7 +30,8 @@ export const POST = async (req: Request) => {
     const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
 
     // cookie
-    const res = NextResponse.json({ message: "Login successful", user });
+    // const res = NextResponse.json({ message: "Login successful", user });
+    const res = NextResponse.redirect(new URL("/dashboard", req.url));
     res.cookies.set("token", sessionCookie, { 
       httpOnly: true, 
       secure: process.env.NODE_ENV === "production",  

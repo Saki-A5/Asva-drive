@@ -6,6 +6,7 @@ import FileModel, { FileInterface } from "@/models/files";
 import User from "@/models/users";
 import { HydratedDocument, Types } from "mongoose";
 import { NextResponse } from "next/server";
+import { deleteAssets } from "@/lib/cloudinary";
 
 export const runtime = 'nodejs';
 
@@ -135,23 +136,62 @@ export const DELETE = async (req: Request, { params }: any) => {
     if (!folder) return NextResponse.json({ error: "No Folder Found" }, { status: 404 });
     if (!folder.isFolder) return NextResponse.json({ error: "This is not a folder" }, { status: 400 })
 
-    const { permanentlyDeleted } = await deleteFolder(folderId);
-    const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW) || 28;
-    const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
-    if (!permanentlyDeleted) { // only add folders to the queue if they have not been permanently deleted
-      await fileQueue.add(
-        'delete-folder',
-        {
-          id: folderId
-        },
-        {
-          delay,
-          attempts: 5,
-          backoff: { type: 'exponential', delay: 1000 },
-          removeOnComplete: true,
-          jobId: `delete-folder-${folderId}`
+    // Check user role to determine delete type
+    const isAdmin = user.role === 'admin';
+
+    if (isAdmin) {
+      // Admin: soft delete (goes to trash)
+      const { permanentlyDeleted } = await deleteFolder(folderId);
+      const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW) || 28;
+      const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
+      if (!permanentlyDeleted) { // only add folders to the queue if they have not been permanently deleted
+        await fileQueue.add(
+          'delete-folder',
+          {
+            folderId: folderId.toString()
+          },
+          {
+            delay,
+            attempts: 5,
+            backoff: { type: 'exponential', delay: 1000 },
+            removeOnComplete: true,
+            jobId: `delete-folder-${folderId}`
+          }
+        )
+      }
+    } else {
+      // Normal user: permanent delete
+      const { descendantFileItems, descendantFolderItems } = await getAllDescendantIds(folderId);
+
+      // Only delete non-referenced files
+      const fileItems = await FileItemModel.find({
+        _id: { $in: descendantFileItems },
+        isReference: false,
+      })
+        .populate<{ file: FileInterface }>("file", "cloudinaryUrl resourceType _id")
+        .lean<{ file: { cloudinaryUrl: string; resourceType: string; _id: Types.ObjectId } }[]>();
+
+      const publicIds = fileItems.map(i => i.file.cloudinaryUrl);
+      const fileIds = fileItems.map(i => i.file._id);
+
+      // Delete from Cloudinary in batches of 100
+      for (let i = 0; i < publicIds.length; i += 100) {
+        const batch = publicIds.slice(i, i + 100);
+        const result = await deleteAssets(batch);
+        if (!result.succeeded) {
+          throw new Error(result.error || 'Failed to delete files from storage');
         }
-      )
+      }
+
+      // Delete files from MongoDB
+      if (fileIds.length) await FileModel.deleteMany({ _id: { $in: fileIds } });
+
+      // Delete all folder/file items
+      const allItems = descendantFileItems.concat(descendantFolderItems);
+      if (allItems.length) await FileItemModel.deleteMany({ _id: { $in: allItems } });
+
+      // Delete the folder itself
+      await FileItemModel.findByIdAndDelete(folderId);
     }
 
     return NextResponse.json({ message: "Successfully Deleted Folder" }, { status: 200 });

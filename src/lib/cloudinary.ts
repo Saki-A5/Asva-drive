@@ -159,12 +159,12 @@ export async function renameAsset(publicId: string, parentFolderId: Types.Object
 
 export function getAssetDeliveryUrl(publicId: string, options: ConfigAndUrlOptions) {
     const signedUrl = cloudinary.url(publicId, {
-        resource_type: options.resource_type,
-        type: options.type,
-        sign_url: options.sign_url,
-        secure: options.secure,
-        expires_at: options.expires_at || null,
-        attachment: options.attachment || false,
+        resource_type: options.resource_type ?? "raw",
+        type: options.type ?? "authenticated",
+        sign_url: true,
+        secure: true,
+        expires_at: options.expires_at ?? Math.floor(Date.now() / 1000) + 3600,
+        attachment: options.attachment ?? false,
     });
 
     return signedUrl;

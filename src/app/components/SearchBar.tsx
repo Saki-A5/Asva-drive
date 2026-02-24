@@ -37,7 +37,7 @@ const SearchBar = () => {
         cancelToken: cancelTokenRef.current.token,
       })
         .then(res => {
-          setResults(res.data.hits || []);
+          setResults(res.data || []);
           setShowDropdown(true);
         })
         .catch(err => {
@@ -87,7 +87,7 @@ const SearchBar = () => {
           {!loading && results.map((item, index) => (
             <Link
               href={item.cloudinaryUrl || '#'}
-              key={item.id}
+              key={item.ObjectId}
               className={`block px-4 py-2 text-black truncate cursor-pointer ${
                 index === activeIndex ? "bg-gray-200" : "hover:bg-gray-100"
               }`}
