@@ -1,6 +1,7 @@
 import { Schema, Types, model, models } from "mongoose";
 import { COLLEGE_IDS } from "./colleges";
 
+
 const userSchema = new Schema(
   {
     name: { type: String, required: [true, "Name field is required"] },
