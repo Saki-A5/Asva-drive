@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import SearchBar from "@/app/components/SearchBar";
 
 import Sidenav from "@/app/components/Sidenav";
 import Loginnav from "@/app/components/Loginnav";
@@ -45,6 +46,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [breadcrumbs, setBreadcrumbs] = useState<any[]>([]);
   const [folderName, setFolderName] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [filters, setFilters] = useState<FilterState>({
     type: "All",
@@ -161,7 +163,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
 
   const handleDelete = async (item: FileItem) => {
     const confirmDelete = confirm(
-      `Are you sure you want to delete ${item.name}?`,
+      `Are you sure you want to delete ${item.name}?`
     );
     if (!confirmDelete) return;
 
@@ -218,14 +220,62 @@ const FilesView = ({ folderId }: FilesViewProps) => {
 
   // ---------------- RENDER ----------------
 
+  // const filteredItems = items.filter((file) => {
+  //   if (filters.type !== "All") {
+  //     const typeMatch = file.type.toLowerCase() === filters.type.toLowerCase();
+  //     if (!typeMatch) return false;
+  //   }
+
+  //   if (filters.modified !== "All") {
+  //     if (file.modified === "—") return false;
+  //     const fileDate = new Date(file.modified);
+  //     const now = new Date();
+
+  //     if (filters.modified === "Last 7 days") {
+  //       if (fileDate < subDays(now, 7)) return false;
+  //     } else if (filters.modified === "Last 14 days") {
+  //       if (fileDate < subDays(now, 14)) return false;
+  //     } else if (
+  //       filters.modified === "Custom Range" &&
+  //       filters.customRange?.from
+  //     ) {
+  //       const start = startOfDay(filters.customRange.from);
+  //       // If end isn't picked yet, use start as the end to show files for that day
+  //       const end = filters.customRange.to ? filters.customRange.to : start;
+
+  //       if (!isWithinInterval(fileDate, { start, end })) {
+  //         return false;
+  //       }
+  //     }
+  //   }
+
+  //   if (filters.source !== "All") {
+  //     if (file.author !== filters.source) return false;
+  //   }
+
+  //   return true;
+  // });
+
   const filteredItems = items.filter((file) => {
+    // 🔎 SEARCH FILTER
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchesName = file.name.toLowerCase().includes(q);
+      const matchesAuthor = file.author.toLowerCase().includes(q);
+
+      if (!matchesName && !matchesAuthor) return false;
+    }
+
+    // 📂 TYPE FILTER
     if (filters.type !== "All") {
       const typeMatch = file.type.toLowerCase() === filters.type.toLowerCase();
       if (!typeMatch) return false;
     }
 
+    // 📅 MODIFIED FILTER
     if (filters.modified !== "All") {
       if (file.modified === "—") return false;
+
       const fileDate = new Date(file.modified);
       const now = new Date();
 
@@ -238,7 +288,6 @@ const FilesView = ({ folderId }: FilesViewProps) => {
         filters.customRange?.from
       ) {
         const start = startOfDay(filters.customRange.from);
-        // If end isn't picked yet, use start as the end to show files for that day
         const end = filters.customRange.to ? filters.customRange.to : start;
 
         if (!isWithinInterval(fileDate, { start, end })) {
@@ -247,6 +296,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
       }
     }
 
+    // 👤 SOURCE FILTER
     if (filters.source !== "All") {
       if (file.author !== filters.source) return false;
     }
@@ -256,7 +306,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
 
   return (
     <Sidenav>
-      <Loginnav />
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
       <div className="px-6 flex flex-col flex-1 min-h-0">
         {folderId && breadcrumbs.length > 0 && (
@@ -271,10 +321,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
 
           <div className="hidden sm:flex space-x-2 gap-y-2">
             {user?.role === "admin" && (
-              <Upload
-                folderId={folderId}
-                onUploadComplete={fetchFiles}
-              />
+              <Upload folderId={folderId} onUploadComplete={fetchFiles} />
             )}
 
             <Create
@@ -286,10 +333,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
           <Floating />
         </div>
 
-        <SortFilters
-          filters={filters}
-          setFilters={setFilters}
-        />
+        <SortFilters filters={filters} setFilters={setFilters} />
 
         {/* Create Folder Input */}
         {showCreateFolder && (
@@ -307,12 +351,23 @@ const FilesView = ({ folderId }: FilesViewProps) => {
         <div className="space-y-8 flex-1 min-h-0 mt-6">
           {loading ? (
             <div className="text-gray-500">Loading files...</div>
+          ) : filteredItems.length === 0 && searchQuery.trim() ? (
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+              <p className="text-lg font-medium">No results found</p>
+              <p className="text-sm mt-1">No files match "{searchQuery}"</p>
+
+              <button
+                onClick={() => setSearchQuery("")}
+                className="mt-3 text-blue-600 hover:underline"
+              >
+                Clear search
+              </button>
+            </div>
           ) : (
             <FileTable
               files={filteredItems}
               onDeleteClick={handleDelete}
               onRenameClick={handleRename}
-              //   onFolderClick={(id) => router.push(`/files/folder/${id}`)}
             />
           )}
         </div>
