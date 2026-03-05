@@ -108,14 +108,11 @@ export const POST = async (req: Request) => {
     // ------------------ Save FileItem document ------------------
     const fileItem = await FileItemModel.create({
       filename: file.name,
-      isFolder: false,
+      // parentFolderId: new Types.ObjectId(folderId),
       parentFolderId: targetFolder._id,
       ownerId: cFile.ownerId,
       ownerType: 'College',
-      file: new Types.ObjectId(cFile._id),
-      isRoot: false,
-      isReference: false,
-      isDeleted: false,
+      file: new Types.ObjectId(cFile._id)
     });
 
     // Notifications / Indexing 
