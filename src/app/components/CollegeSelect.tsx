@@ -24,11 +24,11 @@ type College = {
 };
 
 const colleges: College[] = [
-  { id: "science", name: "College of Sciences`" },
+  { id: "science", name: "College of Sciences" },
   { id: "engineering", name: "College of Engineering" },
   { id: "mhs", name: "College of Medical Health Sciences" },
   { id: "law", name: "College of Law" },
-  { id: "sms", name: "College of Social & Management Sciences" },
+  { id: "sms", name: "College of SMS" },
 ];
 
 interface CollegeSelectProps {
@@ -51,7 +51,7 @@ export function CollegeSelect({ value, onChange }: CollegeSelectProps) {
           <Button
             variant="outline"
             role="combobox"
-            className="justify-between border-gray-300 text-gray-600 placeholder:text-gray-400 focus:ring-0 font-normal"
+            className="justify-between border-gray-300 text-gray-300 placeholder:text-gray-400 focus:ring-0 font-normal h-11"
           >
             {selectedCollege
               ? selectedCollege.name
@@ -61,7 +61,7 @@ export function CollegeSelect({ value, onChange }: CollegeSelectProps) {
         </PopoverTrigger>
 
         <PopoverContent className="p-0">
-          <Command>
+          <Command className="">
             <CommandInput placeholder="Search college..." />
             <CommandEmpty>No college found.</CommandEmpty>
 

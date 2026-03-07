@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = 'nodejs';
 
-export const POST = async (req: NextRequest, { params }: any) => {
+export const PATCH = async (req: NextRequest, { params }: any) => {
     try {
         await dbConnect();
 

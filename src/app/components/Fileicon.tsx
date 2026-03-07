@@ -5,6 +5,7 @@ import { FileArchive, FileSpreadsheet, FileText, Folder } from 'lucide-react';
 type FileiconProps = {
   type: string | undefined;
   isSheetPage: boolean;
+  className?: string;
 };
 const Fileicon = ({ type, isSheetPage }: FileiconProps) => {
   const sizeClass = isSheetPage ? 'h-32 w-32' : 'h-8 w-8';
@@ -18,21 +19,25 @@ const Fileicon = ({ type, isSheetPage }: FileiconProps) => {
     case 'pdf':
       return (
         <FileText
-          className={`${sizeClass} h-8 w-8 text-red-600`}
+          className={`${sizeClass} text-red-600`}
           fill="#ef4444"
         />
       );
+    case 'doc':
+    case 'docx':    
     case 'word':
       return (
         <FileText
-          className={`${sizeClass} h-8 w-8 text-blue-600`}
+          className={`${sizeClass} text-blue-600`}
           fill="#2563eb"
         />
       );
+    case 'xls':
+    case 'xlsx':      
     case 'excel':
       return (
         <FileSpreadsheet
-          className={`${sizeClass} h-8 w-8 text-green-600`}
+          className={`${sizeClass} text-green-600`}
           fill="#16a34a"
         />
       );
@@ -46,7 +51,7 @@ const Fileicon = ({ type, isSheetPage }: FileiconProps) => {
     default:
       return (
         <FileText
-          className={`${sizeClass} h-8 w-8 text-gray-500`}
+          className={`${sizeClass} text-gray-500`}
           fill="#9ca3af"
         />
       );
