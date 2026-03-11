@@ -220,36 +220,6 @@ const FilesView = ({ folderId }: FilesViewProps) => {
 
   const filteredItems = items.filter((file) => {
     if (filters.type !== "All") {
-      if (file.type.toLowerCase() !== filters.type.toLowerCase()) return false;
-  // const filteredItems = items.filter((file) => {
-  //   if (filters.type !== 'All') {
-  //     const typeMatch = file.type.toLowerCase() === filters.type.toLowerCase();
-  //     if (!typeMatch) return false;
-  //   }
-
-  //   if (filters.modified !== 'All') {
-  //     if (file.modified === '—') return false;
-  //     const fileDate = new Date(file.modified);
-  //     const now = new Date();
-
-  //     if (filters.modified === 'Last 7 days') {
-  //       if (fileDate < subDays(now, 7)) return false;
-  //     } else if (filters.modified === 'Last 14 days') {
-  //       if (fileDate < subDays(now, 14)) return false;
-  //     }
-  //   }
-
-  //   if (filters.source !== 'All') {
-  //     if (file.author !== filters.source) return false;
-  //   }
-
-  //   return true;
-  // });
-
-  // ---------------- RENDER ----------------
-
-  const filteredItems = items.filter((file) => {
-    if (filters.type !== "All") {
       const typeMatch = file.type.toLowerCase() === filters.type.toLowerCase();
       if (!typeMatch) return false;
     }
@@ -289,7 +259,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
           </h1>
 
           <div className="hidden sm:flex space-x-2 gap-y-2">
-            {user?.role === "admin" && <Upload folderId={folderId} onUploadComplete={fetchFiles}/>}
+            {user?.role === "admin" && <Upload folderId={folderId} onUploadComplete={() => fetchPage(1, true)}/>}
             <Create
               onCreateFolderClick={() => setShowCreateFolder(true)}
               creating={creating}
