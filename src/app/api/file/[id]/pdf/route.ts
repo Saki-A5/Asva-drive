@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import dbConnect from "@/lib/dbConnect";
 import FileModel from "@/models/files";
 import FileItemModel from "@/models/fileItem";
@@ -7,6 +7,7 @@ import { Types } from "mongoose";
 import { v2 as cloudinary } from "cloudinary";
 import type { FileInterface } from "@/models/files";
 import { getAssetDeliveryUrl } from "@/lib/cloudinary";
+import https from 'https';
 
 export const runtime = "nodejs";
 
@@ -44,22 +45,24 @@ export async function GET(
     const expiresAt = Math.floor(Date.now() / 1000) + 3600;
     console.log("expires_at being passed:", expiresAt);
     const signedUrl = getAssetDeliveryUrl(fileItem.file.cloudinaryUrl, {
-    resource_type: "raw",
-    type: "authenticated",
-    sign_url: true,
-    secure: true,
-    expires_at: Math.floor(Date.now() / 1000) + 3600,
-});
+      resource_type: "raw",
+      type: "authenticated",
+      sign_url: true,
+      secure: true,
+      expires_at: Math.floor(Date.now() / 1000) + 3600,
+    });
 
     console.log("Generated signed URL:", signedUrl);
 
     const response = await axios.get<ArrayBuffer>(signedUrl, {
       responseType: "arraybuffer",
+      httpsAgent: new https.Agent({ family: 4 })   // use Ipv4 by default
     });
 
     console.log("Array Buffer Achieved");
 
     const buffer = Buffer.from(response.data);
+    console.log(buffer);
 
     return new NextResponse(buffer, {
       headers: {
@@ -73,7 +76,11 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error("Proxy error:", error.message);
+    console.log(error instanceof AxiosError);
+    if(error instanceof AxiosError){
+      console.log(error.toJSON())
+    }
+    console.error("Proxy error:", error);
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
