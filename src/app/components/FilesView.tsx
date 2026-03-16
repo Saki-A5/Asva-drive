@@ -19,6 +19,7 @@ import useCurrentUser from "@/hooks/useCurrentUser";
 import { FileItem } from "@/types/File";
 
 import { isWithinInterval, subDays, startOfDay } from "date-fns";
+import FileItem from "./FileItem";
 
 interface FilesViewProps {
   folderId?: string;
@@ -306,7 +307,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
 
   return (
     <Sidenav>
-      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems}/>
 
       <div className="px-6 flex flex-col flex-1 min-h-0">
         {folderId && breadcrumbs.length > 0 && (

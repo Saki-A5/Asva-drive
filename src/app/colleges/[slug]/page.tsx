@@ -142,7 +142,7 @@ const CollegeFiles = () => {
 
   return (
     <section className="p-8">
-      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems}/>
       <div className="px-6 py-4 flex flex-col flex-1 min-h-0">
         {/* Breadcrumbs — show only when inside a subfolder */}
         {currentFolderId && breadcrumbs.length > 0 && (

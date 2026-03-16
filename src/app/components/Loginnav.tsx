@@ -38,9 +38,10 @@ const getInitials = (name: string | null | undefined) => {
 interface LoginnavProps {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
+  filteredItems: [];
 }
 
-const Loginnav = ({ searchQuery, setSearchQuery }: LoginnavProps) => {
+const Loginnav = ({ searchQuery, setSearchQuery, filteredItems }: LoginnavProps) => {
   const { setTheme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
@@ -112,6 +113,7 @@ const Loginnav = ({ searchQuery, setSearchQuery }: LoginnavProps) => {
               value={searchQuery}
               onChange={setSearchQuery}
               placeholder="Search files..."
+              localResultsCount={filteredItems.length}
             />
           </div>
         </div>
