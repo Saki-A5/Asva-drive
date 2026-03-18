@@ -64,17 +64,17 @@ export async function GET(
     const buffer = Buffer.from(response.data);
     console.log(buffer);
 
-    return new NextResponse(buffer, {
+    return new Response(buffer, {
+      status: 200,
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition":
           "inline; filename=" +
-          encodeURIComponent(fileItem.filename ?? "file.pdf"),
+        encodeURIComponent(fileItem.filename ?? "file.pdf"),
         "Content-Length": buffer.length.toString(),
-        "Cache-Control": "private, max-age=3600",
-        "Accept-Ranges": "bytes",
-      },
-    });
+      "Cache-Control": "private, max-age=3600",
+    },
+  });
   } catch (error: any) {
     console.log(error instanceof AxiosError);
     if(error instanceof AxiosError){
