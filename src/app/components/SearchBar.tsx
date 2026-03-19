@@ -2,9 +2,7 @@
 // import { useState, useRef, useEffect } from "react";
 // import { Input } from "@/components/ui/input";
 // import { Search } from "lucide-react";
-// import Link from "next/link";
 // import axios, { CancelTokenSource } from "axios";
-
 // const SearchBar = () => {
 //   const [query, setQuery] = useState("");
 //   const [results, setResults] = useState<any[]>([]);
@@ -108,7 +106,6 @@
 //     </div>
 //   );
 // };
-
 // export default SearchBar;
 
 "use client";
