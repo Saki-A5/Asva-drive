@@ -9,6 +9,7 @@ import AuthorCell from "@/app/components/AuthorCell";
 import Fileicon from "@/app/components/Fileicon";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+import useCurrentUser from "@/hooks/useCurrentUser";
 import * as mammoth from "mammoth";
 import dynamic from "next/dynamic";
 const PdfViewer = dynamic(() => import("@/app/components/PdfViewer"), {
@@ -18,6 +19,7 @@ const PdfViewer = dynamic(() => import("@/app/components/PdfViewer"), {
 const FilePage = () => {
   const { id } = useParams();
   const router = useRouter();
+  const { user } = useCurrentUser();
 
   const [fileData, setFileData] = useState<
     | (FileItem & {
@@ -303,23 +305,36 @@ const FilePage = () => {
                 <Star className="mr-2 h-4 w-4" />
                 Favorite
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="px-4 py-5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600"
-                onClick={async () => {
-                  if (confirm("Are you sure you want to delete this?")) {
-                    try {
-                      await axios.delete(`/api/file/${id}`);
-                      router.push("/files");
-                    } catch (err: any) {
-                      console.error(err);
-                    }
-                  }
-                }}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {user?.role === "admin" && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 py-5 border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900"
+                    onClick={handleRename}
+                  >
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Rename
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="px-4 py-5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600"
+                    onClick={async () => {
+                      if (confirm("Are you sure you want to delete this?")) {
+                        try {
+                          await axios.delete(`/api/file/${id}`);
+                          router.push("/files");
+                        } catch (err: any) {
+                          console.error(err);
+                        }
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>

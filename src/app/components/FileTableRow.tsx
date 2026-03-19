@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AuthorCell from "./AuthorCell";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Share2, Link, UserPlus, Trash2 } from "lucide-react";
+import { MoreHorizontal, Share2, Link, UserPlus, Trash2, Pencil, RotateCcw } from "lucide-react";
 import Fileicon from "./Fileicon";
 import { FileItem } from "@/types/File";
 
@@ -28,6 +28,7 @@ interface RowProps {
   onDeleteClick?: (item: FileItem) => void;
   onOpen: (file: FileItem) => void;
   onRenameClick?: (item: FileItem) => void;
+  onRestoreClick?: (item: FileItem) => void;
 }
 
 export function FileTableRow({
@@ -35,6 +36,7 @@ export function FileTableRow({
   onDeleteClick,
   onOpen,
   onRenameClick,
+  onRestoreClick,
 }: RowProps) {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
 
@@ -123,6 +125,28 @@ export function FileTableRow({
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
 
+                  {onRenameClick && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRenameClick(file);
+                      }}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Rename
+                    </DropdownMenuItem>
+                  )}
+
+                  {onRestoreClick && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRestoreClick(file);
+                      }}>
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                      Restore
+                    </DropdownMenuItem>
+                  )}
+
                   <DropdownMenuItem
                     className="text-red-600 focus:text-red-600 cursor-pointer"
                     onClick={(e) => {
@@ -154,6 +178,7 @@ export function MobileFileRow({
   onDeleteClick,
   onOpen,
   onRenameClick,
+  onRestoreClick,
 }: RowProps) {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
 
@@ -193,11 +218,32 @@ export function MobileFileRow({
           <DropdownMenuTrigger asChild>
             <button
               className="p-2 hover:bg-black/5 rounded-full transition-colors"
-              onClick={(e) => e.stopPropagation()}>
+              onClick={(e) => e.stopPropagation()}
+              aria-label="File actions">
               <MoreHorizontal className="w-5 h-5 dark:text-[#0AFEF2] text-[#050E3F]" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {onRenameClick && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRenameClick(file);
+                }}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Rename
+              </DropdownMenuItem>
+            )}
+            {onRestoreClick && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRestoreClick(file);
+                }}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Restore
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               className="text-red-600 focus:text-red-600"
               onClick={(e) => {
