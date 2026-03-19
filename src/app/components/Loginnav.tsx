@@ -38,7 +38,7 @@ const getInitials = (name: string | null | undefined) => {
 interface LoginnavProps {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
-  filteredItems: [];
+  filteredItems: number;
 }
 
 const Loginnav = ({ searchQuery, setSearchQuery, filteredItems }: LoginnavProps) => {
@@ -113,7 +113,7 @@ const Loginnav = ({ searchQuery, setSearchQuery, filteredItems }: LoginnavProps)
               value={searchQuery}
               onChange={setSearchQuery}
               placeholder="Search files..."
-              localResultsCount={filteredItems.length}
+              localResultsCount={filteredItems}
             />
           </div>
         </div>

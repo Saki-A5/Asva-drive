@@ -260,7 +260,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
 
   return (
     <Sidenav>
-      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems}/>
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems.length}/>
 
       <div className="px-6 flex flex-col flex-1 min-h-0">
         {folderId && breadcrumbs.length > 0 && (

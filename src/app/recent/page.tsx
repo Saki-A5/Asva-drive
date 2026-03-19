@@ -173,7 +173,7 @@ const Recent = () => {
 
   return (
     <Sidenav>
-      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery}  filteredItems={filteredItems.length}/>
       <div className="px-6 flex flex-col flex-1 min-h-0">
         <div className="flex-between gap-2 mt-2">
           <h1 className="font-bold text-xl whitespace-nowrap">Recent</h1>
