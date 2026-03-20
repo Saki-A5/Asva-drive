@@ -91,13 +91,19 @@ export const GET = async (req: Request, { params }: any) => {
   // if the user is an admin, they are accessing college files, if the user is a "user" they are accessing user files
   const ownerId = user.role === "admin" ? user.collegeId : user._id;
 
-  const folder = await FileItemModel.findOne({ _id: folderId, isFolder: true, ownerId });
+  const folder = await FileItemModel.findOne({
+    _id: folderId,
+    isFolder: true,
+    ownerId,
+    isDeleted: { $ne: true },
+  });
   if (!folder) return NextResponse.json({ error: "Folder not Found" }, { status: 404 });
   if (!folder.isFolder) return NextResponse.json({ error: "This is not a folder" }, { status: 400 })
 
   const contents = await FileItemModel.find({
     parentFolderId: folderId,
-    ownerId
+    ownerId,
+    isDeleted: { $ne: true },
   })
   .populate({
       path: "file",

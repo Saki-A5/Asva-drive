@@ -44,6 +44,7 @@ interface FileTableProps {
   header?: string;
   onDeleteClick?: (item: FileItem) => void;
   onRenameClick?: (item: FileItem) => void;
+  onRestoreClick?: (item: FileItem) => void;
   onOpen?: (item: FileItem) => void;
 }
 
@@ -52,6 +53,7 @@ export default function FileTable({
   header,
   onDeleteClick,
   onRenameClick,
+  onRestoreClick,
 }: FileTableProps) {
   // useState to control the layout onClick
   const [layout, setLayout] = useState("flex");
@@ -65,6 +67,7 @@ export default function FileTable({
         header={header}
         onDeleteClick={onDeleteClick}
         onRenameClick={onRenameClick}
+        onRestoreClick={onRestoreClick}
       />
     </SelectionProvider>
   );
@@ -77,6 +80,7 @@ interface FileTableContentProps {
   header?: string;
   onDeleteClick?: (item: FileItem) => void;
   onRenameClick?: (item: FileItem) => void;
+  onRestoreClick?: (item: FileItem) => void;
   onOpen?: (item: FileItem) => void;
 }
 
@@ -89,6 +93,7 @@ function FileTableContent({
   header,
   onDeleteClick,
   onRenameClick,
+  onRestoreClick,
   onOpen,
 }: FileTableContentProps) {
   const { selectedItems, clearSelection } = useSelection();
@@ -216,7 +221,10 @@ function FileTableContent({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="p-2 hover:bg-muted rounded-md">
+                <button
+                  className="p-2 hover:bg-muted rounded-md"
+                  aria-label="More actions"
+                  title="More actions">
                   <MoreHorizontal className="w-5 h-5" />
                 </button>
               </TooltipTrigger>
@@ -278,6 +286,7 @@ function FileTableContent({
                       onDeleteClick={onDeleteClick}
                       onOpen={handleOpenItem}
                       onRenameClick={onRenameClick}
+                onRestoreClick={onRestoreClick}
                     />
                   ))}
                 </TableBody>
@@ -317,6 +326,7 @@ function FileTableContent({
                     onDeleteClick={onDeleteClick}
                     onOpen={handleOpenItem}
                     onRenameClick={onRenameClick}
+                    onRestoreClick={onRestoreClick}
                   />
                 ))}
               </div>
@@ -351,11 +361,13 @@ function FileTableContent({
                   <div className="mt-5 flex gap-4">
                     <button
                       aria-label="Download file"
+                      title="Download file"
                       className="bg-[#D9D9D961] p-2 rounded-[3px] dark:bg-white">
                       <Download className="text-[#050E3F]" />
                     </button>
                     <button
                       aria-label="Star file"
+                      title="Star file"
                       className="bg-[#D9D9D961] p-2 rounded-[3px] dark:bg-white">
                       <Star
                         className="text-[#050E3F]"
@@ -364,7 +376,9 @@ function FileTableContent({
                     </button>
                     <button
                       aria-label="Delete file"
-                      className="bg-[#D9D9D961] p-2 rounded-[3px] dark:bg-white">
+                      title="Delete file"
+                      className="bg-[#D9D9D961] p-2 rounded-[3px] dark:bg-white"
+                      onClick={() => onDeleteClick?.(file)}>
                       <Trash2
                         className="text-[#050E3F]"
                         fill="#050E3F"
