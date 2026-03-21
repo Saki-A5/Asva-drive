@@ -4,6 +4,7 @@ import FileModel, { FileInterface } from '@/models/files';
 import { Types, Schema } from 'mongoose';
 import { NextResponse } from 'next/server';
 import User from '@/models/users';
+import { adminAuth } from '@/lib/firebaseAdmin';
 import { requireRole } from '@/lib/roles';
 import { fileQueue } from '@/lib/queue';
 import FileItemModel from '@/models/fileItem';
@@ -50,10 +51,30 @@ export const DELETE = async (req: Request, { params }: any) => {
   try {
     await dbConnect();
 
-    // const { user, error, status } = await requireRole(req, ['admin']);
-    // if (error) return NextResponse.json({ error }, { status });
+    // Reuse the same auth pattern as the list endpoint:
+    // derive the current user from the Firebase session cookie.
+    const cookies = req.headers.get('cookie') || '';
+    const match = cookies.match(/token=([^;]+)/);
+    const sessionCookie = match ? match[1] : null;
 
-    const user = await User.findOne({ email: 'demo@gmail.com' });
+    if (!sessionCookie) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const decodedToken = await adminAuth.verifySessionCookie(
+      sessionCookie,
+      true,
+    );
+    const userEmail = decodedToken.email;
+
+    if (!userEmail) {
+      return NextResponse.json({ message: 'Missing user id' }, { status: 401 });
+    }
+
+    const user = await User.findOne({ email: userEmail });
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
     const { id } = await params;
     const fileItemId = new Types.ObjectId(id);
     const ownerId = user.role === 'admin' ? user.collegeId : user._id;
@@ -64,7 +85,7 @@ export const DELETE = async (req: Request, { params }: any) => {
 
     // if file is a reference file, delete that reference file permanently
     if (fileItem.isReference) {
-      await FileItemModel.findOneAndDelete(fileItemId);
+      await FileItemModel.findOneAndDelete({ _id: fileItemId });
       return NextResponse.json({
         message: 'Reference File Successfully Deleted',
       });
@@ -83,14 +104,14 @@ export const DELETE = async (req: Request, { params }: any) => {
       await FileModel.findByIdAndUpdate(fileId, {
         $set: { isDeleted: true, deletedAt: Date.now() },
       });
-      // soft delete the file Item
-      await FileItemModel.updateOne(
+      // soft delete all file items referencing this file (hide from all users)
+      await FileItemModel.updateMany(
         { file: fileId },
         { $set: { isDeleted: true, deletedAt: Date.now() } }
       );
 
       // add the deleted file to the deleted queue
-      const fileRestoreWindow = +!process.env.FILE_RESTORE_WINDOW || 28;
+      const fileRestoreWindow = Number(process.env.FILE_RESTORE_WINDOW) || 28;
       const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
       await fileQueue.add(
         'delete-file',
@@ -115,8 +136,8 @@ export const DELETE = async (req: Request, { params }: any) => {
         // Delete from MongoDB
         await FileModel.findByIdAndDelete(fileId);
       }
-      // Delete all file items referencing this file
-      await FileItemModel.deleteMany({ file: fileId });
+      // Delete all file items for this owner referencing this file
+      await FileItemModel.deleteMany({ file: fileId, ownerId });
     }
 
     return NextResponse.json({ message: 'Successfully Deleted File' });
