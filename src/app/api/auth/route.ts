@@ -36,14 +36,13 @@ export async function POST(req: Request) {
     let user = await User.findOne({ email });
     if (!user) {
       user = await User.create({
-        uid,
-        email,
-        name: clientName || firebaseName || email ? email.split("@")[0] : "User"
-      });
-    }
+      firebaseUid: uid,
+      email,
+      name: clientName || firebaseName || email.split("@")[0]
+    });
+  }
 
-    // find or create the root folder
-    let rootFolderId = await createRootIfNotExists(uid, "User");
+  let rootFolderId = await createRootIfNotExists(user._id.toString(), "User");
     try {
       rootFolderId = await createRootIfNotExists(uid, "User");
     } catch (error) {

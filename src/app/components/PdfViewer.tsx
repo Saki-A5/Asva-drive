@@ -6,7 +6,7 @@ import "react-pdf/dist/Page/TextLayer.css";
 import { useState, useEffect } from "react";
 import React from "react";
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
 interface PdfViewerProps {
   url: string;

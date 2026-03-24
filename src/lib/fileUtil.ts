@@ -8,7 +8,8 @@ export async function createRootIfNotExists(ownerId: string, ownerType: "College
             filename: '/', 
             isFolder: true, 
             parentFolderId: null, 
-            ownerId: ownerType === "College" ? ownerId : new Types.ObjectId(ownerId), 
+            // ownerId: ownerType === "College" ? ownerId : new Types.ObjectId(ownerId), 
+            ownerId: new Types.ObjectId(ownerId),
             ownerType, 
             isRoot: true,
         });

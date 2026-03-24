@@ -315,7 +315,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
               <FileTable
                 files={filteredItems}
                 onDeleteClick={handleDelete}
-                onRenameClick={handleRename}
+                onRenameClick={user?.role === "admin" ? handleRename : undefined}
               />
 
               {/* ── Load-more area ─────────────────────────────────────────── */}
