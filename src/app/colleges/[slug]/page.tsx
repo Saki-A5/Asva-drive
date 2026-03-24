@@ -7,6 +7,7 @@ import { COLLEGE_META } from "@/lib/college";
 import FileTable from "@/app/components/FileTable";
 import Breadcrumbs from "@/app/components/Breadcrumbs";
 import { FileItem } from "@/types/File";
+import Loginnav from "@/app/components/Loginnav";
 
 interface ApiItem {
   _id: string;
@@ -54,10 +55,13 @@ const CollegeFiles = () => {
 
   // Track which folder we're currently inside (null = root)
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
-  const [breadcrumbs, setBreadcrumbs] = useState<{ _id: string; filename: string }[]>([]);
+  const [breadcrumbs, setBreadcrumbs] = useState<
+    { _id: string; filename: string }[]
+  >([]);
   const [folderName, setFolderName] = useState<string | null>(null);
   const [items, setItems] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchContents = async (folderId: string | null) => {
     if (!collegeId) return;
@@ -88,9 +92,7 @@ const CollegeFiles = () => {
         name: item.filename,
         type: getFileIconType(item),
         author:
-          item.file?.uploadedBy?.name ??
-          item.file?.uploadedBy?.email ??
-          "—",
+          item.file?.uploadedBy?.name ?? item.file?.uploadedBy?.email ?? "—",
         size: item.file?.sizeBytes
           ? `${(item.file.sizeBytes / (1024 * 1024)).toFixed(1)} MB`
           : "—",
@@ -122,54 +124,72 @@ const CollegeFiles = () => {
     router.push(`/file/${item.id}`);
   };
 
-  const collegeName =
-    collegeId
-      ? COLLEGE_META[collegeId as keyof typeof COLLEGE_META]?.label
-      : slug;
+  const collegeName = collegeId
+    ? COLLEGE_META[collegeId as keyof typeof COLLEGE_META]?.label
+    : slug;
+
+  const filteredItems = items.filter((file) => {
+    if (!searchQuery.trim()) return true;
+
+    const q = searchQuery.toLowerCase();
+
+    return (
+      file.name.toLowerCase().includes(q) ||
+      file.author.toLowerCase().includes(q) ||
+      file.type.toLowerCase().includes(q)
+    );
+  });
 
   return (
-    <div className="px-6 py-4 flex flex-col flex-1 min-h-0">
-      {/* Breadcrumbs — show only when inside a subfolder */}
-      {currentFolderId && breadcrumbs.length > 0 && (
-        <Breadcrumbs folders={breadcrumbs} />
-      )}
+    <section className="p-8">
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems.length}/>
+      <div className="px-6 py-4 flex flex-col flex-1 min-h-0">
+        {/* Breadcrumbs — show only when inside a subfolder */}
+        {currentFolderId && breadcrumbs.length > 0 && (
+          <Breadcrumbs folders={breadcrumbs} />
+        )}
 
-      {/* Back button when inside a subfolder */}
-      {currentFolderId && (
-        <button
-          onClick={() => {
-            // Go up one level using the breadcrumb trail
-            const parent = breadcrumbs[breadcrumbs.length - 2];
-            setCurrentFolderId(parent?._id ?? null);
-          }}
-          className="text-sm text-blue-600 hover:underline mb-2 self-start"
-        >
-          ← Back
-        </button>
-      )}
+        {/* Back button when inside a subfolder */}
+        {currentFolderId && (
+          <button
+            onClick={() => {
+              // Go up one level using the breadcrumb trail
+              const parent = breadcrumbs[breadcrumbs.length - 2];
+              setCurrentFolderId(parent?._id ?? null);
+            }}
+            className="text-sm text-blue-600 hover:underline mb-2 self-start"
+          >
+            ← Back
+          </button>
+        )}
 
-      <h1 className="font-bold text-xl mb-4">
-        {folderName ?? `${collegeName} Files`}
-      </h1>
+        <h1 className="font-bold text-xl mb-4">
+          {folderName ?? `${collegeName} Files`}
+        </h1>
 
-      {loading ? (
-        <div className="text-gray-500">Loading files...</div>
-      ) : (
-        <FileTable
-          files={items}
-          onOpen={(item) => {
-            if (item.type === "folder") {
-              setCurrentFolderId(item.id);
-            } else {
-              router.push(`/file/${item.id}`);
-            }
-          }}
-          // Read-only — no delete or rename in the college view
-          onDeleteClick={undefined}
-          onRenameClick={undefined}
-        />
-      )}
-    </div>
+        {loading ? (
+          <div className="text-gray-500">Loading files...</div>
+        ) : filteredItems.length === 0 && searchQuery.trim() ? (
+          <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+            <p className="text-lg font-medium">No results found</p>
+            <p className="text-sm mt-1">No files match "{searchQuery}"</p>
+          </div>
+        ) : (
+          <FileTable
+            files={filteredItems}
+            onOpen={(item) => {
+              if (item.type === "folder") {
+                setCurrentFolderId(item.id);
+              } else {
+                router.push(`/file/${item.id}`);
+              }
+            }}
+            onDeleteClick={undefined}
+            onRenameClick={undefined}
+          />
+        )}
+      </div>
+    </section>
   );
 };
 
