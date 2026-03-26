@@ -7,7 +7,7 @@ import Details from '../components/SignupDetail';
 import { Button } from '@/components/ui/button';
 
 const Signup = () => {
-  const [step, setStep] = useState<'email' | 'otp' | 'details'>('details');
+  const [step, setStep] = useState<'email' | 'otp' | 'details'>('email');
   const [email, setEmail] = useState('');
 
   const nextStep = () => {
