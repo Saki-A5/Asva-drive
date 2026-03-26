@@ -22,8 +22,8 @@ export async function POST(req: Request) {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const { uid, email, name: firebaseName } = decodedToken;
 
-    const sessionCookie = await adminAuth.createSessionCookie(idToken, {
-      expiresIn: 60 * 60 * 24 * 5 * 1000
+    const sessionCookie = await adminAuth.createSessionCookie(idToken, { 
+      expiresIn: 60 * 60 * 24 * 5 * 1000 
     });
 
     if (!email) {
@@ -36,29 +36,28 @@ export async function POST(req: Request) {
     let user = await User.findOne({ email });
     if (!user) {
       user = await User.create({
-        firebaseUid: uid,
-        email,
-        name: clientName || firebaseName || email.split("@")[0]
-      });
-    }
+      firebaseUid: uid,
+      email,
+      name: clientName || firebaseName || email.split("@")[0]
+    });
+  }
 
-    let rootFolderId: string;
-    try{
-      rootFolderId = await createRootIfNotExists(user._id.toString(), "User");
-    }
-    catch(e: any){
-      console.log("[Auth] An error occured while creating the root folder");
-      throw new Error(e.message);
+  let rootFolderId = await createRootIfNotExists(user._id.toString(), "User");
+    try {
+      rootFolderId = await createRootIfNotExists(uid, "User");
+    } catch (error) {
+      console.error("Error creating root folder:", error);
+      throw new Error("Failed to create root folder");
     }
     // Set authentication cookie
-    const res = NextResponse.json({
-      message: "Signup successful",
-      user,
+    const res = NextResponse.json({ 
+      message: "Signup successful", 
+      user, 
       rootFolder: rootFolderId,
     });
-    res.cookies.set("token", sessionCookie, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+    res.cookies.set("token", sessionCookie, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production",  
       path: '/',
       maxAge: 60 * 60 * 24 * 5,
       sameSite: 'lax'
