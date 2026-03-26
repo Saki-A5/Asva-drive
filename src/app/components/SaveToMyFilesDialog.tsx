@@ -71,6 +71,8 @@ export function SaveToMyFilesDialog({
         // Reuses the existing GET /api/file endpoint but we only want folders.
         // If you have a dedicated /api/file/folders endpoint, swap this out.
         const res = await axios.get("/api/file/folder");
+        console.log("Folder list", res.data.data);
+
         setFolders(res.data.data ?? []);
       } catch {
         // Non-fatal: user can still save to root
