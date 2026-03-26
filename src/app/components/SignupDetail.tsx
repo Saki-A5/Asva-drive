@@ -56,7 +56,7 @@ const Details = ({ email }: Detailsprop) => {
   const onSubmit = async (values: DetailsFormValues) => {
     console.log("FORM VALUES:", values);
     try {
-      // 1. Create Firebase user
+      // 1. Create Firebase user only if OTP was verified
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -65,17 +65,29 @@ const Details = ({ email }: Detailsprop) => {
       const user = userCredential.user;
       const idToken = await user.getIdToken();
 
-      // 3. Send token + name to backend
+      // 2. Send token + name to backend
+      // Backend will verify OTP before creating MongoDB user
       const res = await axios.post("/api/auth", {
         idToken,
         name: values.name,
         collgeId: values.collegeId,
       });
+      
       router.push("/dashboard");
     } catch (error: any) {
+      // If backend rejects due to missing OTP verification, delete Firebase user
+      if (error.response?.status === 403 && error.response?.data?.error?.includes("verification")) {
+        try {
+          const user = auth.currentUser;
+          if (user) await user.delete();
+        } catch (deleteErr) {
+          console.error("Failed to delete Firebase user:", deleteErr);
+        }
+      }
+
       if (axios.isAxiosError(error)) {
         console.error("Axios error: ", error.response?.data || error.message);
-        alert("Signup failed. Please try again.");
+        alert(error.response?.data?.error || "Signup failed. Please try again.");
       } else {
         console.error("sign-up error: ", error.message);
         alert(error.message);

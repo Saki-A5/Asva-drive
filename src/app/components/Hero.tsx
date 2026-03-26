@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Darker_Grotesque } from "next/font/google";
+import { Poppins } from "next/font/google";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { Menu, X } from "lucide-react";
 
-const darkerGrotesque = Darker_Grotesque({
+const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800", "900"], // all Tailwind-supported weights
 });
@@ -239,7 +239,7 @@ export default function Hero() {
         </nav>
         <section className="mt-10 flex flex-col justify-center items-center">
           <h1
-            className={` ${darkerGrotesque.className}
+            className={` ${poppins.className}
   font-semibold
   text-3xl md:text-6xl lg:text-[96px]
   leading-none lg:leading-[81px]

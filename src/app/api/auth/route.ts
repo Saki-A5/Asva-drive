@@ -5,6 +5,7 @@ import { adminAuth } from "@/lib/firebaseAdmin";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/users";
 import FileModel from "@/models/files";
+import Otp from "@/models/Otp";
 import { Types } from "mongoose";
 import FileItemModel from "@/models/fileItem";
 import { createRootIfNotExists } from "@/lib/fileUtil";
@@ -32,6 +33,15 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
+    // Check if OTP for this email was verified
+    const otpRecord = await Otp.findOne({ email });
+    if (!otpRecord || !otpRecord.verified) {
+      return NextResponse.json(
+        { error: "Email verification required. Please verify your OTP." },
+        { status: 403 }
+      );
+    }
+
     // Find or create user
     let user = await User.findOne({ email });
     if (!user) {
@@ -50,6 +60,10 @@ export async function POST(req: Request) {
       console.log("[Auth] An error occured while creating the root folder");
       throw new Error(e.message);
     }
+    
+    // Clean up OTP record after successful signup
+    await Otp.deleteOne({ email });
+
     // Set authentication cookie
     const res = NextResponse.json({
       message: "Signup successful",

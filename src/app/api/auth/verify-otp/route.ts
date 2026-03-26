@@ -20,5 +20,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'OTP expired' }, { status: 400 });
   }
 
+  // Mark OTP as verified
+  record.verified = true;
+  await record.save();
+
   return NextResponse.json({ message: 'OTP verified' });
 }

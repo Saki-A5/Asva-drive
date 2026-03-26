@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Darker_Grotesque } from "next/font/google";
+import { Poppins } from "next/font/google";
 
 import {
   Folder,
@@ -90,9 +90,9 @@ const faqData: FAQItem[] = [
   },
 ];
 
-const darkerGrotesque = Darker_Grotesque({
+const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"], // all Tailwind-supported weights
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
 
@@ -151,7 +151,7 @@ const Home = () => {
 
       <section className=" p-2 mb-10">
         <h1
-          className={`${darkerGrotesque.className} font-semibold text-[#050E3F] text-3xl lg:text-7xl text-center dark:text-white`}
+          className={`${poppins.className} font-semibold text-[#050E3F] text-3xl lg:text-7xl text-center dark:text-white`}
         >
           Why Asva Drive?
         </h1>
