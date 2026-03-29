@@ -15,6 +15,8 @@ const Signup = () => {
     else if (step === "otp") setStep("details");
   };
 
+  console.log("Email passed to details: ", email);
+
   return (
     <>
       <div className=" flex h-20 pt-2">
@@ -43,7 +45,6 @@ const Signup = () => {
             nextStep={nextStep}
           />
         )}
-
         {step === "details" && <Details email={email} />}
       </div>
     </>

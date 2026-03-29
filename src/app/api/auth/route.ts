@@ -13,26 +13,15 @@ import { createRootIfNotExists } from "@/lib/fileUtil";
 // Create user (POST)
 export async function POST(req: Request) {
   try {
-    const {
-      idToken,
-      name: clientName,
-      // NOTE: email and uid are sent directly from the client as a fallback
-      // while Firebase token verification is disabled. Remove once fixed.
-      email: clientEmail,
-      uid: clientUid,
-    } = await req.json();
+    const { idToken, name: clientName } = await req.json();
 
-    // NOTE: idToken guard disabled - token verification is bypassed below.
-    // Re-enable this check once adminAuth.verifyIdToken is restored.
-    // if (!idToken) {
-    //   return NextResponse.json({ error: "Missing token" }, { status: 400 });
-    // }
+    if (!idToken) {
+      return NextResponse.json({ error: "Missing token" }, { status: 400 });
+    }
 
-    // NOTE: Firebase token verification temporarily disabled due to sign-up error.
-    // This was decoding uid, email, and firebaseName from the token.
-    // Restore this block and remove clientEmail/clientUid once the issue is fixed.
-    // const decodedToken = await adminAuth.verifyIdToken(idToken);
-    // const { uid, email, name: firebaseName } = decodedToken;
+    // Verify Firebase ID token
+    const decodedToken = await adminAuth.verifyIdToken(idToken);
+    const { uid, email, name: firebaseName } = decodedToken;
 
     if (!email) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
@@ -41,7 +30,6 @@ export async function POST(req: Request) {
     const sessionCookie = await adminAuth.createSessionCookie(idToken, {
       expiresIn: 60 * 60 * 24 * 5 * 1000,
     });
-
 
     await dbConnect();
 
@@ -63,8 +51,7 @@ export async function POST(req: Request) {
         name: clientName || firebaseName || email.split("@")[0],
       });
     } else {
-      user.firebaseUid = uid,
-      await user.save()
+      ((user.firebaseUid = uid), await user.save());
     }
 
     let rootFolderId: string;
