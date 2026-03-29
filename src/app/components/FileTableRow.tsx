@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useHighlightable } from "@/hooks/useHighlightable";
 import { TableCell, TableRow } from "@/components/ui/table";
 import {
@@ -19,9 +20,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AuthorCell from "./AuthorCell";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Share2, Link, UserPlus, Trash2, Pencil, RotateCcw } from "lucide-react";
+import {
+  MoreHorizontal,
+  Share2,
+  Link,
+  UserPlus,
+  Trash2,
+  Pencil,
+  RotateCcw,
+  BookmarkPlus,
+} from "lucide-react";
 import Fileicon from "./Fileicon";
 import { FileItem } from "@/types/File";
+import { SaveToMyFilesDialog } from "./SaveToMyFilesDialog";
 
 interface RowProps {
   file: FileItem;
@@ -29,6 +40,8 @@ interface RowProps {
   onOpen: (file: FileItem) => void;
   onRenameClick?: (item: FileItem) => void;
   onRestoreClick?: (item: FileItem) => void;
+  /** Pass true when rendering inside the college/[slug] route */
+  isCollegeView?: boolean;
 }
 
 export function FileTableRow({
@@ -37,8 +50,13 @@ export function FileTableRow({
   onOpen,
   onRenameClick,
   onRestoreClick,
+  isCollegeView = false,
 }: RowProps) {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+
+  // Only non-folder files get the "Save to My Files" option
+  const canSave = isCollegeView && file.type !== "folder";
 
   return (
     <>
@@ -46,9 +64,9 @@ export function FileTableRow({
         {...eventHandlers}
         onDoubleClick={() => onOpen(file)}
         className={`
-    transition cursor-pointer !border-b-0 select-none touch-none
-    ${isSelected ? "bg-[#0AFEF236] hover:bg-[#0AFEF236]" : "hover:bg-muted/40"}
-  `}>
+          transition cursor-pointer !border-b-0 select-none touch-none
+          ${isSelected ? "bg-[#0AFEF236] hover:bg-[#0AFEF236]" : "hover:bg-muted/40"}
+        `}>
         <TableCell className="w-[40%] text-left rounded-l-lg">
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="flex-shrink-0">
@@ -57,7 +75,6 @@ export function FileTableRow({
                 isSheetPage={false}
               />
             </div>
-
             <span
               className="font-medium truncate block max-w-[200px] lg:max-w-[300px]"
               title={file.name}>
@@ -68,11 +85,9 @@ export function FileTableRow({
         <TableCell className="w-[20%] text-left">
           <AuthorCell author={file.author} />
         </TableCell>
-
         <TableCell className="w-[15%] text-left text-muted-foreground">
           {file.size}
         </TableCell>
-
         <TableCell className="w-[15%] text-left text-muted-foreground">
           {file.modified}
         </TableCell>
@@ -92,20 +107,33 @@ export function FileTableRow({
                     </Button>
                   </DropdownMenuTrigger>
                 </TooltipTrigger>
-
                 <TooltipContent side="left">
                   <p>Actions</p>
                 </TooltipContent>
 
                 <DropdownMenuContent align="end">
+                  {/* Save to My Files — college view, non-folder files only */}
+                  {canSave && (
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSaveDialogOpen(true);
+                      }}>
+                      <BookmarkPlus className="h-4 w-4" />
+                      Save to My Files
+                    </DropdownMenuItem>
+                  )}
+
+                  {/* Share — always visible */}
                   <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
+                    <DropdownMenuSubTrigger className="cursor-pointer">
                       <Share2 className="mr-2 h-4 w-4" />
                       Share with
                     </DropdownMenuSubTrigger>
-
                     <DropdownMenuSubContent className="mr-2 mt-2">
                       <DropdownMenuItem
+                        className="cursor-pointer"
                         onClick={(e) => {
                           e.stopPropagation();
                           console.log("Share directly", file.id);
@@ -113,8 +141,8 @@ export function FileTableRow({
                         <UserPlus className="mr-2 h-4 w-4" />
                         Share via mail
                       </DropdownMenuItem>
-
                       <DropdownMenuItem
+                        className="cursor-pointer"
                         onClick={(e) => {
                           e.stopPropagation();
                           console.log("Share via link", file.id);
@@ -147,7 +175,7 @@ export function FileTableRow({
                     </DropdownMenuItem>
                   )}
 
-                  <DropdownMenuItem
+                  {/* <DropdownMenuItem
                     className="text-red-600 focus:text-red-600 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -156,19 +184,42 @@ export function FileTableRow({
                     }}>
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
+                  {/* Delete — only when a handler is wired up (not in college view) */}
+                  {onDeleteClick && (
+                    <DropdownMenuItem
+                      className="text-red-600 focus:text-red-600 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteClick(file);
+                      }}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </Tooltip>
           </TooltipProvider>
         </TableCell>
       </TableRow>
+
       <TableRow className="pointer-events-none !border-b-0">
         <TableCell
           colSpan={5}
           className="h-[2px]"
         />
       </TableRow>
+
+      {/* Save to My Files dialog */}
+      {canSave && (
+        <SaveToMyFilesDialog
+          open={saveDialogOpen}
+          onOpenChange={setSaveDialogOpen}
+          sourceFileItemId={file.id}
+          sourceFileName={file.name}
+        />
+      )}
     </>
   );
 }
@@ -179,41 +230,108 @@ export function MobileFileRow({
   onOpen,
   onRenameClick,
   onRestoreClick,
+  isCollegeView = false,
 }: RowProps) {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+
+  const canSave = isCollegeView && file.type !== "folder";
 
   return (
-    <div
-      {...eventHandlers}
-      onDoubleClick={() => onOpen(file)}
-      className={`
-        flex items-center justify-between p-4 transition cursor-pointer select-none touch-pan-y
-        ${isSelected ? "bg-[#0AFEF236]" : "hover:bg-muted/40"}
-      `}>
-      <div className="flex items-center gap-4 overflow-hidden">
-        <div className="flex-shrink-0">
-          <Fileicon
-            type={file.type}
-            isSheetPage={false}
-          />
+    <>
+      <div
+        {...eventHandlers}
+        onDoubleClick={() => onOpen(file)}
+        className={`
+          flex items-center justify-between p-4 transition cursor-pointer select-none touch-pan-y
+          ${isSelected ? "bg-[#0AFEF236]" : "hover:bg-muted/40"}
+        `}>
+        <div className="flex items-center gap-4 overflow-hidden">
+          <div className="flex-shrink-0">
+            <Fileicon
+              type={file.type}
+              isSheetPage={false}
+            />
+          </div>
+          <div className="flex flex-col overflow-hidden">
+            <span className="font-semibold text-[15px] truncate text-[#050E3F] dark:text-white">
+              {file.name}
+            </span>
+            <div className="flex items-center gap-1 text-[12px] text-muted-foreground font-normal">
+              <span className="truncate max-w-[80px]">{file.author}</span>
+              <span>•</span>
+              <span>{file.size}</span>
+              <span>•</span>
+              <span className="truncate">{file.modified}</span>
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col overflow-hidden">
-          <span className="font-semibold text-[15px] truncate text-[#050E3F] dark:text-white">
-            {file.name}
-          </span>
+        <div className="flex-shrink-0 ml-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-2 hover:bg-black/5 rounded-full transition-colors"
+                onClick={(e) => e.stopPropagation()}>
+                <MoreHorizontal className="w-5 h-5 dark:text-[#0AFEF2] text-[#050E3F]" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {canSave && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSaveDialogOpen(true);
+                  }}>
+                  <BookmarkPlus className="mr-2 h-4 w-4" />
+                  Save to My Files
+                </DropdownMenuItem>
+              )}
 
-          <div className="flex items-center gap-1 text-[12px] text-muted-foreground font-normal">
-            <span className="truncate max-w-[80px]">{file.author}</span>
-            <span>•</span>
-            <span>{file.size}</span>
-            <span>•</span>
-            <span className="truncate">{file.modified}</span>
-          </div>
+              {/* Share — always visible */}
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share with
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="mr-2 mt-2">
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("Share directly", file.id);
+                    }}>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Share via mail
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("Share via link", file.id);
+                    }}>
+                    <Link className="mr-2 h-4 w-4" />
+                    Share via link
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              {/* Delete — only when handler is wired up */}
+              {onDeleteClick && (
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-600"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteClick(file);
+                  }}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
-      <div className="flex-shrink-0 ml-2">
+      {/* <div className="flex-shrink-0 ml-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -256,6 +374,15 @@ export function MobileFileRow({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </div>
+    </div> */}
+      {canSave && (
+        <SaveToMyFilesDialog
+          open={saveDialogOpen}
+          onOpenChange={setSaveDialogOpen}
+          sourceFileItemId={file.id}
+          sourceFileName={file.name}
+        />
+      )}
+    </>
   );
 }

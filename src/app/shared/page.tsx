@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Sidenav from '../components/Sidenav';
-import Loginnav from '../components/Loginnav';
-import Upload from '../components/Upload';
-import Create from '../components/Create';
-import FileTable from '../components/FileTable';
-import { Button } from '@/components/ui/button';
-import { ChevronDown } from 'lucide-react';
-import { FileItem } from '@/types/File';
-import useCurrentUser from '@/hooks/useCurrentUser';
-import SortFilters, {FilterState} from '../components/SortFilter';
+import { useEffect, useState } from "react";
+import Sidenav from "../components/Sidenav";
+import Loginnav from "../components/Loginnav";
+import Upload from "../components/Upload";
+import Create from "../components/Create";
+import FileTable from "../components/FileTable";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
+import { FileItem } from "@/types/File";
+import useCurrentUser from "@/hooks/useCurrentUser";
+import SortFilters, { FilterState } from "../components/SortFilter";
 
 interface FileType {
   _id: string;
@@ -25,16 +25,16 @@ const Shared = () => {
   const [myFiles, setMyFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>({
-      type: 'All',
-      modified: 'All',
-      source: 'All',
-    });
+    type: "All",
+    modified: "All",
+    source: "All",
+  });
   const handleCreateFolder = () => {
-    console.log('Create folder clicked');
-  }
+    console.log("Create folder clicked");
+  };
   const { user } = useCurrentUser();
 
-  const userId = '67a93bc9f92a5b14e25c5123'; // replace later
+  const userId = "67a93bc9f92a5b14e25c5123"; // replace later
 
   useEffect(() => {
     const getFiles = async () => {
@@ -46,8 +46,8 @@ const Shared = () => {
           const mapped: FileItem[] = data.data.map((f: FileType) => ({
             id: f._id,
             name: f.name,
-            type: f.mimetype.split('/')[0], // "image", "pdf", "video"
-            author: 'SMS',
+            type: f.mimetype.split("/")[0], // "image", "pdf", "video"
+            author: "SMS",
             size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
             modified: new Date(f.updatedAt).toDateString(),
             sharedUsers: [],
@@ -56,144 +56,144 @@ const Shared = () => {
           setMyFiles(mapped);
         }
       } catch (error) {
-        console.error('Error fetching files:', error);
+        console.error("Error fetching files:", error);
       } finally {
         // Change this when the cloudhinary from Daniel data has been resolved
         setMyFiles([
           {
-            id: '111222',
-            name: 'Past Questions',
-            type: 'folder',
-            author: 'Sciences',
-            size: '1.2GB',
-            modified: 'Jun 12, 2025',
+            id: "111222",
+            name: "Past Questions",
+            type: "folder",
+            author: "Sciences",
+            size: "1.2GB",
+            modified: "Jun 12, 2025",
             sharedUsers: [],
           },
           {
-            id: '222333',
-            name: 'C#/C++',
-            type: 'folder',
-            author: 'Sciences',
-            size: '2.7GB',
-            modified: 'Oct 12, 2025',
+            id: "222333",
+            name: "C#/C++",
+            type: "folder",
+            author: "Sciences",
+            size: "2.7GB",
+            modified: "Oct 12, 2025",
             sharedUsers: [],
           },
           {
-            id: '333444',
-            name: 'MATLAB',
-            type: 'folder',
-            author: 'Sciences',
-            size: '5.2GB',
-            modified: 'Jan 12, 2026',
+            id: "333444",
+            name: "MATLAB",
+            type: "folder",
+            author: "Sciences",
+            size: "5.2GB",
+            modified: "Jan 12, 2026",
             sharedUsers: [],
           },
           {
-            id: '444555',
-            name: 'Previous Work',
-            type: 'pdf',
-            author: 'Sciences',
-            size: '1.0GB',
-            modified: 'Nov 8, 2025',
+            id: "444555",
+            name: "Previous Work",
+            type: "pdf",
+            author: "Sciences",
+            size: "1.0GB",
+            modified: "Nov 8, 2025",
             sharedUsers: [],
           },
           {
-            id: '555666',
-            name: 'AutoCAD Workbook',
-            type: 'folder',
-            author: 'Sciences',
-            size: '320MB',
-            modified: 'Yesterday',
+            id: "555666",
+            name: "AutoCAD Workbook",
+            type: "folder",
+            author: "Sciences",
+            size: "320MB",
+            modified: "Yesterday",
             sharedUsers: [],
           },
           {
-            id: '666777',
-            name: 'Python',
-            type: 'folder',
-            author: 'Engineering',
-            size: '1.2GB',
-            modified: 'Apr 27, 2025',
-            sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
+            id: "666777",
+            name: "Python",
+            type: "folder",
+            author: "Engineering",
+            size: "1.2GB",
+            modified: "Apr 27, 2025",
+            sharedUsers: ["/avatars/user1.png", "/avatars/user2.png"],
           },
           {
-            id: '777888',
-            name: 'Past Questions',
-            type: 'folder',
-            author: 'Sciences',
-            size: '1.2GB',
-            modified: 'Jun 12, 2025',
+            id: "777888",
+            name: "Past Questions",
+            type: "folder",
+            author: "Sciences",
+            size: "1.2GB",
+            modified: "Jun 12, 2025",
             sharedUsers: [],
           },
           {
-            id: '888999',
-            name: 'C#/C++',
-            type: 'folder',
-            author: 'Sciences',
-            size: '2.7GB',
-            modified: 'Oct 12, 2025',
+            id: "888999",
+            name: "C#/C++",
+            type: "folder",
+            author: "Sciences",
+            size: "2.7GB",
+            modified: "Oct 12, 2025",
             sharedUsers: [],
           },
           {
-            id: '999000',
-            name: 'MATLAB',
-            type: 'folder',
-            author: 'Sciences',
-            size: '5.2GB',
-            modified: 'Jan 12, 2026',
+            id: "999000",
+            name: "MATLAB",
+            type: "folder",
+            author: "Sciences",
+            size: "5.2GB",
+            modified: "Jan 12, 2026",
             sharedUsers: [],
           },
           {
-            id: '112233',
-            name: 'Previous Work',
-            type: 'pdf',
-            author: 'Sciences',
-            size: '1.0GB',
-            modified: 'Nov 8, 2025',
+            id: "112233",
+            name: "Previous Work",
+            type: "pdf",
+            author: "Sciences",
+            size: "1.0GB",
+            modified: "Nov 8, 2025",
             sharedUsers: [],
           },
           {
-            id: '223344',
-            name: 'AutoCAD Workbook',
-            type: 'folder',
-            author: 'Sciences',
-            size: '320MB',
-            modified: 'Yesterday',
+            id: "223344",
+            name: "AutoCAD Workbook",
+            type: "folder",
+            author: "Sciences",
+            size: "320MB",
+            modified: "Yesterday",
             sharedUsers: [],
           },
           {
-            id: '445566',
-            name: 'Python',
-            type: 'folder',
-            author: 'Engineering',
-            size: '1.2GB',
-            modified: 'Apr 27, 2025',
-            sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
+            id: "445566",
+            name: "Python",
+            type: "folder",
+            author: "Engineering",
+            size: "1.2GB",
+            modified: "Apr 27, 2025",
+            sharedUsers: ["/avatars/user1.png", "/avatars/user2.png"],
           },
           {
-            id: '1122330',
-            name: 'Previous Work',
-            type: 'pdf',
-            author: 'Sciences',
-            size: '1.0GB',
-            modified: 'Nov 8, 2025',
+            id: "1122330",
+            name: "Previous Work",
+            type: "pdf",
+            author: "Sciences",
+            size: "1.0GB",
+            modified: "Nov 8, 2025",
             sharedUsers: [],
           },
           {
-            id: '2233440',
-            name: 'AutoCAD Workbook2',
-            type: 'folder',
-            author: 'Sciences',
-            size: '320MB',
-            modified: 'Yesterday',
+            id: "2233440",
+            name: "AutoCAD Workbook2",
+            type: "folder",
+            author: "Sciences",
+            size: "320MB",
+            modified: "Yesterday",
             sharedUsers: [],
           },
           {
-            id: '4455660',
-            name: 'Python',
-            type: 'folder',
-            author: 'Engineering',
-            size: '1.2GB',
-            modified: 'Apr 27, 2025',
-            sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
+            id: "4455660",
+            name: "Python",
+            type: "folder",
+            author: "Engineering",
+            size: "1.2GB",
+            modified: "Apr 27, 2025",
+            sharedUsers: ["/avatars/user1.png", "/avatars/user2.png"],
           },
         ]);
         setLoading(false);
@@ -211,14 +211,15 @@ const Shared = () => {
           <h1 className="font-bold text-xl whitespace-nowrap">Shared</h1>
 
           <div className="flex space-x-2 gap-y-2">
-            {user?.role === 'admin' && <Upload />}
+            {user?.role === "admin" && <Upload />}
             <Create onCreateFolderClick={handleCreateFolder} />
           </div>
         </div>
 
-        <SortFilters 
-        filters={filters}
-          setFilters={setFilters}/>
+        <SortFilters
+          filters={filters}
+          setFilters={setFilters}
+        />
 
         <div className="space-y-8 flex-1 min-h-0 mt-6">
           {loading ? (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Table,
   TableBody,
@@ -48,31 +48,6 @@ interface FileTableProps {
   onOpen?: (item: FileItem) => void;
 }
 
-export default function FileTable({
-  files,
-  header,
-  onDeleteClick,
-  onRenameClick,
-  onRestoreClick,
-}: FileTableProps) {
-  // useState to control the layout onClick
-  const [layout, setLayout] = useState("flex");
-
-  return (
-    <SelectionProvider>
-      <FileTableContent
-        files={files}
-        layout={layout}
-        setLayout={setLayout}
-        header={header}
-        onDeleteClick={onDeleteClick}
-        onRenameClick={onRenameClick}
-        onRestoreClick={onRestoreClick}
-      />
-    </SelectionProvider>
-  );
-}
-
 interface FileTableContentProps {
   files: FileItem[];
   layout: string;
@@ -86,6 +61,88 @@ interface FileTableContentProps {
 
 type SortKeyType = "name" | "author" | "size" | "modified";
 
+// Only the changed/added lines are shown — merge into your existing FileTable.tsx
+
+// 1. Add isCollegeView to FileTableProps
+interface FileTableProps {
+  files: FileItem[];
+  header?: string;
+  onDeleteClick?: (item: FileItem) => void;
+  onRenameClick?: (item: FileItem) => void;
+  onOpen?: (item: FileItem) => void;
+  /** Set to true inside app/college/[slug] to show "Save to My Files" */
+  isCollegeView?: boolean;
+  hasMore?: boolean;
+  loadingMore?: boolean;
+  onLoadMore?: () => void;
+}
+
+// 2. Pass it through in the default export
+export default function FileTable({
+  files,
+  header,
+  onDeleteClick,
+  onRenameClick,
+  isCollegeView = false,
+  onOpen,
+  hasMore,
+  loadingMore,
+  onLoadMore,
+}: FileTableProps) {
+  const [layout, setLayout] = useState("flex");
+
+  return (
+    <SelectionProvider>
+      <FileTableContent
+        files={files}
+        layout={layout}
+        setLayout={setLayout}
+        header={header}
+        onDeleteClick={onDeleteClick}
+        onRenameClick={onRenameClick}
+        isCollegeView={isCollegeView}
+        onOpen={onOpen}
+        hasMore={hasMore}
+        loadingMore={loadingMore}
+        onLoadMore={onLoadMore}
+      />
+    </SelectionProvider>
+  );
+}
+
+// 3. Add isCollegeView to FileTableContentProps
+interface FileTableContentProps {
+  files: FileItem[];
+  layout: string;
+  setLayout: React.Dispatch<React.SetStateAction<string>>;
+  header?: string;
+  onDeleteClick?: (item: FileItem) => void;
+  onRenameClick?: (item: FileItem) => void;
+  onOpen?: (item: FileItem) => void;
+  isCollegeView?: boolean;
+  hasMore?: boolean;
+  loadingMore?: boolean;
+  onLoadMore?: () => void;
+}
+
+// 4. Destructure and thread it to FileTableRow / MobileFileRow / FileGrid
+// function FileTableContent({
+//   files,
+//   layout,
+//   setLayout,
+//   header,
+//   onDeleteClick,
+//   onRenameClick,
+//   onOpen,
+//   isCollegeView = false,
+// }: FileTableContentProps) {
+//   // ...all existing state and logic stays the same...
+//   // In the table body:
+//   // <FileTableRow ... isCollegeView={isCollegeView} />
+//   // In the mobile list:
+//   // <MobileFileRow ... isCollegeView={isCollegeView} />
+// }
+
 function FileTableContent({
   files,
   layout,
@@ -95,34 +152,35 @@ function FileTableContent({
   onRenameClick,
   onRestoreClick,
   onOpen,
+  isCollegeView = false,
+  hasMore,
+  loadingMore,
+  onLoadMore,
 }: FileTableContentProps) {
   const { selectedItems, clearSelection } = useSelection();
   const [sheetOpen, setSheetOpen] = useState(false);
-
   const [sortKey, setSortKey] = useState<SortKeyType>("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-
   const router = useRouter();
 
-  const handleOpenItem = (file: FileItem) => {
-    if (onOpen) {
-      onOpen(file); // caller handles it
-    } else {
-    // existing default behavior stays untouched
-      if (file.type === "folder") {
-        router.push(`/files/folder/${file.id}`);
-      } else {
-        router.push(`/files/${file.id}`);
-      }
-    }
-  };
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!sentinelRef.current || !onLoadMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) onLoadMore();
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, onLoadMore]);
 
   function handleSort(key: SortKeyType) {
     if (sortKey === key) {
-      // same column → toggle direction
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
-      // new column → start ascending
       setSortKey(key);
       setSortDirection("asc");
     }
@@ -130,10 +188,8 @@ function FileTableContent({
 
   const sortedFiles = [...files].sort((a, b) => {
     if (!sortKey) return 0;
-
     let aValue: any;
     let bValue: any;
-
     if (sortKey === "size") {
       aValue = parseSize(a.size);
       bValue = parseSize(b.size);
@@ -144,24 +200,16 @@ function FileTableContent({
       aValue = (a[sortKey] || "").toString().toLowerCase();
       bValue = (b[sortKey] || "").toString().toLowerCase();
     }
-
-    // Handle equal values to maintain stability
     if (aValue === bValue) return 0;
-
-    if (sortDirection === "asc") {
-      return aValue > bValue ? 1 : -1;
-    } else {
-      return aValue < bValue ? 1 : -1;
-    }
+    if (sortDirection === "asc") return aValue > bValue ? 1 : -1;
+    else return aValue < bValue ? 1 : -1;
   });
 
   useEffect(() => {
     const cookie = document.cookie
       .split("; ")
       .find((row) => row.startsWith(`${SORT_COOKIE_KEY}=`));
-
     if (!cookie) return;
-
     try {
       const value = JSON.parse(decodeURIComponent(cookie.split("=")[1]));
       if (value.sortKey && value.sortDirection) {
@@ -169,28 +217,19 @@ function FileTableContent({
         setSortDirection(value.sortDirection);
       }
     } catch {
-      // ignore corrupted cookie
       console.error("Cookie corrupted");
     }
   }, []);
 
   useEffect(() => {
     const value = JSON.stringify({ sortKey, sortDirection });
-
-    document.cookie = `${SORT_COOKIE_KEY}=${encodeURIComponent(
-      value,
-    )}; path=/; max-age=31536000`;
+    document.cookie = `${SORT_COOKIE_KEY}=${encodeURIComponent(value)}; path=/; max-age=31536000`;
   }, [sortKey, sortDirection]);
 
   useEffect(() => {
-    if (selectedItems.length === 1) {
-      setSheetOpen(true);
-    } else {
-      setSheetOpen(false);
-    }
+    if (selectedItems.length === 1) setSheetOpen(true);
+    else setSheetOpen(false);
   }, [selectedItems.length]);
-
-  console.log(selectedItems);
 
   return (
     <div className="border border-gray-200 rounded-2xl p-2 md:p-5 flex flex-col h-fit md:h-full text-base font-semibold">
@@ -218,7 +257,6 @@ function FileTableContent({
                 <p>{layout == "flex" ? "Grid" : "Flex"} View</p>
               </TooltipContent>
             </Tooltip>
-
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -235,25 +273,20 @@ function FileTableContent({
           </TooltipProvider>
         </div>
       </div>
+
       {layout === "grid" ? (
         <section className="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-card">
           <SelectionActionBar
             count={selectedItems.length}
             onClear={clearSelection}
-            // onDelete={handleDelete}
-            // onDownload={handleDownload}
-            // onShare={handleShare}
-            // onGetLink={handleGetLink}
-            // onMove={handleMove}
           />
-
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 touch-pan-y min-h-0">
             {sortedFiles.map((file) => (
               <FileGrid
                 file={file}
                 key={file.id}
                 onDeleteClick={onDeleteClick}
-                onOpen={handleOpenItem}
+                onOpen={onOpen}
                 onRenameClick={onRenameClick}
               />
             ))}
@@ -266,6 +299,7 @@ function FileTableContent({
             onClear={clearSelection}
           />
 
+          {/* Desktop table */}
           <div className="hidden md:flex flex-col flex-1 min-h-0">
             <div className="overflow-hidden">
               <Table className="table-fixed min-w-[550px] w-full">
@@ -284,15 +318,34 @@ function FileTableContent({
                       key={file.id}
                       file={file}
                       onDeleteClick={onDeleteClick}
-                      onOpen={handleOpenItem}
+                      onOpen={onOpen}
                       onRenameClick={onRenameClick}
-                onRestoreClick={onRestoreClick}
+                      onRestoreClick={onRestoreClick}
+                      isCollegeView={isCollegeView}
                     />
                   ))}
                 </TableBody>
               </Table>
+              {hasMore && (
+                <div
+                  ref={sentinelRef}
+                  className="py-4">
+                  {loadingMore && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 px-2">
+                      {Array.from({ length: 16 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="animate-pulse rounded-xl bg-gray-100 h-28"
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Mobile list */}
           <div className="flex md:hidden flex-col">
             <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 overflow-x-auto no-scrollbar whitespace-nowrap bg-background/50 sticky top-0 z-10">
               {(["name", "author", "size", "modified"] as SortKeyType[]).map(
@@ -316,7 +369,6 @@ function FileTableContent({
                 ),
               )}
             </div>
-
             <div className="flex-1 overflow-y-auto touch-pan-y min-h-0">
               <div className="divide-y divide-gray-50/10">
                 {sortedFiles.map((file) => (
@@ -324,16 +376,35 @@ function FileTableContent({
                     key={file.id}
                     file={file}
                     onDeleteClick={onDeleteClick}
-                    onOpen={handleOpenItem}
+                    onOpen={onOpen}
                     onRenameClick={onRenameClick}
                     onRestoreClick={onRestoreClick}
+                    isCollegeView={isCollegeView}
                   />
                 ))}
               </div>
+              {hasMore && (
+                <div
+                  ref={sentinelRef}
+                  className="py-4">
+                  {loadingMore && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 px-2">
+                      {Array.from({ length: 16 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="animate-pulse rounded-xl bg-gray-100 h-28"
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
+
+      {/* File detail sheet */}
       {files.map(
         (file) =>
           selectedItems.includes(file.id) && (
@@ -343,13 +414,13 @@ function FileTableContent({
               key={file.id}>
               <SheetContent
                 side="right"
-                className="w-[80vw] max-w-[360px] sm:w-[360px] md:w-[480px] overflow-y-auto"
+                className="w-[80vw] max-w-90 sm:w-90 md:w-120 overflow-y-auto"
                 aria-describedby="file-details-title">
                 <VisuallyHidden>
                   <SheetTitle id="file-details-title">File details</SheetTitle>
                 </VisuallyHidden>
                 <div className="mt-6 flex flex-col items-center w-full px-4 sm:px-6">
-                  <div className="w-[93%] max-w-[224px] flex flex-col border rounded-[15px] justify-center items-center mt-5 h-auto px-2">
+                  <div className="w-[93%] max-w-56 flex flex-col border rounded-[15px] justify-center items-center mt-5 h-auto px-2">
                     <Fileicon
                       type={file.type}
                       isSheetPage={sheetOpen}
@@ -385,19 +456,17 @@ function FileTableContent({
                       />
                     </button>
                   </div>
-
                   <div className="w-full max-w-[320px] mt-6">
                     <h3 className="font-bold text-[20px] dark:text-white">
                       Description
                     </h3>
-                    <p className="font-[400] text-sm dark:text-[#FFFFFFB2]">
+                    <p className="font-normal text-sm dark:text-[#FFFFFFB2]">
                       Lorem ipsum dolor sit amet consectetur adipisicing elit.
                       Voluptates nostrum tempora dicta maxime non id eos
                       exercitationem cumque minima. Eaque odio sunt voluptate
                       aspernatur eos!
                     </p>
                   </div>
-
                   <div className="w-full max-w-[320px] mt-6">
                     <h3 className="font-bold text-[20px]">Info</h3>
                     <div className="flex justify-between mb-5 flex-wrap">
@@ -409,7 +478,6 @@ function FileTableContent({
                       <p>{file.id}</p>
                     </div>
                   </div>
-
                   <div className="w-full max-w-[320px] mt-6">
                     <h3 className="font-bold text-[20px]">Shared by</h3>
                     <AuthorCell author={file.author} />

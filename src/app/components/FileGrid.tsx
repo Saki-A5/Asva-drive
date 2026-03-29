@@ -11,13 +11,17 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Trash2 } from "lucide-react";
+import { Link, MoreHorizontal, Share2, Trash2, UserPlus } from "lucide-react";
 import Fileicon from "./Fileicon";
 import { useSelection } from "@/context/SelectionContext";
 import { useHighlightable } from "@/hooks/useHighlightable";
 import { FileItem } from "@/types/File";
+import { Button } from "@/components/ui/button";
 
 interface FileGridItemProps {
   file: FileItem;
@@ -53,36 +57,66 @@ const FileGridItem: React.FC<FileGridItemProps> = ({
       `}>
       <div className="w-full bg-black/10 h-[80%] flex justify-center items-center rounded-md relative">
         <div className="absolute top-0 right-2 z-20">
-          <DropdownMenu>
-            <TooltipProvider>
-              <Tooltip>
+          <TooltipProvider>
+            <Tooltip>
+              <DropdownMenu>
                 <TooltipTrigger asChild>
                   <DropdownMenuTrigger asChild>
-                    <button
-                      className="p-2 rounded-md cursor-pointer hover:bg-black/5"
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={(e) => e.stopPropagation()}>
-                      <MoreHorizontal className="w-5 h-5" />
-                    </button>
+                      <MoreHorizontal className="w-4 h-4 dark:text-[#0AFEF2] text-[#050E3F]" />
+                    </Button>
                   </DropdownMenuTrigger>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>File actions menu</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
 
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                className="text-red-600 focus:text-red-600 cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteClick?.(file);
-                }}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <TooltipContent side="left">
+                  <p>Actions</p>
+                </TooltipContent>
+
+                <DropdownMenuContent align="end">
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Share2 className="mr-2 h-4 w-4" />
+                      Share with
+                    </DropdownMenuSubTrigger>
+
+                    <DropdownMenuSubContent className="mr-2 mt-2">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log("Share directly", file.id);
+                        }}>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Share via mail
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log("Share via link", file.id);
+                        }}>
+                        <Link className="mr-2 h-4 w-4" />
+                        Share via link
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+
+                  <DropdownMenuItem
+                    className="text-red-600 focus:text-red-600 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // TRIGGER THE DELETE MODAL
+                      onDeleteClick?.(file);
+                    }}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <div className="flex flex-col items-center text-sm font-bold">

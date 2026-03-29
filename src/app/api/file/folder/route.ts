@@ -1,4 +1,4 @@
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 import dbConnect from "@/lib/dbConnect";
 import { adminAuth } from "@/lib/firebaseAdmin";
@@ -9,77 +9,137 @@ import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 
 export const POST = async (req: Request) => {
-    await dbConnect()
-    const cookies = req.headers.get('cookie') || '';
-    const match = cookies.match(/token=([^;]+)/);
-    const sessionCookie = match ? match[1] : null;
-    if (!sessionCookie) {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+  await dbConnect();
+  const cookies = req.headers.get("cookie") || "";
+  const match = cookies.match(/token=([^;]+)/);
+  const sessionCookie = match ? match[1] : null;
+  if (!sessionCookie) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
 
-    // Verify session cookie
-    const decodedToken = await adminAuth.verifySessionCookie(
-        sessionCookie,
-        true
+  // Verify session cookie
+  const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+  const userEmail = decodedToken.email;
+  // const userEmail = "asvasoftwareteam@gmail.com"; // comment this line and uncomment the code block above
+  const user = await User.findOne({ email: userEmail });
+  if (!user)
+    return NextResponse.json({ error: "Could not find user" }, { status: 401 });
+
+  const ownerId = user.role === "admin" ? user.collegeId : user._id;
+  const ownerType = user.role === "admin" ? "College" : "User";
+
+  const { folderName, parentFolderId } = await req.json();
+  // const parentId = parentFolderId ? new Types.ObjectId(parentFolderId): null
+  // if (!folderName || !parentFolderId) return NextResponse.json({ message: "folder name, parentFolderId and ownerId are compulsory" }, { status: 400 });
+  if (!folderName || !folderName.trim()) {
+    return NextResponse.json(
+      { message: "folderName is required" },
+      { status: 400 },
     );
-    const userEmail = decodedToken.email;
-    // const userEmail = "asvasoftwareteam@gmail.com"; // comment this line and uncomment the code block above
-    const user = await User.findOne({email: userEmail});
-    if(!user) return NextResponse.json({error: "Could not find user"}, {status: 401});
-
-    const ownerId = user.role === "admin" ? user.collegeId : user._id;
-    const ownerType = user.role === "admin" ? "College" : "User";
-
-    const { folderName, parentFolderId } = await req.json();
-    // const parentId = parentFolderId ? new Types.ObjectId(parentFolderId): null
-    // if (!folderName || !parentFolderId) return NextResponse.json({ message: "folder name, parentFolderId and ownerId are compulsory" }, { status: 400 });
-    if (!folderName || !folderName.trim()) {
-    return NextResponse.json({ message: "folderName is required" }, { status: 400 });
   } // just added
 
-    try {
-        // const parentFolder = await FileItemModel.findOne({
-        //     _id: new Types.ObjectId(parentFolderId)
-        // });
-        // if (!parentFolder) return NextResponse.json({
-        //     message: 'Parent Folder not Found'
-        // }, { status: 404 });
+  try {
+    // const parentFolder = await FileItemModel.findOne({
+    //     _id: new Types.ObjectId(parentFolderId)
+    // });
+    // if (!parentFolder) return NextResponse.json({
+    //     message: 'Parent Folder not Found'
+    // }, { status: 404 });
 
-        let parentFolder = null;
-        if (parentFolderId) {
-            if (!Types.ObjectId.isValid(parentFolderId)) {
-                return NextResponse.json({ message: "Invalid parentFolderId" }, { status: 400 });
-            }
+    let parentFolder = null;
+    if (parentFolderId) {
+      if (!Types.ObjectId.isValid(parentFolderId)) {
+        return NextResponse.json(
+          { message: "Invalid parentFolderId" },
+          { status: 400 },
+        );
+      }
 
-            parentFolder = await FileItemModel.findById(parentFolderId);
-            if (!parentFolder) {
-                return NextResponse.json({ message: "Parent folder not found" }, { status: 404 });
-            }
-        }
-
-        const ownerId = user.role === "admin" ? user.collegeId : user._id;
-        if(!parentFolder) parentFolder = await FileItemModel.findOne({ownerId, isRoot: true, filename: '/'});
-        if(!parentFolder) return NextResponse.json({message: "This user doesn not have a root folder"}, {status: 404});
-
-        const folder = await FileItemModel.create({
-            // filename: folderName,
-            filename: folderName.trim(),
-            isFolder: true,
-            // parentFolderId: parentFolderId,
-            parentFolderId: parentFolder ? parentFolder._id : null,
-            ownerId,
-            ownerType
-        });
-
-        return NextResponse.json({
-            message: 'Folder successfully created',
-            data: { folderId: folder._id }
-        })
-    } catch (e: any) {
-        return NextResponse.json({
-            message: e.message
-        }, { status: 404 })
+      parentFolder = await FileItemModel.findById(parentFolderId);
+      if (!parentFolder) {
+        return NextResponse.json(
+          { message: "Parent folder not found" },
+          { status: 404 },
+        );
+      }
     }
 
+    const ownerId = user.role === "admin" ? user.collegeId : user._id;
+    if (!parentFolder)
+      parentFolder = await FileItemModel.findOne({
+        ownerId,
+        isRoot: true,
+        filename: "/",
+      });
+    if (!parentFolder)
+      return NextResponse.json(
+        { message: "This user doesn not have a root folder" },
+        { status: 404 },
+      );
 
-}
+    const folder = await FileItemModel.create({
+      // filename: folderName,
+      filename: folderName.trim(),
+      isFolder: true,
+      // parentFolderId: parentFolderId,
+      parentFolderId: parentFolder ? parentFolder._id : null,
+      ownerId,
+      ownerType,
+    });
+
+    return NextResponse.json({
+      message: "Folder successfully created",
+      data: { folderId: folder._id },
+    });
+  } catch (e: any) {
+    return NextResponse.json(
+      {
+        message: e.message,
+      },
+      { status: 404 },
+    );
+  }
+};
+
+/**
+ * GET /api/file/folder
+ * Returns a flat list of all (non-deleted) folders belonging to the user.
+ * Used by SaveToMyFilesDialog to populate the destination picker.
+ */
+export const GET = async (req: Request) => {
+  await dbConnect();
+
+  const cookies = req.headers.get("cookie") || "";
+  const match = cookies.match(/token=([^;]+)/);
+  const sessionCookie = match ? match[1] : null;
+
+  if (!sessionCookie) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  let decodedToken;
+  try {
+    decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+  } catch {
+    return NextResponse.json({ message: "Invalid session" }, { status: 401 });
+  }
+
+  const user = await User.findOne({ email: decodedToken.email });
+  if (!user) {
+    return NextResponse.json({ message: "User not found" }, { status: 401 });
+  }
+
+  const userId = user._id;
+
+  const folders = await FileItemModel.find({
+    ownerId: userId,
+    isFolder: true,
+    isRoot: { $ne: true }, // exclude the invisible root
+    isDeleted: { $ne: true },
+  })
+    .select("_id filename")
+    .sort({ filename: 1 })
+    .lean();
+
+  return NextResponse.json({ data: folders });
+};

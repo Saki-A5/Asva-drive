@@ -1,18 +1,18 @@
-'use client';
-import Emailstep from '../components/Email';
-import OtpStep from '../components/OtpStep';
-import { useState } from 'react';
-import Link from 'next/link';
-import Details from '../components/SignupDetail';
-import { Button } from '@/components/ui/button';
+"use client";
+import Emailstep from "../components/Email";
+import OtpStep from "../components/OtpStep";
+import { useState } from "react";
+import Link from "next/link";
+import Details from "../components/SignupDetail";
+import { Button } from "@/components/ui/button";
 
 const Signup = () => {
-  const [step, setStep] = useState<'email' | 'otp' | 'details'>('email');
-  const [email, setEmail] = useState('');
+  const [step, setStep] = useState<"email" | "otp" | "details">("email");
+  const [email, setEmail] = useState("");
 
   const nextStep = () => {
-    if (step === 'email') setStep('otp');
-    else if (step === 'otp') setStep('details');
+    if (step === "email") setStep("otp");
+    else if (step === "otp") setStep("details");
   };
 
   return (
@@ -29,7 +29,7 @@ const Signup = () => {
       </div>
 
       <div>
-        {step === 'email' && (
+        {step === "email" && (
           <Emailstep
             email={email}
             setEmail={setEmail}
@@ -37,14 +37,14 @@ const Signup = () => {
           />
         )}
 
-        {step === 'otp' && (
+        {step === "otp" && (
           <OtpStep
             email={email}
             nextStep={nextStep}
           />
         )}
 
-        {step === 'details' && <Details email={email} />}
+        {step === "details" && <Details email={email} />}
       </div>
     </>
   );
