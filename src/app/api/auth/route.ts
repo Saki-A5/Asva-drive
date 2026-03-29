@@ -23,13 +23,14 @@ export async function POST(req: Request) {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const { uid, email, name: firebaseName } = decodedToken;
 
+    if (!email) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+
     const sessionCookie = await adminAuth.createSessionCookie(idToken, {
       expiresIn: 60 * 60 * 24 * 5 * 1000
     });
 
-    if (!email) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
 
     await dbConnect();
 
@@ -50,6 +51,9 @@ export async function POST(req: Request) {
         email,
         name: clientName || firebaseName || email.split("@")[0]
       });
+    } else {
+      user.firebaseUid = uid,
+      await user.save()
     }
 
     let rootFolderId: string;
