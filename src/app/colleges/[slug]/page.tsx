@@ -116,49 +116,49 @@ const CollegeFiles = () => {
     : slug;
 
   return (
-    <div className="px-6 py-4 flex flex-col flex-1 min-h-0">
-      {currentFolderId && breadcrumbs.length > 0 && (
-        <Breadcrumbs folders={breadcrumbs} />
-      )}
+    <Sidenav>
+      <Loginnav />
 
-      {currentFolderId && (
-        <button
-          onClick={() => {
-            const parent = breadcrumbs[breadcrumbs.length - 2];
-            setCurrentFolderId(parent?._id ?? null);
-          }}
-          className="text-sm text-blue-600 hover:underline mb-2 self-start">
-          ← Back
-        </button>
-      )}
-
-      <div className="flex flex-col items-center justify-between gap-2 mt-2">
-        <h1 className="font-bold text-xl whitespace-nowrap">
-          {folderName ?? `${collegeName} Files`}
-        </h1>
-
-        {loading ? (
-          <div className="text-gray-500">Loading files...</div>
-        ) : (
-          <FileTable
-            files={items}
-            onOpen={(item) => {
-              if (item.type === "folder") {
-                // ?collegeView=1 tells FilesView to activate college mode:
-                // shows "Save to My Files" on files, hides upload/delete controls
-                router.push(`/files/folder/${item.id}?collegeView=1`);
-              } else {
-                router.push(`/file/${item.id}`);
-              }
-            }}
-            onDeleteClick={undefined}
-            onRenameClick={undefined}
-            // No isCollegeView here — this page only shows the root folder row.
-            // College mode activates inside FilesView after the user navigates in.
-          />
+      <div className="px-6 flex flex-col flex-1 min-h-0">
+        {currentFolderId && breadcrumbs.length > 0 && (
+          <Breadcrumbs folders={breadcrumbs} />
         )}
+
+        <div className="flex items-center justify-between gap-2 mt-2">
+          <h1 className="font-bold text-xl whitespace-nowrap">
+            {folderName ?? `${collegeName} Files`}
+          </h1>
+
+          {currentFolderId && (
+            <button
+              onClick={() => {
+                const parent = breadcrumbs[breadcrumbs.length - 2];
+                setCurrentFolderId(parent?._id ?? null);
+              }}
+              className="text-sm text-blue-600 hover:underline">
+              ← Back
+            </button>
+          )}
+        </div>
+
+        <div className="space-y-8 flex-1 min-h-0 mt-6">
+          {loading ? (
+            <div className="text-gray-500">Loading files...</div>
+          ) : (
+            <FileTable
+              files={items}
+              onOpen={(item) => {
+                if (item.type === "folder") {
+                  setCurrentFolderId(item.id);
+                } else {
+                  router.push(`/file/${item.id}`);
+                }
+              }}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </Sidenav>
   );
 };
 
