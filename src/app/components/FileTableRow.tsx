@@ -37,10 +37,9 @@ import { SaveToMyFilesDialog } from "./SaveToMyFilesDialog";
 interface RowProps {
   file: FileItem;
   onDeleteClick?: (item: FileItem) => void;
-  onOpen: (file: FileItem) => void;
+  onOpen?: (file: FileItem) => void;
   onRenameClick?: (item: FileItem) => void;
   onRestoreClick?: (item: FileItem) => void;
-  /** Pass true when rendering inside the college/[slug] route */
   isCollegeView?: boolean;
 }
 
@@ -55,14 +54,13 @@ export function FileTableRow({
   const { isSelected, eventHandlers } = useHighlightable(file.id);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
-  // Only non-folder files get the "Save to My Files" option
   const canSave = isCollegeView && file.type !== "folder";
 
   return (
     <>
       <TableRow
         {...eventHandlers}
-        onDoubleClick={() => onOpen(file)}
+        onDoubleClick={() => onOpen?.(file)}
         className={`
           transition cursor-pointer !border-b-0 select-none touch-none
           ${isSelected ? "bg-[#0AFEF236] hover:bg-[#0AFEF236]" : "hover:bg-muted/40"}
@@ -91,8 +89,6 @@ export function FileTableRow({
         <TableCell className="w-[15%] text-left text-muted-foreground">
           {file.modified}
         </TableCell>
-
-        {/* Actions */}
         <TableCell className="w-[10%] text-right rounded-r-lg">
           <TooltipProvider>
             <Tooltip>
@@ -110,9 +106,7 @@ export function FileTableRow({
                 <TooltipContent side="left">
                   <p>Actions</p>
                 </TooltipContent>
-
                 <DropdownMenuContent align="end">
-                  {/* Save to My Files — college view, non-folder files only */}
                   {canSave && (
                     <DropdownMenuItem
                       className="cursor-pointer"
@@ -124,8 +118,6 @@ export function FileTableRow({
                       Save to My Files
                     </DropdownMenuItem>
                   )}
-
-                  {/* Share — always visible */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="cursor-pointer">
                       <Share2 className="mr-2 h-4 w-4" />
@@ -152,9 +144,9 @@ export function FileTableRow({
                       </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
-
                   {onRenameClick && (
                     <DropdownMenuItem
+                      className="cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         onRenameClick(file);
@@ -163,9 +155,9 @@ export function FileTableRow({
                       Rename
                     </DropdownMenuItem>
                   )}
-
                   {onRestoreClick && (
                     <DropdownMenuItem
+                      className="cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         onRestoreClick(file);
@@ -174,18 +166,6 @@ export function FileTableRow({
                       Restore
                     </DropdownMenuItem>
                   )}
-
-                  {/* <DropdownMenuItem
-                    className="text-red-600 focus:text-red-600 cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // TRIGGER THE DELETE MODAL
-                      onDeleteClick?.(file);
-                    }}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem> */}
-                  {/* Delete — only when a handler is wired up (not in college view) */}
                   {onDeleteClick && (
                     <DropdownMenuItem
                       className="text-red-600 focus:text-red-600 cursor-pointer"
@@ -211,7 +191,6 @@ export function FileTableRow({
         />
       </TableRow>
 
-      {/* Save to My Files dialog */}
       {canSave && (
         <SaveToMyFilesDialog
           open={saveDialogOpen}
@@ -241,7 +220,7 @@ export function MobileFileRow({
     <>
       <div
         {...eventHandlers}
-        onDoubleClick={() => onOpen(file)}
+        onDoubleClick={() => onOpen?.(file)}
         className={`
           flex items-center justify-between p-4 transition cursor-pointer select-none touch-pan-y
           ${isSelected ? "bg-[#0AFEF236]" : "hover:bg-muted/40"}
@@ -279,6 +258,7 @@ export function MobileFileRow({
             <DropdownMenuContent align="end">
               {canSave && (
                 <DropdownMenuItem
+                  className="cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSaveDialogOpen(true);
@@ -287,8 +267,6 @@ export function MobileFileRow({
                   Save to My Files
                 </DropdownMenuItem>
               )}
-
-              {/* Share — always visible */}
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   <Share2 className="mr-2 h-4 w-4" />
@@ -313,11 +291,9 @@ export function MobileFileRow({
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
-
-              {/* Delete — only when handler is wired up */}
               {onDeleteClick && (
                 <DropdownMenuItem
-                  className="text-red-600 focus:text-red-600"
+                  className="text-red-600 focus:text-red-600 cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteClick(file);
@@ -331,50 +307,6 @@ export function MobileFileRow({
         </div>
       </div>
 
-      {/* <div className="flex-shrink-0 ml-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              className="p-2 hover:bg-black/5 rounded-full transition-colors"
-              onClick={(e) => e.stopPropagation()}
-              aria-label="File actions">
-              <MoreHorizontal className="w-5 h-5 dark:text-[#0AFEF2] text-[#050E3F]" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {onRenameClick && (
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRenameClick(file);
-                }}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Rename
-              </DropdownMenuItem>
-            )}
-            {onRestoreClick && (
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRestoreClick(file);
-                }}>
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Restore
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem
-              className="text-red-600 focus:text-red-600"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDeleteClick?.(file);
-              }}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div> */}
       {canSave && (
         <SaveToMyFilesDialog
           open={saveDialogOpen}

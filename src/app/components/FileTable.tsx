@@ -1,13 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import {
   MoreHorizontal,
   LayoutGrid,
@@ -46,6 +40,10 @@ interface FileTableProps {
   onRenameClick?: (item: FileItem) => void;
   onRestoreClick?: (item: FileItem) => void;
   onOpen?: (item: FileItem) => void;
+  isCollegeView?: boolean;
+  hasMore?: boolean;
+  loadingMore?: boolean;
+  onLoadMore?: () => void;
 }
 
 interface FileTableContentProps {
@@ -57,32 +55,84 @@ interface FileTableContentProps {
   onRenameClick?: (item: FileItem) => void;
   onRestoreClick?: (item: FileItem) => void;
   onOpen?: (item: FileItem) => void;
-}
-
-type SortKeyType = "name" | "author" | "size" | "modified";
-
-// Only the changed/added lines are shown — merge into your existing FileTable.tsx
-
-// 1. Add isCollegeView to FileTableProps
-interface FileTableProps {
-  files: FileItem[];
-  header?: string;
-  onDeleteClick?: (item: FileItem) => void;
-  onRenameClick?: (item: FileItem) => void;
-  onOpen?: (item: FileItem) => void;
-  /** Set to true inside app/college/[slug] to show "Save to My Files" */
   isCollegeView?: boolean;
   hasMore?: boolean;
   loadingMore?: boolean;
   onLoadMore?: () => void;
 }
 
-// 2. Pass it through in the default export
+type SortKeyType = "name" | "author" | "size" | "modified";
+
+// ── Skeleton components ────────────────────────────────────────────────────
+
+function RowSkeleton() {
+  return (
+    <>
+      <TableRow className="!border-b-0">
+        <TableCell className="w-[40%] rounded-l-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-md bg-gray-100 animate-pulse flex-shrink-0" />
+            <div className="h-3.5 bg-gray-100 animate-pulse rounded-md w-[60%]" />
+          </div>
+        </TableCell>
+        <TableCell className="w-[20%]">
+          <div className="h-3.5 bg-gray-100 animate-pulse rounded-md w-[70%]" />
+        </TableCell>
+        <TableCell className="w-[15%]">
+          <div className="h-3.5 bg-gray-100 animate-pulse rounded-md w-[50%]" />
+        </TableCell>
+        <TableCell className="w-[15%]">
+          <div className="h-3.5 bg-gray-100 animate-pulse rounded-md w-[60%]" />
+        </TableCell>
+        <TableCell className="w-[10%] rounded-r-lg">
+          <div className="h-7 w-7 bg-gray-100 animate-pulse rounded-md ml-auto" />
+        </TableCell>
+      </TableRow>
+      <TableRow className="pointer-events-none !border-b-0">
+        <TableCell
+          colSpan={5}
+          className="h-[2px]"
+        />
+      </TableRow>
+    </>
+  );
+}
+
+function MobileRowSkeleton() {
+  return (
+    <div className="flex items-center justify-between p-4 border-b border-gray-50/10">
+      <div className="flex items-center gap-4 overflow-hidden flex-1">
+        <div className="w-9 h-9 rounded-md bg-gray-100 animate-pulse flex-shrink-0" />
+        <div className="flex flex-col gap-1.5 flex-1">
+          <div className="h-3.5 bg-gray-100 animate-pulse rounded-md w-[55%]" />
+          <div className="h-2.5 bg-gray-100 animate-pulse rounded-md w-[75%]" />
+        </div>
+      </div>
+      <div className="w-8 h-8 bg-gray-100 animate-pulse rounded-full ml-3 flex-shrink-0" />
+    </div>
+  );
+}
+
+function GridSkeleton() {
+  return (
+    <div className="flex flex-col items-start p-4 rounded-xl h-[200px] gap-3 w-full bg-gray-50 animate-pulse">
+      <div className="w-full bg-gray-100 h-[80%] rounded-md" />
+      <div className="w-full flex flex-col gap-1.5">
+        <div className="h-3 bg-gray-100 rounded-md w-[65%]" />
+        <div className="h-2.5 bg-gray-100 rounded-md w-[40%]" />
+      </div>
+    </div>
+  );
+}
+
+// ── Exports ────────────────────────────────────────────────────────────────
+
 export default function FileTable({
   files,
   header,
   onDeleteClick,
   onRenameClick,
+  onRestoreClick,
   isCollegeView = false,
   onOpen,
   hasMore,
@@ -100,6 +150,7 @@ export default function FileTable({
         header={header}
         onDeleteClick={onDeleteClick}
         onRenameClick={onRenameClick}
+        onRestoreClick={onRestoreClick}
         isCollegeView={isCollegeView}
         onOpen={onOpen}
         hasMore={hasMore}
@@ -110,38 +161,7 @@ export default function FileTable({
   );
 }
 
-// 3. Add isCollegeView to FileTableContentProps
-interface FileTableContentProps {
-  files: FileItem[];
-  layout: string;
-  setLayout: React.Dispatch<React.SetStateAction<string>>;
-  header?: string;
-  onDeleteClick?: (item: FileItem) => void;
-  onRenameClick?: (item: FileItem) => void;
-  onOpen?: (item: FileItem) => void;
-  isCollegeView?: boolean;
-  hasMore?: boolean;
-  loadingMore?: boolean;
-  onLoadMore?: () => void;
-}
-
-// 4. Destructure and thread it to FileTableRow / MobileFileRow / FileGrid
-// function FileTableContent({
-//   files,
-//   layout,
-//   setLayout,
-//   header,
-//   onDeleteClick,
-//   onRenameClick,
-//   onOpen,
-//   isCollegeView = false,
-// }: FileTableContentProps) {
-//   // ...all existing state and logic stays the same...
-//   // In the table body:
-//   // <FileTableRow ... isCollegeView={isCollegeView} />
-//   // In the mobile list:
-//   // <MobileFileRow ... isCollegeView={isCollegeView} />
-// }
+// ── FileTableContent ───────────────────────────────────────────────────────
 
 function FileTableContent({
   files,
@@ -163,19 +183,44 @@ function FileTableContent({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const router = useRouter();
 
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const desktopSentinelRef = useRef<HTMLDivElement | null>(null);
+  const mobileSentinelRef = useRef<HTMLDivElement | null>(null);
+  const gridSentinelRef = useRef<HTMLDivElement | null>(null);
+
+  const triggerLoadMore = useCallback(() => {
+    if (hasMore && !loadingMore && onLoadMore) onLoadMore();
+  }, [hasMore, loadingMore, onLoadMore]);
 
   useEffect(() => {
-    if (!sentinelRef.current || !onLoadMore) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) onLoadMore();
-      },
-      { rootMargin: "200px" },
-    );
-    observer.observe(sentinelRef.current);
-    return () => observer.disconnect();
-  }, [hasMore, loadingMore, onLoadMore]);
+    const refs = [desktopSentinelRef, mobileSentinelRef, gridSentinelRef];
+    const observers: IntersectionObserver[] = [];
+
+    refs.forEach((ref) => {
+      if (!ref.current) return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) triggerLoadMore();
+        },
+        { rootMargin: "200px" },
+      );
+      observer.observe(ref.current);
+      observers.push(observer);
+    });
+
+    return () => observers.forEach((o) => o.disconnect());
+  }, [triggerLoadMore]);
+
+  const handleOpenItem = (file: FileItem) => {
+    if (onOpen) {
+      onOpen(file);
+    } else {
+      if (file.type === "folder") {
+        router.push(`/files/folder/${file.id}`);
+      } else {
+        router.push(`/files/${file.id}`);
+      }
+    }
+  };
 
   function handleSort(key: SortKeyType) {
     if (sortKey === key) {
@@ -231,8 +276,15 @@ function FileTableContent({
     else setSheetOpen(false);
   }, [selectedItems.length]);
 
+  const allFilesLoadedLabel = (
+    <p className="text-center text-xs text-gray-400 py-4">
+      All {files.length} file{files.length !== 1 ? "s" : ""} loaded
+    </p>
+  );
+
   return (
     <div className="border border-gray-200 rounded-2xl p-2 md:p-5 flex flex-col h-fit md:h-full text-base font-semibold">
+      {/* Toolbar */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">{header}</h2>
         <div className="flex justify-end items-center gap-0">
@@ -242,11 +294,11 @@ function FileTableContent({
                 <button
                   className="p-2 hover:bg-muted rounded-md"
                   onClick={
-                    layout == "flex"
+                    layout === "flex"
                       ? () => setLayout("grid")
                       : () => setLayout("flex")
                   }>
-                  {layout == "flex" ? (
+                  {layout === "flex" ? (
                     <LayoutGrid className="w-5 h-5" />
                   ) : (
                     <Columns className="w-5 h-5" />
@@ -254,7 +306,7 @@ function FileTableContent({
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{layout == "flex" ? "Grid" : "Flex"} View</p>
+                <p>{layout === "flex" ? "Grid" : "Flex"} View</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -274,6 +326,7 @@ function FileTableContent({
         </div>
       </div>
 
+      {/* ── Grid layout ── */}
       {layout === "grid" ? (
         <section className="flex-1 min-h-0 overflow-y-auto p-4 rounded-xl bg-card">
           <SelectionActionBar
@@ -286,21 +339,34 @@ function FileTableContent({
                 file={file}
                 key={file.id}
                 onDeleteClick={onDeleteClick}
-                onOpen={onOpen}
+                onOpen={handleOpenItem}
                 onRenameClick={onRenameClick}
               />
             ))}
+            {loadingMore &&
+              Array.from({ length: 8 }).map((_, i) => (
+                <GridSkeleton key={`grid-skeleton-${i}`} />
+              ))}
           </div>
+          {hasMore && (
+            <div
+              ref={gridSentinelRef}
+              className="h-1"
+            />
+          )}
+          {!hasMore && files.length > 0 && allFilesLoadedLabel}
         </section>
       ) : (
+        // ── Flex (table) layout ──
         <div className="flex flex-col flex-1 min-h-0 rounded-2xl">
           <SelectionActionBar
             count={selectedItems.length}
             onClear={clearSelection}
           />
 
-          {/* Desktop table */}
+          {/* Desktop table — header always visible, body scrolls */}
           <div className="hidden md:flex flex-col flex-1 min-h-0">
+            {/* Sticky header in its own non-scrolling table */}
             <div className="overflow-hidden">
               <Table className="table-fixed min-w-[550px] w-full">
                 <FileTableHeader
@@ -310,6 +376,7 @@ function FileTableContent({
                 />
               </Table>
             </div>
+            {/* Scrollable body — skeletons live here so header never moves */}
             <div className="flex-1 overflow-y-auto">
               <Table className="table-fixed min-w-[550px] w-full">
                 <TableBody>
@@ -318,34 +385,29 @@ function FileTableContent({
                       key={file.id}
                       file={file}
                       onDeleteClick={onDeleteClick}
-                      onOpen={onOpen}
+                      onOpen={handleOpenItem}
                       onRenameClick={onRenameClick}
                       onRestoreClick={onRestoreClick}
                       isCollegeView={isCollegeView}
                     />
                   ))}
+                  {loadingMore &&
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <RowSkeleton key={`row-skeleton-${i}`} />
+                    ))}
                 </TableBody>
               </Table>
               {hasMore && (
                 <div
-                  ref={sentinelRef}
-                  className="py-4">
-                  {loadingMore && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 px-2">
-                      {Array.from({ length: 16 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="animate-pulse rounded-xl bg-gray-100 h-28"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  ref={desktopSentinelRef}
+                  className="h-1"
+                />
               )}
+              {!hasMore && files.length > 0 && allFilesLoadedLabel}
             </div>
           </div>
 
-          {/* Mobile list */}
+          {/* Mobile list — sort bar always visible, rows scroll */}
           <div className="flex md:hidden flex-col">
             <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 overflow-x-auto no-scrollbar whitespace-nowrap bg-background/50 sticky top-0 z-10">
               {(["name", "author", "size", "modified"] as SortKeyType[]).map(
@@ -376,29 +438,24 @@ function FileTableContent({
                     key={file.id}
                     file={file}
                     onDeleteClick={onDeleteClick}
-                    onOpen={onOpen}
+                    onOpen={handleOpenItem}
                     onRenameClick={onRenameClick}
                     onRestoreClick={onRestoreClick}
                     isCollegeView={isCollegeView}
                   />
                 ))}
+                {loadingMore &&
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <MobileRowSkeleton key={`mobile-skeleton-${i}`} />
+                  ))}
               </div>
               {hasMore && (
                 <div
-                  ref={sentinelRef}
-                  className="py-4">
-                  {loadingMore && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 px-2">
-                      {Array.from({ length: 16 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="animate-pulse rounded-xl bg-gray-100 h-28"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  ref={mobileSentinelRef}
+                  className="h-1"
+                />
               )}
+              {!hasMore && files.length > 0 && allFilesLoadedLabel}
             </div>
           </div>
         </div>

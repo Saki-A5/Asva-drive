@@ -69,6 +69,7 @@ function mapApiItem(item: ApiItem): FileItem {
 }
 
 const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
+  const router = useRouter();
   const { user } = useCurrentUser();
 
   const [items, setItems] = useState<FileItem[]>([]);
@@ -92,7 +93,7 @@ const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
     if (hasMore && !loadingMore) setPage((p) => p + 1);
   }, [hasMore, loadingMore]);
 
-  // ── Fetch a single page ────────────────────────────────────────────────────
+  //  Fetch a single page
 
   const fetchPage = useCallback(
     async (pageNum: number, replace: boolean) => {
@@ -128,7 +129,7 @@ const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
     [folderId],
   );
 
-  // ── Initial load / folder change ───────────────────────────────────────────
+  //  Initial load / folder change ─
 
   useEffect(() => {
     setItems([]);
@@ -137,14 +138,14 @@ const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
     fetchPage(1, true);
   }, [folderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Load more ─────────────────────────────────────────────────────────────
+  //  Load more ─
 
   useEffect(() => {
     if (page === 1) return;
     fetchPage(page, false);
   }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Create folder ─────────────────────────────────────────────────────────
+  //  Create folder ─
 
   const handleCreateFolder = async (name: string) => {
     if (!name || !user) return;
@@ -165,7 +166,7 @@ const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
     }
   };
 
-  // ── Delete ────────────────────────────────────────────────────────────────
+  //  Delete
 
   const handleDelete = async (item: FileItem) => {
     if (!confirm(`Are you sure you want to delete ${item.name}?`)) return;
@@ -179,7 +180,7 @@ const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
     }
   };
 
-  // ── Rename ────────────────────────────────────────────────────────────────
+  //  Rename
 
   const handleRename = async (item: FileItem) => {
     const newName = prompt("Enter new name:", item.name);
@@ -195,7 +196,7 @@ const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
     }
   };
 
-  // ── Filter ────────────────────────────────────────────────────────────────
+  //  Filter
 
   const filteredItems = items.filter((file) => {
     if (filters.type !== "All") {
@@ -216,7 +217,15 @@ const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
     return true;
   });
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // const handleOpen = (item: FileItem) => {
+  //   if (item.type === "folder") {
+  //     router.push(`/files/${item.id}`);
+  //   } else {
+  //     // open preview, download, etc.
+  //   }
+  // };
+
+  //  Render
 
   return (
     <Sidenav>

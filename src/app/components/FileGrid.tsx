@@ -70,18 +70,15 @@ const FileGridItem: React.FC<FileGridItemProps> = ({
                     </Button>
                   </DropdownMenuTrigger>
                 </TooltipTrigger>
-
                 <TooltipContent side="left">
                   <p>Actions</p>
                 </TooltipContent>
-
                 <DropdownMenuContent align="end">
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
                       <Share2 className="mr-2 h-4 w-4" />
                       Share with
                     </DropdownMenuSubTrigger>
-
                     <DropdownMenuSubContent className="mr-2 mt-2">
                       <DropdownMenuItem
                         onClick={(e) => {
@@ -91,7 +88,6 @@ const FileGridItem: React.FC<FileGridItemProps> = ({
                         <UserPlus className="mr-2 h-4 w-4" />
                         Share via mail
                       </DropdownMenuItem>
-
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
@@ -102,17 +98,17 @@ const FileGridItem: React.FC<FileGridItemProps> = ({
                       </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
-
-                  <DropdownMenuItem
-                    className="text-red-600 focus:text-red-600 cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // TRIGGER THE DELETE MODAL
-                      onDeleteClick?.(file);
-                    }}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
+                  {onDeleteClick && (
+                    <DropdownMenuItem
+                      className="text-red-600 focus:text-red-600 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteClick(file);
+                      }}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </Tooltip>
