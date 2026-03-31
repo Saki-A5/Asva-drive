@@ -20,6 +20,11 @@ import { subDays } from "date-fns";
 
 interface FilesViewProps {
   folderId?: string;
+  /**
+   * Set to true when this view is reached from a college route.
+   * Hides upload/create/delete/rename and shows "Save to My Files" instead.
+   */
+  isCollegeView?: boolean;
 }
 
 interface ApiItem {
@@ -63,12 +68,13 @@ function mapApiItem(item: ApiItem): FileItem {
   };
 }
 
-const FilesView = ({ folderId }: FilesViewProps) => {
+const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
+  const router = useRouter();
   const { user } = useCurrentUser();
 
   const [items, setItems] = useState<FileItem[]>([]);
-  const [loading, setLoading] = useState(true); // initial load
-  const [loadingMore, setLoadingMore] = useState(false); // subsequent pages
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -83,10 +89,11 @@ const FilesView = ({ folderId }: FilesViewProps) => {
     source: "All",
   });
 
-  // Sentinel div at the bottom — IntersectionObserver triggers loadMore
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !loadingMore) setPage((p) => p + 1);
+  }, [hasMore, loadingMore]);
 
-  // ── Fetch a single page ────────────────────────────────────────────────────
+  //  Fetch a single page
 
   const fetchPage = useCallback(
     async (pageNum: number, replace: boolean) => {
@@ -94,7 +101,6 @@ const FilesView = ({ folderId }: FilesViewProps) => {
         if (replace) setLoading(true);
         else setLoadingMore(true);
 
-        // Folder contents don't use the paginated root route
         const url = folderId
           ? `/api/file/folder/${folderId}`
           : `/api/file?page=${pageNum}`;
@@ -112,8 +118,6 @@ const FilesView = ({ folderId }: FilesViewProps) => {
         setItems((prev) => (replace ? mapped : [...prev, ...mapped]));
         setBreadcrumbs(crumbs);
         setFolderName(name);
-
-        // Only the root file list is paginated
         setHasMore(!folderId && (pagination?.hasMore ?? false));
       } catch (err) {
         console.error("Fetch files failed:", err);
@@ -125,7 +129,7 @@ const FilesView = ({ folderId }: FilesViewProps) => {
     [folderId],
   );
 
-  // ── Initial load / folder change ───────────────────────────────────────────
+  //  Initial load / folder change ─
 
   useEffect(() => {
     setItems([]);
@@ -134,32 +138,14 @@ const FilesView = ({ folderId }: FilesViewProps) => {
     fetchPage(1, true);
   }, [folderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Load more (triggered by page state change, not page 1) ────────────────
+  //  Load more ─
 
   useEffect(() => {
-    if (page === 1) return; // initial load handled above
+    if (page === 1) return;
     fetchPage(page, false);
   }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── IntersectionObserver — auto-load when sentinel scrolls into view ───────
-
-  useEffect(() => {
-    if (!sentinelRef.current) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
-          setPage((p) => p + 1);
-        }
-      },
-      { rootMargin: "200px" }, // start loading 200px before reaching bottom
-    );
-
-    observer.observe(sentinelRef.current);
-    return () => observer.disconnect();
-  }, [hasMore, loadingMore]);
-
-  // ── Create folder ──────────────────────────────────────────────────────────
+  //  Create folder ─
 
   const handleCreateFolder = async (name: string) => {
     if (!name || !user) return;
@@ -170,7 +156,6 @@ const FilesView = ({ folderId }: FilesViewProps) => {
         parentFolderId: folderId ?? null,
       });
       setShowCreateFolder(false);
-      // Reset and reload from page 1
       setItems([]);
       setPage(1);
       fetchPage(1, true);
@@ -181,30 +166,25 @@ const FilesView = ({ folderId }: FilesViewProps) => {
     }
   };
 
-  // ── Delete ─────────────────────────────────────────────────────────────────
+  //  Delete
 
   const handleDelete = async (item: FileItem) => {
     if (!confirm(`Are you sure you want to delete ${item.name}?`)) return;
-
-    // Optimistic remove
     setItems((prev) => prev.filter((f) => f.id !== item.id));
-
     try {
       await axios.delete(`/api/file/${item.id}`);
     } catch (error) {
       console.error("Error deleting file:", error);
       alert("Failed to delete file");
-      // Reload to restore correct state
       fetchPage(1, true);
     }
   };
 
-  // ── Rename ─────────────────────────────────────────────────────────────────
+  //  Rename
 
   const handleRename = async (item: FileItem) => {
     const newName = prompt("Enter new name:", item.name);
     if (!newName || newName === item.name) return;
-
     try {
       await axios.post(`/api/file/${item.id}/rename`, { filename: newName });
       setItems((prev) =>
@@ -216,14 +196,12 @@ const FilesView = ({ folderId }: FilesViewProps) => {
     }
   };
 
-  // ── Filter (client-side on already-loaded items) ───────────────────────────
+  //  Filter
 
   const filteredItems = items.filter((file) => {
     if (filters.type !== "All") {
-      const typeMatch = file.type.toLowerCase() === filters.type.toLowerCase();
-      if (!typeMatch) return false;
+      if (file.type.toLowerCase() !== filters.type.toLowerCase()) return false;
     }
-
     if (filters.modified !== "All") {
       if (file.modified === "—") return false;
       const fileDate = new Date(file.modified);
@@ -233,15 +211,21 @@ const FilesView = ({ folderId }: FilesViewProps) => {
       if (filters.modified === "Last 14 days" && fileDate < subDays(now, 14))
         return false;
     }
-
     if (filters.source !== "All") {
       if (file.author !== filters.source) return false;
     }
-
     return true;
   });
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // const handleOpen = (item: FileItem) => {
+  //   if (item.type === "folder") {
+  //     router.push(`/files/${item.id}`);
+  //   } else {
+  //     // open preview, download, etc.
+  //   }
+  // };
+
+  //  Render
 
   return (
     <Sidenav>
@@ -255,18 +239,26 @@ const FilesView = ({ folderId }: FilesViewProps) => {
         {/* Header */}
         <div className="flex-between gap-2 mt-2">
           <h1 className="font-bold text-xl whitespace-nowrap">
-            {folderName ?? "My Files"}
+            {folderName ?? (isCollegeView ? "College Files" : "My Files")}
           </h1>
 
-          <div className="hidden sm:flex space-x-2 gap-y-2">
-            {user?.role === "admin" && <Upload folderId={folderId} onUploadComplete={() => fetchPage(1, true)}/>}
-            <Create
-              onCreateFolderClick={() => setShowCreateFolder(true)}
-              creating={creating}
-            />
-          </div>
+          {/* Upload / Create — hidden in college view */}
+          {!isCollegeView && (
+            <div className="hidden sm:flex space-x-2 gap-y-2">
+              {user?.role === "admin" && (
+                <Upload
+                  folderId={folderId}
+                  onUploadComplete={() => fetchPage(1, true)}
+                />
+              )}
+              <Create
+                onCreateFolderClick={() => setShowCreateFolder(true)}
+                creating={creating}
+              />
+            </div>
+          )}
 
-          <Floating />
+          {!isCollegeView && <Floating />}
         </div>
 
         <SortFilters
@@ -274,8 +266,8 @@ const FilesView = ({ folderId }: FilesViewProps) => {
           setFilters={setFilters}
         />
 
-        {/* Create Folder Input */}
-        {showCreateFolder && (
+        {/* Create Folder Input — hidden in college view */}
+        {!isCollegeView && showCreateFolder && (
           <div className="mt-4">
             <CreateFolder
               parentFolderId={folderId ?? null}
@@ -289,7 +281,6 @@ const FilesView = ({ folderId }: FilesViewProps) => {
         {/* File Table */}
         <div className="space-y-8 flex-1 min-h-0 mt-6">
           {loading ? (
-            // ── Initial skeleton ──────────────────────────────────────────────
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
               {Array.from({ length: 24 }).map((_, i) => (
                 <div
@@ -302,42 +293,18 @@ const FilesView = ({ folderId }: FilesViewProps) => {
             <>
               <FileTable
                 files={filteredItems}
-                onDeleteClick={handleDelete}
-                onRenameClick={user?.role === "admin" ? handleRename : undefined}
+                // In college view: no delete/rename, but show "Save to My Files"
+                onDeleteClick={isCollegeView ? undefined : handleDelete}
+                onRenameClick={
+                  !isCollegeView && user?.role === "admin"
+                    ? handleRename
+                    : undefined
+                }
+                isCollegeView={isCollegeView}
+                hasMore={hasMore}
+                loadingMore={loadingMore}
+                onLoadMore={handleLoadMore}
               />
-
-              {/* ── Load-more area ─────────────────────────────────────────── */}
-              {hasMore && (
-                <div
-                  ref={sentinelRef}
-                  className="flex flex-col items-center gap-3 py-4">
-                  {loadingMore ? (
-                    // Loading more skeleton — 16 items to match next page size
-                    <div className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-                      {Array.from({ length: 16 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="animate-pulse rounded-xl bg-gray-100 h-28"
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    // Fallback manual button (shown briefly before observer fires)
-                    <button
-                      onClick={() => setPage((p) => p + 1)}
-                      className="px-6 py-2 rounded-full border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
-                      Load more files
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* End-of-list message */}
-              {!hasMore && items.length > 0 && (
-                <p className="text-center text-xs text-gray-400 py-4">
-                  All {items.length} file{items.length !== 1 ? "s" : ""} loaded
-                </p>
-              )}
             </>
           )}
         </div>

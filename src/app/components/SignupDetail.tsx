@@ -60,7 +60,7 @@ const Details = ({ email }: Detailsprop) => {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
-        values.password
+        values.password,
       );
       const user = userCredential.user;
       const idToken = await user.getIdToken();
@@ -71,6 +71,11 @@ const Details = ({ email }: Detailsprop) => {
         idToken,
         name: values.name,
         collgeId: values.collegeId,
+        // NOTE: Sending email and uid directly as fallback while server-side
+        // Firebase token verification is temporarily disabled.
+        // Remove these once adminAuth.verifyIdToken is re-enabled.
+        email: user.email,
+        uid: user.uid,
       });
       
       router.push("/dashboard");
@@ -121,8 +126,7 @@ const Details = ({ email }: Detailsprop) => {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="w-4/5 mx-auto sm:w-3/5 md:w-2/5 mt-20"
-          >
+            className="w-4/5 mx-auto sm:w-3/5 md:w-2/5 mt-20">
             <Image
               src="/asva logo.jpg"
               alt="asva logo"
@@ -140,7 +144,11 @@ const Details = ({ email }: Detailsprop) => {
                 <FormItem>
                   <div className="mx-auto mt-4 w-4/5">
                     <FormControl>
-                      <Input placeholder="Full Name" {...field} className="h-11"/>
+                      <Input
+                        placeholder="Full Name"
+                        {...field}
+                        className="h-11"
+                      />
                     </FormControl>
                   </div>
                   <FormMessage className="text-center mb-4" />
@@ -170,42 +178,47 @@ const Details = ({ email }: Detailsprop) => {
               <div className="mx-auto w-4/5 mt-2 text-sm space-y-1">
                 <p
                   className={
-                    passwordChecks.length ? "text-green-600 flex items-center gap-1" : "text-red-500 flex items-center gap-1"
-                  }
-                >
-                  {passwordChecks.length ? <Check/> : <X/>}
-                   At least 8 characters
+                    passwordChecks.length
+                      ? "text-green-600 flex items-center gap-1"
+                      : "text-red-500 flex items-center gap-1"
+                  }>
+                  {passwordChecks.length ? <Check /> : <X />}
+                  At least 8 characters
                 </p>
                 <p
                   className={
-                    passwordChecks.lowercase ? "text-green-600 flex items-center gap-1" : "text-red-500 flex items-center gap-1"
-                  }
-                >
-                  {passwordChecks.lowercase ? <Check/> : <X/>}
+                    passwordChecks.lowercase
+                      ? "text-green-600 flex items-center gap-1"
+                      : "text-red-500 flex items-center gap-1"
+                  }>
+                  {passwordChecks.lowercase ? <Check /> : <X />}
                   One lowercase letter
                 </p>
                 <p
                   className={
-                    passwordChecks.uppercase ? "text-green-600 flex items-center gap-1" : "text-red-500 flex items-center gap-1"
-                  }
-                >
-                  {passwordChecks.uppercase ? <Check/> : <X/>}
+                    passwordChecks.uppercase
+                      ? "text-green-600 flex items-center gap-1"
+                      : "text-red-500 flex items-center gap-1"
+                  }>
+                  {passwordChecks.uppercase ? <Check /> : <X />}
                   One uppercase letter
                 </p>
                 <p
                   className={
-                    passwordChecks.number ? "text-green-600 flex items-center gap-1" : "text-red-500 flex items-center gap-1"
-                  }
-                >
-                  {passwordChecks.number ? <Check/> : <X/>}
+                    passwordChecks.number
+                      ? "text-green-600 flex items-center gap-1"
+                      : "text-red-500 flex items-center gap-1"
+                  }>
+                  {passwordChecks.number ? <Check /> : <X />}
                   One number
                 </p>
                 <p
                   className={
-                    passwordChecks.special ? "text-green-600 flex items-center gap-1" : "text-red-500 flex items-center gap-1"
-                  }
-                >
-                  {passwordChecks.special ? <Check/> : <X/>}
+                    passwordChecks.special
+                      ? "text-green-600 flex items-center gap-1"
+                      : "text-red-500 flex items-center gap-1"
+                  }>
+                  {passwordChecks.special ? <Check /> : <X />}
                   One special character
                 </p>
               </div>
@@ -234,8 +247,7 @@ const Details = ({ email }: Detailsprop) => {
               <p
                 className={`text-center text-sm mt-1 ${
                   passwordsMatch ? "text-green-600" : "text-red-500"
-                }`}
-              >
+                }`}>
                 {passwordsMatch ? "Passwords match" : "Passwords do not match"}
               </p>
             )}
@@ -261,15 +273,16 @@ const Details = ({ email }: Detailsprop) => {
               className="mx-auto block mt-4 w-4/5"
               disabled={
                 !Object.values(passwordChecks).every(Boolean) || !passwordsMatch
-              }
-            >
+              }>
               Create Account
             </Button>
 
             <p className="text-center mt-4 mb-4">
               already have an account?{" "}
               <span>
-                <Link href="#" className="underline">
+                <Link
+                  href="#"
+                  className="underline">
                   Login
                 </Link>
               </span>

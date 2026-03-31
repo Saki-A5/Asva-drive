@@ -51,11 +51,13 @@ const CollegeFiles = () => {
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
 
   const collegeId = Object.entries(COLLEGE_META).find(
-    ([, meta]) => meta.slug === slug
+    ([, meta]) => meta.slug === slug,
   )?.[0];
 
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
-  const [breadcrumbs, setBreadcrumbs] = useState<{ _id: string; filename: string }[]>([]);
+  const [breadcrumbs, setBreadcrumbs] = useState<
+    { _id: string; filename: string }[]
+  >([]);
   const [folderName, setFolderName] = useState<string | null>(null);
   const [items, setItems] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,9 +87,7 @@ const CollegeFiles = () => {
         name: item.filename,
         type: getFileIconType(item),
         author:
-          item.file?.uploadedBy?.name ??
-          item.file?.uploadedBy?.email ??
-          "—",
+          item.file?.uploadedBy?.name ?? item.file?.uploadedBy?.email ?? "—",
         size: item.file?.sizeBytes
           ? `${(item.file.sizeBytes / (1024 * 1024)).toFixed(1)} MB`
           : "—",
@@ -135,8 +135,7 @@ const CollegeFiles = () => {
                 const parent = breadcrumbs[breadcrumbs.length - 2];
                 setCurrentFolderId(parent?._id ?? null);
               }}
-              className="text-sm text-blue-600 hover:underline"
-            >
+              className="text-sm text-blue-600 hover:underline">
               ← Back
             </button>
           )}
