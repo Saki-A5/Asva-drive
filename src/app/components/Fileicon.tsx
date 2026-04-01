@@ -5,6 +5,7 @@ import { FileArchive, FileSpreadsheet, FileText, Folder } from 'lucide-react';
 type FileiconProps = {
   type: string | undefined;
   isSheetPage: boolean;
+  className?: string;
 };
 const Fileicon = ({ type, isSheetPage }: FileiconProps) => {
   const sizeClass = isSheetPage ? 'h-32 w-32' : 'h-8 w-8';
