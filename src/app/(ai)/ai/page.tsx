@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import SourcesSidebar from "./components/Historysidebar";
 import ChatArea from "./components/Chatarea";
+import HistorySidebar from "./components/Historysidebar";
 import ModeInfoPanel from "./components/ModeInfoPanel";
 import { PanelLeftOpen } from "lucide-react";
 
@@ -10,48 +10,51 @@ type Mode = "Socratic" | "Standard" | "Explain";
 export default function AiPage() {
   const [currentMode, setCurrentMode] = useState<Mode>("Socratic");
   const [showModePanel, setShowModePanel] = useState(false);
-  const [showSourcesDrawer, setShowSourcesDrawer] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
 
   return (
     <div className="flex h-screen overflow-hidden bg-gradient-to-br from-[#02427E] to-[#05081A] gap-2 p-2 md:gap-3 md:p-3">
-      {/* ── MOBILE: Sources drawer overlay ── */}
-      {showSourcesDrawer && (
+      {/* Mobile drawer backdrop */}
+      {showDrawer && (
         <div
           className="fixed inset-0 z-40 bg-black/50 md:hidden"
-          onClick={() => setShowSourcesDrawer(false)}
+          onClick={() => setShowDrawer(false)}
         />
       )}
+
+      {/* Mobile drawer */}
       <div
-        className={`
-          fixed top-0 left-0 h-full z-50 transition-transform duration-300 md:hidden
-          ${showSourcesDrawer ? "translate-x-0" : "-translate-x-full"}
-        `}
+        className={`fixed top-0 left-0 h-full z-50 transition-transform duration-300 md:hidden ${showDrawer ? "translate-x-0" : "-translate-x-full"}`}
       >
-        <SourcesSidebar onClose={() => setShowSourcesDrawer(false)} />
+        <HistorySidebar
+          onClose={() => setShowDrawer(false)}
+          onNewChat={() => {
+            setShowDrawer(false);
+          }}
+        />
       </div>
 
-      {/* ── DESKTOP: Sources panel (always visible md+) ── */}
+      {/* Desktop sidebar */}
       <div className="hidden md:flex shrink-0 h-full rounded-2xl overflow-hidden">
-        <SourcesSidebar />
+        <HistorySidebar onNewChat={() => {}} />
       </div>
 
-      {/* ── MAIN CONTENT ── */}
+      {/* Main content */}
       <div className="flex-1 h-full min-w-0 flex flex-col">
         {/* Mobile top bar */}
         <div className="flex items-center gap-3 md:hidden mb-2">
           <button
-            onClick={() => setShowSourcesDrawer(true)}
+            onClick={() => setShowDrawer(true)}
             className="p-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
-            aria-label="Open sources"
+            aria-label="Open history"
           >
             <PanelLeftOpen className="h-5 w-5" />
           </button>
           <span className="text-white text-sm font-semibold">ASVA AI</span>
         </div>
 
-        {/* Chat + Mode panel row */}
         <div className="flex flex-1 min-h-0 gap-2 md:gap-3">
-          {/* Chat area */}
+          {/* Chat */}
           <div className="flex-1 h-full min-w-0 bg-white rounded-2xl overflow-hidden shadow-sm">
             <ChatArea
               onModeChange={(m) => {
@@ -61,7 +64,7 @@ export default function AiPage() {
             />
           </div>
 
-          {/* Mode info panel — hidden on mobile, shown on lg+ when active */}
+          {/* Mode panel — desktop only */}
           {showModePanel && (
             <div className="hidden lg:flex shrink-0 h-full rounded-2xl overflow-hidden shadow-sm">
               <ModeInfoPanel
@@ -73,10 +76,10 @@ export default function AiPage() {
         </div>
       </div>
 
-      {/* Mode info panel — mobile bottom sheet */}
+      {/* Mode panel — mobile bottom sheet */}
       {showModePanel && (
         <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
-          <div className="bg-white rounded-t-2xl shadow-xl p-5 mx-2 mb-0">
+          <div className="bg-white rounded-t-2xl shadow-xl p-5 mx-2">
             <ModeInfoPanel
               mode={currentMode}
               onClose={() => setShowModePanel(false)}
