@@ -5,11 +5,7 @@ import { Send, ChevronDown } from "lucide-react";
 type Mode = "Socratic" | "Standard" | "Explain";
 const modes: Mode[] = ["Socratic", "Standard", "Explain"];
 
-type Message = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-};
+type Message = { id: string; role: "user" | "assistant"; content: string };
 
 export default function ChatArea({
   onModeChange,
@@ -30,9 +26,8 @@ export default function ChatArea({
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node))
         setShowModeMenu(false);
-      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -47,25 +42,15 @@ export default function ChatArea({
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || loading) return;
-
-    const userMsg: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: text,
-    };
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now().toString(), role: "user", content: text },
+    ]);
     setInput("");
     setLoading(true);
-
     try {
       // ---------------------------------------------------------------
-      // TODO: Replace this with your own LLM API call.
-      // Available context:
-      //   - text      → current user message (string)
-      //   - messages  → full conversation history (Message[])
-      //   - mode      → "Socratic" | "Standard" | "Explain"
-      //
-      // Example using a Next.js API route:
+      // TODO: Replace with your own LLM API call.
       //   const res = await fetch("/api/chat", {
       //     method: "POST",
       //     headers: { "Content-Type": "application/json" },
@@ -75,7 +60,6 @@ export default function ChatArea({
       //   const reply = data.reply;
       // ---------------------------------------------------------------
       const reply = ""; // ← replace with your LLM response
-
       setMessages((prev) => [
         ...prev,
         { id: (Date.now() + 1).toString(), role: "assistant", content: reply },
@@ -103,32 +87,32 @@ export default function ChatArea({
 
   return (
     <div className="flex flex-col h-full bg-white overflow-hidden">
-      {/* Header — full width */}
-      <div className="w-full px-6 py-3 border-b border-gray-100">
+      {/* Header */}
+      <div className="w-full px-4 sm:px-6 py-3 border-b border-gray-100">
         <h1 className="text-sm font-semibold text-gray-800">Chat</h1>
       </div>
 
-      {/* Messages — scrollable, content constrained to max-w-3xl centered */}
+      {/* Messages */}
       <div className="flex-1 overflow-y-auto w-full">
-        <div className="mx-auto w-full max-w-3xl px-6 py-6">
+        <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-4 sm:py-6">
           {messages.length === 0 && !loading ? (
-            <div className="flex flex-col items-center justify-center h-full text-center mt-40">
-              <h2 className="text-2xl font-bold text-gray-800 mb-1">
+            <div className="flex flex-col items-center justify-center text-center mt-24 sm:mt-40">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">
                 Welcome to ASVA AI
               </h2>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-400 text-xs sm:text-sm">
                 Create summaries and projects with our different modes
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3 sm:gap-4">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+                    className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap ${
                       msg.role === "user"
                         ? "bg-[#02427E] text-white"
                         : "bg-gray-100 text-gray-800"
@@ -138,7 +122,6 @@ export default function ChatArea({
                   </div>
                 </div>
               ))}
-
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-gray-100 rounded-2xl px-4 py-3 flex gap-1 items-center">
@@ -154,17 +137,17 @@ export default function ChatArea({
         </div>
       </div>
 
-      {/* Input bar — full width container, input constrained to max-w-3xl centered */}
-      <div className="w-full px-6 pb-5 pt-3 border-t border-gray-100">
+      {/* Input bar */}
+      <div className="w-full px-3 sm:px-6 pb-3 sm:pb-5 pt-2 sm:pt-3 border-t border-gray-100">
         <div className="mx-auto w-full max-w-3xl">
-          <div className="flex items-end gap-2 border border-gray-200 rounded-2xl px-4 py-3 bg-white shadow-sm">
+          <div className="flex items-end gap-2 border border-gray-200 rounded-2xl px-3 sm:px-4 py-2 sm:py-3 bg-white shadow-sm">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask anything..."
               rows={1}
-              className="flex-1 resize-none text-sm text-gray-700 placeholder-gray-400 outline-none bg-transparent max-h-32 leading-relaxed"
+              className="flex-1 resize-none text-xs sm:text-sm text-gray-700 placeholder-gray-400 outline-none bg-transparent max-h-32 leading-relaxed"
               style={{ overflow: "hidden" }}
               onInput={(e) => {
                 const t = e.currentTarget;
@@ -172,24 +155,21 @@ export default function ChatArea({
                 t.style.height = t.scrollHeight + "px";
               }}
             />
-
-            {/* Mode selector */}
             <div className="relative flex-shrink-0" ref={menuRef}>
               <button
                 onClick={() => setShowModeMenu((v) => !v)}
-                className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors font-medium"
+                className="flex items-center gap-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 transition-colors font-medium"
               >
                 {mode}
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
               </button>
-
               {showModeMenu && (
-                <div className="absolute bottom-full mb-2 right-0 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden w-36 z-50">
+                <div className="absolute bottom-full mb-2 right-0 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden w-32 sm:w-36 z-50">
                   {modes.map((m) => (
                     <button
                       key={m}
                       onClick={() => selectMode(m)}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${
+                      className={`w-full text-left px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm hover:bg-gray-50 transition-colors ${
                         m === mode
                           ? "text-[#02427E] font-semibold"
                           : "text-gray-700"
@@ -201,15 +181,13 @@ export default function ChatArea({
                 </div>
               )}
             </div>
-
-            {/* Send button */}
             <button
               onClick={sendMessage}
               disabled={!input.trim() || loading}
               className="flex-shrink-0 text-gray-400 hover:text-[#02427E] disabled:opacity-40 transition-colors"
               aria-label="Send"
             >
-              <Send className="h-5 w-5" />
+              <Send className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
         </div>
