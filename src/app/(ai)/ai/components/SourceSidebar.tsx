@@ -1,12 +1,19 @@
 "use client";
 import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import {
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
 import SourcesUploadModal from "./SourceUploadModal";
+import Link from "next/link";
+import Image from "next/image";
 
 type Source = {
   id: string;
   label: string;
-  icon?: React.ReactNode;
 };
 
 const defaultSources: Source[] = [
@@ -14,7 +21,6 @@ const defaultSources: Source[] = [
   { id: "2", label: "CSC 407 - netcentric..." },
 ];
 
-// Small grid-of-squares icon to mimic the document icon in the screenshot
 const DocIcon = () => (
   <svg
     width="16"
@@ -68,15 +74,13 @@ export default function SourcesSidebar() {
     new Set(defaultSources.map((s) => s.id)),
   );
   const [modalOpen, setModalOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const allChecked = checkedIds.size === sources.length;
 
   const toggleAll = () => {
-    if (allChecked) {
-      setCheckedIds(new Set());
-    } else {
-      setCheckedIds(new Set(sources.map((s) => s.id)));
-    }
+    if (allChecked) setCheckedIds(new Set());
+    else setCheckedIds(new Set(sources.map((s) => s.id)));
   };
 
   const toggleOne = (id: string) => {
@@ -88,9 +92,94 @@ export default function SourcesSidebar() {
     });
   };
 
+  /* ── COLLAPSED STATE ── */
+  if (collapsed) {
+    return (
+      <div className="flex flex-col items-center h-full w-14 bg-gradient-to-b from-[#02427E] to-[#05081A] text-white py-4 gap-4">
+        {/* Expand button */}
+        <button
+          onClick={() => setCollapsed(false)}
+          className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+          aria-label="Expand sidebar"
+        >
+          <PanelLeftOpen className="h-4 w-4" />
+        </button>
+
+        {/* Doc icons for each source */}
+        <div className="flex flex-col gap-3 flex-1 items-center mt-2">
+          {sources.map((source) => (
+            <div key={source.id} title={source.label}>
+              <DocIcon />
+            </div>
+          ))}
+        </div>
+
+        {/* Add sources icon */}
+        <button
+          onClick={() => setModalOpen(true)}
+          className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+          aria-label="Add sources"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+
+        <SourcesUploadModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onFilesSelected={(files) => {
+            const newSources = files.map((f) => ({
+              id: Date.now().toString() + f.name,
+              label: f.name,
+            }));
+            setSources((prev) => [...prev, ...newSources]);
+            setCheckedIds((prev) => {
+              const next = new Set(prev);
+              newSources.forEach((s) => next.add(s.id));
+              return next;
+            });
+          }}
+        />
+      </div>
+    );
+  }
+
+  /* ── EXPANDED STATE ── */
   return (
-    <div className="flex flex-col h-full w-56 bg-linear-to-b from-[#02427E] to-[#05081A] text-white p-4">
-      {/* Header */}
+    <div className="flex flex-col h-full w-56 bg-gradient-to-b from-[#02427E] to-[#05081A] text-white p-4">
+      {/* Top bar: back button + logo + collapse */}
+      <div className="flex items-center justify-between mb-4">
+        {/* Back to home */}
+        <Link
+          href="/"
+          className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+          aria-label="Back to home"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Link>
+
+        {/* Logo + name */}
+        <div className="flex items-center gap-1.5">
+          <Image
+            src="/asva logo.png"
+            alt="ASVA Logo"
+            width={20}
+            height={20}
+            className="h-5 w-5"
+          />
+          <span className="text-sm font-semibold tracking-wide">ASVA AI</span>
+        </div>
+
+        {/* Collapse button */}
+        <button
+          onClick={() => setCollapsed(true)}
+          className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+          aria-label="Collapse sidebar"
+        >
+          <PanelLeftClose className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Sources header */}
       <h2 className="text-base font-bold mb-3 tracking-wide">Sources</h2>
 
       {/* Select all row */}
