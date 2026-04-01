@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import SourcesSidebar from "./components/SourceSidebar";
+import SourcesSidebar from "./components/Historysidebar";
 import ChatArea from "./components/Chatarea";
 import ModeInfoPanel from "./components/ModeInfoPanel";
 import { PanelLeftOpen } from "lucide-react";
