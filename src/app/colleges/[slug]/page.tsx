@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { COLLEGE_META } from "@/lib/college";
 import FileTable from "@/app/components/FileTable";
 import Breadcrumbs from "@/app/components/Breadcrumbs";
+import Sidenav from "@/app/components/Sidenav";
+import Loginnav from "@/app/components/Loginnav";
 import { FileItem } from "@/types/File";
 import Loginnav from "@/app/components/Loginnav";
 
@@ -50,10 +52,9 @@ const CollegeFiles = () => {
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
 
   const collegeId = Object.entries(COLLEGE_META).find(
-    ([, meta]) => meta.slug === slug
+    ([, meta]) => meta.slug === slug,
   )?.[0];
 
-  // Track which folder we're currently inside (null = root)
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<
     { _id: string; filename: string }[]
@@ -72,16 +73,12 @@ const CollegeFiles = () => {
       let name: string | null = null;
 
       if (folderId) {
-        // Reuse the existing folder endpoint — same one "My Files" uses
         const res = await axios.get(`/api/file/folder/${folderId}`);
         data = res.data.contents;
         crumbs = res.data.breadcrumbs ?? [];
         name = res.data.folderName ?? null;
       } else {
-        // Root of this college — fetch from the college tree endpoint
         const res = await axios.get(`/api/colleges/${collegeId}/tree`);
-        // The tree endpoint returns nested nodes; we only want the top level
-        // (children are fetched on demand via the folder endpoint above)
         data = res.data.tree;
         crumbs = [];
         name = null;
@@ -116,14 +113,6 @@ const CollegeFiles = () => {
     fetchContents(currentFolderId);
   }, [currentFolderId, collegeId]);
 
-  const handleFolderClick = (item: FileItem) => {
-    setCurrentFolderId(item.id);
-  };
-
-  const handleFileClick = (item: FileItem) => {
-    router.push(`/file/${item.id}`);
-  };
-
   const collegeName = collegeId
     ? COLLEGE_META[collegeId as keyof typeof COLLEGE_META]?.label
     : slug;
@@ -141,55 +130,49 @@ const CollegeFiles = () => {
   });
 
   return (
-    <section className="p-8">
-      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems.length}/>
-      <div className="px-6 py-4 flex flex-col flex-1 min-h-0">
-        {/* Breadcrumbs — show only when inside a subfolder */}
+    <Sidenav>
+      <Loginnav />
+
+      <div className="px-6 flex flex-col flex-1 min-h-0">
         {currentFolderId && breadcrumbs.length > 0 && (
           <Breadcrumbs folders={breadcrumbs} />
         )}
 
-        {/* Back button when inside a subfolder */}
-        {currentFolderId && (
-          <button
-            onClick={() => {
-              // Go up one level using the breadcrumb trail
-              const parent = breadcrumbs[breadcrumbs.length - 2];
-              setCurrentFolderId(parent?._id ?? null);
-            }}
-            className="text-sm text-blue-600 hover:underline mb-2 self-start"
-          >
-            ← Back
-          </button>
-        )}
+        <div className="flex items-center justify-between gap-2 mt-2">
+          <h1 className="font-bold text-xl whitespace-nowrap">
+            {folderName ?? `${collegeName} Files`}
+          </h1>
 
-        <h1 className="font-bold text-xl mb-4">
-          {folderName ?? `${collegeName} Files`}
-        </h1>
+          {currentFolderId && (
+            <button
+              onClick={() => {
+                const parent = breadcrumbs[breadcrumbs.length - 2];
+                setCurrentFolderId(parent?._id ?? null);
+              }}
+              className="text-sm text-blue-600 hover:underline">
+              ← Back
+            </button>
+          )}
+        </div>
 
-        {loading ? (
-          <div className="text-gray-500">Loading files...</div>
-        ) : filteredItems.length === 0 && searchQuery.trim() ? (
-          <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-            <p className="text-lg font-medium">No results found</p>
-            <p className="text-sm mt-1">No files match "{searchQuery}"</p>
-          </div>
-        ) : (
-          <FileTable
-            files={filteredItems}
-            onOpen={(item) => {
-              if (item.type === "folder") {
-                setCurrentFolderId(item.id);
-              } else {
-                router.push(`/file/${item.id}`);
-              }
-            }}
-            onDeleteClick={undefined}
-            onRenameClick={undefined}
-          />
-        )}
+        <div className="space-y-8 flex-1 min-h-0 mt-6">
+          {loading ? (
+            <div className="text-gray-500">Loading files...</div>
+          ) : (
+            <FileTable
+              files={items}
+              onOpen={(item) => {
+                if (item.type === "folder") {
+                  setCurrentFolderId(item.id);
+                } else {
+                  router.push(`/file/${item.id}`);
+                }
+              }}
+            />
+          )}
+        </div>
       </div>
-    </section>
+    </Sidenav>
   );
 };
 

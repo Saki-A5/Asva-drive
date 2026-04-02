@@ -36,6 +36,10 @@ export default function ResetPasswordPage() {
 
   const form = useForm<ResetPasswordForm>({
     resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
   });
 
   useEffect(() => {

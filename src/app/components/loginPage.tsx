@@ -21,7 +21,11 @@ type loginForm = z.infer<typeof loginSchema>
 
 const Loginpage = () => {
     const form = useForm<loginForm>({
-        resolver: zodResolver(loginSchema)
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: "",
+            password: "",
+        },
     })
 
     const router = useRouter()

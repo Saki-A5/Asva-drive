@@ -30,7 +30,6 @@ export const GET = async (req: Request, { params }: any) => {
 
     try {
         const signedUrl = getAssetDeliveryUrl(fileItem.file.cloudinaryUrl, {
-            attachment: true,
             resource_type: fileItem.file.resourceType,
             sign_url: true,
             secure: true,
