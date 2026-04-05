@@ -56,8 +56,6 @@ const SearchBar = ({
         const data = res.data || [];
 
         setResults(data);
-
-        // 👇 only show dropdown if local table found nothing
         if (localResultsCount === 0 && data.length > 0) {
           setShowDropdown(true);
         } else {
