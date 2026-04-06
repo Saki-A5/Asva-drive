@@ -6,6 +6,8 @@ import { fileQueue } from "@/lib/queue";
 import { requireRole } from "@/lib/roles";
 import FileItemModel from "@/models/fileItem";
 import { Types } from "mongoose";
+import { adminAuth } from "@/lib/firebaseAdmin";
+import User from "@/models/users";
 
 export const runtime = 'nodejs';
 
@@ -13,8 +15,29 @@ export const POST = async (req: Request) => {
     try {
         await dbConnect();
 
-        // const {user, error, status} = await requireRole(req, ['admin']);
-        // if(error) return NextResponse.json({error}, {status});
+        const cookies = req.headers.get("cookie") || "";
+        const match = cookies.match(/token=([^;]+)/);
+        const sessionCookie = match ? match[1] : null;
+
+        if (!sessionCookie) {
+            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+        }
+
+        const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+        const userEmail = decodedToken.email;
+
+        if (!userEmail) {
+            return NextResponse.json({ message: "Missing user id" }, { status: 401 });
+        }
+
+        const user = await User.findOne({ email: userEmail });
+        if (!user) {
+            return NextResponse.json({ message: "User not found" }, { status: 404 });
+        }
+
+        if (user.role !== "admin") {
+            return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+        }
 
         const { fileItemId } = await req.json();
 
@@ -54,10 +77,20 @@ export const POST = async (req: Request) => {
             const job = await fileQueue.getJob(`delete-file-${fileItemId}`);
             if (job) await job.remove();
 
-            // restore the file
-            await FileModel.findByIdAndUpdate(fileItemId, { $set: { isDeleted: false, deletedAt: null } });
-            // restore referenced files
-            await FileModel.updateMany({ "reference.referencedFile": fileItemId }, { $set: { isDeleted: false, deletedAt: null } })
+            // restore the file item itself
+            await FileItemModel.updateMany(
+                { file: fileItem.file },
+                { $set: { isDeleted: false, deletedAt: null } }
+            );
+
+            // restore the underlying file (and any referenced file models)
+            if (fileItem.file) {
+                await FileModel.findByIdAndUpdate(fileItem.file, { $set: { isDeleted: false, deletedAt: null } });
+                await FileModel.updateMany(
+                    { "reference.referencedFile": fileItem.file },
+                    { $set: { isDeleted: false, deletedAt: null } }
+                );
+            }
         }
 
         return NextResponse.json({ message: "File has been successfully restored" });

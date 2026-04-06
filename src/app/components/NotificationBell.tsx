@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import axios from "axios";
+import useCurrentUser from "@/hooks/useCurrentUser";
 import NotificationDropdown from "./NotificationDropdown";
 
 interface Notification {
@@ -21,6 +22,7 @@ const NotificationBell = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const { user } = useCurrentUser();
 
   // Fetch notifications once
   useEffect(() => {
@@ -65,7 +67,7 @@ const markAllAsRead = async () => {
   try {
     await axios.patch(
       "/api/notifications/read-all",
-      {},
+      { userId: user?._id },
       { withCredentials: true }
     );
 

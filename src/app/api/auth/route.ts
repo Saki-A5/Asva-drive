@@ -5,6 +5,7 @@ import { adminAuth } from "@/lib/firebaseAdmin";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/users";
 import FileModel from "@/models/files";
+import Otp from "@/models/Otp";
 import { Types } from "mongoose";
 import FileItemModel from "@/models/fileItem";
 import { createRootIfNotExists } from "@/lib/fileUtil";
@@ -22,52 +23,69 @@ export async function POST(req: Request) {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const { uid, email, name: firebaseName } = decodedToken;
 
-    const sessionCookie = await adminAuth.createSessionCookie(idToken, { 
-      expiresIn: 60 * 60 * 24 * 5 * 1000 
-    });
-
     if (!email) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
+    const sessionCookie = await adminAuth.createSessionCookie(idToken, {
+      expiresIn: 60 * 60 * 24 * 5 * 1000,
+    });
+
     await dbConnect();
+
+    // Check if OTP for this email was verified
+    const otpRecord = await Otp.findOne({ email });
+    if (!otpRecord || !otpRecord.verified) {
+      return NextResponse.json(
+        { error: "Email verification required. Please verify your OTP." },
+        { status: 403 },
+      );
+    }
 
     // Find or create user
     let user = await User.findOne({ email });
     if (!user) {
       user = await User.create({
-        uid,
+        firebaseUid: uid,
         email,
-        name: clientName || firebaseName || email ? email.split("@")[0] : "User"
+        name: clientName || firebaseName || email.split("@")[0],
       });
+    } else {
+      ((user.firebaseUid = uid), await user.save());
     }
 
-    // find or create the root folder
-    let rootFolderId = await createRootIfNotExists(uid, "User");
+    let rootFolderId: string;
     try {
-      rootFolderId = await createRootIfNotExists(uid, "User");
-    } catch (error) {
-      console.error("Error creating root folder:", error);
-      throw new Error("Failed to create root folder");
+      rootFolderId = await createRootIfNotExists(user._id.toString(), "User");
+    } catch (e: any) {
+      console.log("[Auth] An error occured while creating the root folder");
+      throw new Error(e.message);
     }
+
+    // Clean up OTP record after successful signup
+    await Otp.deleteOne({ email });
+
     // Set authentication cookie
-    const res = NextResponse.json({ 
-      message: "Signup successful", 
-      user, 
+    const res = NextResponse.json({
+      message: "Signup successful",
+      user,
       rootFolder: rootFolderId,
     });
-    res.cookies.set("token", sessionCookie, { 
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === "production",  
-      path: '/',
+    res.cookies.set("token", sessionCookie, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
       maxAge: 60 * 60 * 24 * 5,
-      sameSite: 'lax'
+      sameSite: "lax",
     });
 
     return res;
   } catch (error: any) {
     console.error("Sign-up Error:", error);
     console.error("Stack Trace:", error?.stack);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

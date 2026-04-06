@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useState } from "react";
 import useCurrentUser from "@/hooks/useCurrentUser";
+import { usePathname } from "next/navigation";
 
 // Icon type for lucide-react components
 type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>;
@@ -47,6 +48,7 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
   const [mode, setMode] = useState<"open" | "collapsed" | "hidden">("open");
   const isCollapsed = mode === "collapsed";
   const { user, loading } = useCurrentUser();
+  const pathname = usePathname();
 
   if (loading) return null;
 
@@ -85,11 +87,17 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
                 <div className="space-y-2">
                   {section.links.map((link) => {
                     const Icon = link.icon;
+                    const isActive = pathname === link.href
                     return (
                       <Link
                         key={link.href}
                         href={link.href}
-                        className="flex items-center gap-2 font-semibold rounded-lg text-[10px]  px-2 py-1 hover:bg-accent hover:text-accent-foreground transition">
+                        className={`relative flex items-center gap-2 font-semibold rounded-lg text-[10px] px-2 py-1 hover:bg-accent hover:text-accent-foreground transition ${
+                          isActive ? "bg-accent/20 text-white" : ""
+                        }`}>
+                          {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] bg-white rounded-r-full" />
+                        )}
                         <Icon className="h-4 w-4" />
                         {!isCollapsed && (
                           <span className="text-sm">{link.label}</span>
@@ -105,6 +113,7 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
           // single link branch
           const single = section as LinkItem;
           const Icon = single.icon;
+          const isActive = pathname === single.href;
           const isCenteredIcon =
             isCollapsed && collapsedVisible.includes(single.href);
           const linkClass = isCenteredIcon
@@ -116,7 +125,10 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
             <div key={key}>
               <Link
                 href={single.href}
-                className={linkClass}>
+                className={`relative ${linkClass} ${isActive ? "bg-accent/20 text-white" : ""}`}>
+                {isActive && !isCollapsed && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] bg-white rounded-r-full" />
+                )}
                 <Icon className={iconClass} />
                 {!isCollapsed && (
                   <span className="text-sm">{single.label}</span>

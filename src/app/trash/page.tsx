@@ -7,8 +7,9 @@ import Loginnav from '../components/Loginnav';
 import FileTable from '../components/FileTable';
 import { FileItem } from '@/types/File';
 import useCurrentUser from '@/hooks/useCurrentUser';
-import SortFilters, {FilterState} from '../components/SortFilter';
-import DeleteModal from '../components/DeleteModal'; // Assuming you saved the modal here
+import SortFilters, { FilterState } from '../components/SortFilter';
+import DeleteModal from '../components/DeleteModal';
+import { useRouter } from 'next/navigation';
 
 const Trash = () => {
   const [trashedFiles, setTrashedFiles] = useState<FileItem[]>([]);
@@ -21,8 +22,17 @@ const Trash = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<FileItem | null>(null);
 
-  const { user } = useCurrentUser();
-  const userId = user?._id;
+  const { user, loading: userLoading } = useCurrentUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) {
+      router.replace('/files');
+      return;
+    }
+    if (user.role !== 'admin') router.replace('/files');
+  }, [user, router]);
 
   // Function to trigger the modal from the table
   const handleDeleteClick = (item: FileItem) => {
@@ -44,84 +54,73 @@ const Trash = () => {
     }
   };
 
+  const handleRestoreClick = async (item: FileItem) => {
+    try {
+      await axios.post('/api/file/restore', { fileItemId: item.id });
+      setTrashedFiles((prev) => prev.filter((f) => f.id !== item.id));
+    } catch (error) {
+      console.error('Error restoring item:', error);
+      alert('Failed to restore item');
+    }
+  };
+
   useEffect(() => {
     const getTrashedFiles = async () => {
-      if (!userId) return;
-
       try {
         setLoading(true);
-        // Update this endpoint to your actual trash endpoint
-        // const res = await axios.get('/api/file/trash', {
-        //   params: { ownerId: userId },
-        // });
+        const res = await axios.get('/api/file/trash');
+        const files = res.data?.data ?? [];
+        const mapped: FileItem[] = files.map((f: any) => {
+          if (f.isFolder) {
+            return {
+              id: f._id,
+              name: f.filename,
+              type: 'folder',
+              author: '_',
+              size: '—',
+              modified: f.updatedAt ? new Date(f.updatedAt).toDateString() : '—',
+              sharedUsers: [],
+            };
+          }
 
-        // const files = res.data?.data ?? [];
-        // const mapped: FileItem[] = files.map((f: any) => ({
-        //   id: f._id,
-        //   name: f.name,
-        //   type: f.mimeType?.split('/')[0] || 'folder',
-        //   author: f.folderName || 'General',
-        //   size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
-        //   modified: new Date(f.updatedAt).toDateString(),
-        //   sharedUsers: [],
-        // }));
-        // setTrashedFiles(mapped);
+          const mimeType = f.file?.mimeType ?? '';
+          const sizeBytes = f.file?.sizeBytes ?? 0;
+          const uploadedBy = f.file?.uploadedBy;
+
+          return {
+            id: f._id,
+            name: f.filename,
+            type: mimeType ? mimeType.split('/')[0] : 'file',
+            author: uploadedBy?.name ?? uploadedBy?.email ?? 'SMS',
+            size: sizeBytes
+              ? `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
+              : '—',
+            modified: f.file?.updatedAt
+              ? new Date(f.file.updatedAt).toDateString()
+              : '—',
+            sharedUsers: [],
+          };
+        });
+        setTrashedFiles(mapped);
       } catch (error) {
         console.error('Error fetching trashed files:', error);
       } finally {
-        // MOCK DATA for design preview
-        setTrashedFiles([
-          {
-            id: '1',
-            name: 'Past Questions',
-            type: 'folder',
-            author: 'Sciences',
-            size: '1.2GB',
-            modified: 'Jun 12, 2025',
-            sharedUsers: [],
-          },
-          {
-            id: '2',
-            name: 'C#/C++',
-            type: 'folder',
-            author: 'Engineering',
-            size: '2.7GB',
-            modified: 'Oct 12, 2025',
-            sharedUsers: [],
-          },
-          {
-            id: '3',
-            name: 'MATLAB',
-            type: 'folder',
-            author: 'Sciences',
-            size: '5.2GB',
-            modified: 'Jan 12, 2026',
-            sharedUsers: [],
-          },
-          {
-            id: '4',
-            name: 'Previous Work',
-            type: 'pdf',
-            author: 'Sciences',
-            size: '1.0GB',
-            modified: 'Nov 8, 2025',
-            sharedUsers: [],
-          },
-          {
-            id: '5',
-            name: 'AutoCAD Workbook',
-            type: 'pdf',
-            author: 'Engineering',
-            size: '320MB',
-            modified: 'Yesterday',
-            sharedUsers: [],
-          },
-        ]);
         setLoading(false);
       }
     };
+
+    if (userLoading) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    if (user.role !== 'admin') {
+      setLoading(false);
+      return;
+    }
+
     getTrashedFiles();
-  }, [userId]);
+  }, [user, userLoading]);
 
   return (
     <Sidenav>
@@ -144,6 +143,7 @@ const Trash = () => {
               <FileTable
                 files={trashedFiles}
                 onDeleteClick={handleDeleteClick}
+                onRestoreClick={handleRestoreClick}
               />
             </div>
           )}

@@ -36,7 +36,7 @@
     ".next/types/**/*.ts",
     "src/types/**/*",
     ".next/dev/types/**/*.ts"
-  ],
+, "scripts/reindex-files.cts"  ],
   "exclude": [
     "node_modules"
   ]

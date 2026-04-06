@@ -32,9 +32,10 @@ type UploadingFile = {
 
 interface UploadProps {
   folderId?: string;
+  onUploadComplete?: () => void;
 }
 
-const Upload = ({ folderId }: UploadProps) => {
+const Upload = ({ folderId, onUploadComplete }: UploadProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -70,6 +71,7 @@ const Upload = ({ folderId }: UploadProps) => {
       })
     ));
     setUploading(false);
+    onUploadComplete?.();
   }
   return (
     <Dialog

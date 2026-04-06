@@ -23,6 +23,9 @@ export default function ForgotPasswordPage() {
 
   const form = useForm<ForgotPasswordForm>({
     resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
   });
 
   const onSubmit = async (values: ForgotPasswordForm) => {
