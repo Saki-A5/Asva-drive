@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import SearchBar from "@/app/components/SearchBar";
 
 import Sidenav from "@/app/components/Sidenav";
 import Loginnav from "@/app/components/Loginnav";
@@ -82,6 +83,7 @@ const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [breadcrumbs, setBreadcrumbs] = useState<any[]>([]);
   const [folderName, setFolderName] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [filters, setFilters] = useState<FilterState>({
     type: "All",
@@ -199,11 +201,22 @@ const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
   //  Filter
 
   const filteredItems = items.filter((file) => {
+    // 🔎 SEARCH FILTER
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchesName = file.name.toLowerCase().includes(q);
+      const matchesAuthor = file.author.toLowerCase().includes(q);
+
+      if (!matchesName && !matchesAuthor) return false;
+    }
+
+    // 📂 TYPE FILTER
     if (filters.type !== "All") {
       if (file.type.toLowerCase() !== filters.type.toLowerCase()) return false;
     }
     if (filters.modified !== "All") {
       if (file.modified === "—") return false;
+
       const fileDate = new Date(file.modified);
       const now = new Date();
       if (filters.modified === "Last 7 days" && fileDate < subDays(now, 7))
@@ -229,7 +242,7 @@ const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
 
   return (
     <Sidenav>
-      <Loginnav />
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems.length}/>
 
       <div className="px-6 flex flex-col flex-1 min-h-0">
         {folderId && breadcrumbs.length > 0 && (
@@ -261,10 +274,7 @@ const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
           {!isCollegeView && <Floating />}
         </div>
 
-        <SortFilters
-          filters={filters}
-          setFilters={setFilters}
-        />
+        <SortFilters filters={filters} setFilters={setFilters} />
 
         {/* Create Folder Input — hidden in college view */}
         {!isCollegeView && showCreateFolder && (
