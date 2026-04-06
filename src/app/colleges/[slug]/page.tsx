@@ -9,6 +9,7 @@ import Breadcrumbs from "@/app/components/Breadcrumbs";
 import Sidenav from "@/app/components/Sidenav";
 import Loginnav from "@/app/components/Loginnav";
 import { FileItem } from "@/types/File";
+import Loginnav from "@/app/components/Loginnav";
 
 interface ApiItem {
   _id: string;
@@ -61,6 +62,7 @@ const CollegeFiles = () => {
   const [folderName, setFolderName] = useState<string | null>(null);
   const [items, setItems] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchContents = async (folderId: string | null) => {
     if (!collegeId) return;
@@ -114,6 +116,18 @@ const CollegeFiles = () => {
   const collegeName = collegeId
     ? COLLEGE_META[collegeId as keyof typeof COLLEGE_META]?.label
     : slug;
+
+  const filteredItems = items.filter((file) => {
+    if (!searchQuery.trim()) return true;
+
+    const q = searchQuery.toLowerCase();
+
+    return (
+      file.name.toLowerCase().includes(q) ||
+      file.author.toLowerCase().includes(q) ||
+      file.type.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <Sidenav>

@@ -2,19 +2,18 @@ export const runtime = "nodejs";
 
 import { uploadFile } from '@/lib/cloudinary';
 import dbConnect from '@/lib/dbConnect';
-import { adminAuth } from '@/lib/firebaseAdmin';
 import { indexQueue } from '@/lib/queue';
 import FileModel from '@/models/files';
 import User from '@/models/users';
 // import { File } from 'buffer';
 import { Types } from 'mongoose';
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server';
 import Notification from '@/models/notificationSchema';
 import { sendPush } from '@/lib/sendPush';
 import Token from '@/models/notificationToken';
 import College from '@/models/colleges';
 import FileItemModel from '@/models/fileItem';
+import { bytesToMegabytes } from '@/utils/file_size_conversion';
 
 export function getCloudinaryResourceType(mimeType: string) {
   if (!mimeType) return 'raw';
@@ -72,6 +71,11 @@ export const POST = async (req: Request) => {
 
     // Get file 
     const file = formData.get("file") as File | null;
+    const FILE_LIMIT = Number(process.env.FILE_LIMIT) || 52428800;
+    if(file && file.size > FILE_LIMIT){
+      return NextResponse.json({error: `File is larger than ${bytesToMegabytes(FILE_LIMIT)}MB`});
+    }
+
     if (!file) return NextResponse.json({ error: "Missing file" }, { status: 400 });
 
     const fileArrayBuffer = await file.arrayBuffer();
