@@ -1,3 +1,4 @@
+import dbConnect from "@/lib/dbConnect";
 import { COLLEGE_IDS } from "@/models/colleges";
 import EventModel, { EventInterface } from "@/models/events";
 import User from "@/models/users";
@@ -51,14 +52,16 @@ const handleCollegeEventNotification = async (collegeId: COLLEGE_IDS, events: (F
 }
 
 const currentEvents = async (): Promise<boolean> => {
+    await dbConnect();
     /* Finds Event that are currently going on  */
     const now = new Date();
     const events = await EventModel.find({
         eventStart: { $lte: now },
-        eventEnd: { $gte: now }
+        eventEnd: { $gte: now },
+        isDeleted: { $ne: true },
     }).lean();
 
-    if (!events) return true;
+    if (!events?.length) return true;
 
     const ids = events.map(event => event._id);
     await EventModel.updateMany({ _id: { $in: ids } }, { $set: { status: 'ONGOING' } });
@@ -92,26 +95,41 @@ const currentEvents = async (): Promise<boolean> => {
 }
 
 const pastEvents = async () => {
-    /* Finds events that have passed and sets them to COMPLETED */
+    await dbConnect();
+    /* Soft-delete events that have ended */
     const now = new Date();
-    const events = await EventModel.updateMany({
-        eventEnd: {$lte: now}
-    }, {$set: {status: "COMPLETED"}});
-}
+    await EventModel.updateMany(
+        {
+            eventEnd: { $lte: now },
+            isDeleted: { $ne: true },
+        },
+        {
+            $set: {
+                status: "COMPLETED",
+                isDeleted: true,
+                deletedAt: now,
+            },
+        },
+    );
+};
 
 const eventWorker = new Worker(
-    "events", 
+    "events",
     async (job: Job) => {
-        try{
-            switch(job.name){
-                case 'ongoing-events': 
+        try {
+            switch (job.name) {
+                case "ongoing-events":
                     await currentEvents();
-                case 'past-events':
+                    break;
+                case "past-events":
                     await pastEvents();
+                    break;
+                default:
+                    break;
             }
-        }
-        catch(err){
+        } catch (err) {
             console.log(`[Event Worker] Job Failed: ${job.id}`, err);
         }
-    }
-)
+    },
+    { connection: redisConnection },
+);

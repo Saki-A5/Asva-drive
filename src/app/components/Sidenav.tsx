@@ -194,7 +194,7 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
         {/* Bottom section */}
         <div className="mt-auto pt-0">
           {/* events (only in open mode) */}
-          {user?.role === "admin" && mode === "open" && (
+          {mode === "open" && (
             <Link
               href="/events"
               className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition">
@@ -261,21 +261,19 @@ const Sidenav = ({ children }: { children: React.ReactNode }) => {
 
           {/* Bottom section for Mobile */}
           <div className="mt-auto pt-0 space-y-2">
+            <Link
+              href="/events"
+              className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition">
+              <Star className="h-5 w-5" />
+              <span className="font-semibold">Events</span>
+            </Link>
             {user?.role === "admin" && (
-              <>
-                <Link
-                  href="/events"
-                  className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition">
-                  <Star className="h-5 w-5" />
-                  <span className="font-semibold">Events</span>
-                </Link>
-                <Link
-                  href="/trash"
-                  className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition">
-                  <Trash2 className="h-5 w-5" />
-                  <span className="font-semibold">Trash</span>
-                </Link>
-              </>
+              <Link
+                href="/trash"
+                className="flex items-center gap-2 rounded-lg text-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground transition">
+                <Trash2 className="h-5 w-5" />
+                <span className="font-semibold">Trash</span>
+              </Link>
             )}
 
             {/* Storage box for Mobile */}
