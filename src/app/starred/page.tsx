@@ -22,6 +22,7 @@ interface FileType {
 const Starred = () => {
   const [myFiles, setMyFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({
       type: 'All',
       modified: 'All',
@@ -200,9 +201,34 @@ const Starred = () => {
     getFiles();
   }, [userId]);
 
+  const filteredItems = myFiles.filter((file) => {
+    // 🔎 SEARCH FILTER
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchesName = file.name.toLowerCase().includes(q);
+      const matchesAuthor = file.author.toLowerCase().includes(q);
+
+      if (!matchesName && !matchesAuthor) return false;
+    }
+
+    // 📂 TYPE FILTER
+    if (filters.type !== 'All') {
+      const typeMatch =
+        file.type.toLowerCase() === filters.type.toLowerCase();
+      if (!typeMatch) return false;
+    }
+
+    // 👤 SOURCE FILTER
+    if (filters.source !== 'All') {
+      if (file.author !== filters.source) return false;
+    }
+
+    return true;
+  });
+
   return (
     <Sidenav>
-      <Loginnav />
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems.length} />
       <div className="px-6 flex flex-col flex-1 min-h-0">
         <div className="flex-between gap-2">
           <h1 className="font-bold text-xl whitespace-nowrap">Starred</h1>
@@ -223,7 +249,7 @@ const Starred = () => {
           ) : (
             <div className="flex-1 sm:h-full">
               <FileTable
-                files={myFiles}
+                files={filteredItems}
                 header="Starred"
               />
             </div>

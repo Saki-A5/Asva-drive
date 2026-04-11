@@ -9,7 +9,6 @@ import Breadcrumbs from "@/app/components/Breadcrumbs";
 import Sidenav from "@/app/components/Sidenav";
 import Loginnav from "@/app/components/Loginnav";
 import { FileItem } from "@/types/File";
-import Loginnav from "@/app/components/Loginnav";
 
 interface ApiItem {
   _id: string;
@@ -131,7 +130,7 @@ const CollegeFiles = () => {
 
   return (
     <Sidenav>
-      <Loginnav />
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems.length} />
 
       <div className="px-6 flex flex-col flex-1 min-h-0">
         {currentFolderId && breadcrumbs.length > 0 && (

@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 const Trash = () => {
   const [trashedFiles, setTrashedFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({
       type: 'All',
       modified: 'All',
@@ -122,9 +123,34 @@ const Trash = () => {
     getTrashedFiles();
   }, [user, userLoading]);
 
+  const filteredItems = trashedFiles.filter((file) => {
+    // 🔎 SEARCH FILTER
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchesName = file.name.toLowerCase().includes(q);
+      const matchesAuthor = file.author.toLowerCase().includes(q);
+
+      if (!matchesName && !matchesAuthor) return false;
+    }
+
+    // 📂 TYPE FILTER
+    if (filters.type !== 'All') {
+      const typeMatch =
+        file.type.toLowerCase() === filters.type.toLowerCase();
+      if (!typeMatch) return false;
+    }
+
+    // 👤 SOURCE FILTER
+    if (filters.source !== 'All') {
+      if (file.author !== filters.source) return false;
+    }
+
+    return true;
+  });
+
   return (
     <Sidenav>
-      <Loginnav />
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems.length} />
 
       <div className="px-6 flex flex-col flex-1 min-h-0">
         <div className="flex justify-between items-center gap-2">
@@ -141,7 +167,7 @@ const Trash = () => {
           ) : (
             <div className="flex-1 sm:h-full">
               <FileTable
-                files={trashedFiles}
+                files={filteredItems}
                 onDeleteClick={handleDeleteClick}
                 onRestoreClick={handleRestoreClick}
               />

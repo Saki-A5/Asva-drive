@@ -58,6 +58,7 @@ const recentFiles: FileItem[] = [
 const Dashboard = () => {
   const { user, loading } = useCurrentUser();
   const [starredFiles, setStarredFiles] = useState<FileItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const handleCreateFolder = () => {
     console.log('Create folder clicked');
   }
@@ -90,78 +91,7 @@ const Dashboard = () => {
       } catch (error) {
         console.error('Error fetching files:', error);
       } finally {
-        // setStarredFiles([
-        //   {
-        //     id: '111222',
-        //     name: 'Past Questions',
-        //     type: 'folder',
-        //     author: 'Sciences',
-        //     size: '1.2GB',
-        //     items: '10 items',
-        //     modified: 'Jun 12, 2025',
-        //     sharedUsers: [],
-        //   },
-        //   {
-        //     id: '222333',
-        //     name: 'C#/C++',
-        //     type: 'folder',
-        //     author: 'Sciences',
-        //     size: '2.7GB',
-        //     items: '8 items',
-        //     modified: 'Oct 12, 2025',
-        //     sharedUsers: [],
-        //   },
-        //   {
-        //     id: '333444',
-        //     name: 'MATLAB',
-        //     type: 'folder',
-        //     author: 'Sciences',
-        //     size: '5.2GB',
-        //     items: '15 items',
-        //     modified: 'Jan 12, 2026',
-        //     sharedUsers: [],
-        //   },
-        //   {
-        //     id: '444555',
-        //     name: 'Previous Work',
-        //     type: 'pdf',
-        //     author: 'Sciences',
-        //     size: '1.0GB',
-        //     items: 'PDF',
-        //     modified: 'Nov 8, 2025',
-        //     sharedUsers: [],
-        //   },
-        //   {
-        //     id: '555666',
-        //     name: 'AutoCAD Workbook',
-        //     type: 'folder',
-        //     author: 'Sciences',
-        //     size: '320MB',
-        //     items: '5 items',
-        //     modified: 'Yesterday',
-        //     sharedUsers: [],
-        //   },
-        //   {
-        //     id: '666777',
-        //     name: 'Python',
-        //     type: 'folder',
-        //     author: 'Engineering',
-        //     size: '1.2GB',
-        //     items: '12 items',
-        //     modified: 'Apr 27, 2025',
-        //     sharedUsers: ['/avatars/user1.png', '/avatars/user2.png'],
-        //   },
-        //   {
-        //     id: '777888',
-        //     name: 'Past Questions',
-        //     type: 'folder',
-        //     author: 'Sciences',
-        //     size: '1.2GB',
-        //     items: '10 items',
-        //     modified: 'Jun 12, 2025',
-        //     sharedUsers: [],
-        //   },
-        // ]);
+        // setLoading(false);
       }
     };
 
@@ -170,9 +100,19 @@ const Dashboard = () => {
 
   if (loading) return null;
 
+  const filteredItems = starredFiles.filter((file) => {
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchesName = file.name.toLowerCase().includes(q);
+      const matchesAuthor = file.author.toLowerCase().includes(q);
+      if (!matchesName && !matchesAuthor) return false;
+    }
+    return true;
+  });
+
   return (
     <Sidenav>
-      <Loginnav />
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems.length} />
 
       <div className="px-6 flex flex-col flex-1 min-h-0">
         <div className="flex-between gap-2">
@@ -225,7 +165,7 @@ const Dashboard = () => {
             ) : (
               <div className="flex-1 sm:h-full">
                 <FileTable
-                  files={starredFiles}
+                  files={filteredItems}
                   header="Starred"
                 />
               </div>

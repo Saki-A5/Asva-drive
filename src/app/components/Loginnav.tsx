@@ -36,12 +36,12 @@ const getInitials = (name: string | null | undefined) => {
 };
 
 interface LoginnavProps {
-  searchQuery: string;
-  setSearchQuery: (value: string) => void;
-  filteredItems: number;
+  searchQuery?: string;
+  setSearchQuery?: (value: string) => void;
+  filteredItems?: number;
 }
 
-const Loginnav = ({ searchQuery, setSearchQuery, filteredItems }: LoginnavProps) => {
+const Loginnav = ({ searchQuery = "", setSearchQuery, filteredItems }: LoginnavProps) => {
   const { setTheme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
@@ -109,12 +109,14 @@ const Loginnav = ({ searchQuery, setSearchQuery, filteredItems }: LoginnavProps)
       <div className="flex h-20 sm:p-0 pl-12 mt-4">
         <div className="flex-1 max-w-xl ml-2 mr-4">
           <div className="relative">
-            <SearchBar
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search files..."
-              localResultsCount={filteredItems}
-            />
+            {setSearchQuery && (
+              <SearchBar
+                value={searchQuery || ""}
+                onChange={setSearchQuery}
+                placeholder="Search files..."
+                localResultsCount={filteredItems || 0}
+              />
+            )}
           </div>
         </div>
         <div className="flex ml-auto mr-4 gap-x-4">

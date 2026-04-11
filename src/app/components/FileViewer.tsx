@@ -50,6 +50,8 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, fileType, fileName }) => {
     // Images
     if (
       lowerType.includes("image") ||
+      lowerType.includes("jpeg") ||
+      lowerType.includes("png") ||
       ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"].includes(ext)
     )
       return "image";
@@ -72,6 +74,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, fileType, fileName }) => {
     if (
       lowerType.includes("word") ||
       lowerType.includes("officedocument") ||
+      lowerType.includes("vnd.openxmlformats") ||
       ["doc", "docx"].includes(ext)
     )
       return "word";
@@ -80,9 +83,24 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, fileType, fileName }) => {
     if (
       lowerType.includes("text") ||
       lowerType.includes("plain") ||
+      lowerType.includes("csv") ||
+      lowerType.includes("markdown") ||
       ["txt", "md", "log", "csv"].includes(ext)
     )
       return "text";
+
+    // For "raw" or unknown types, check extension as last resort
+    if (ext) {
+      if (["txt", "md", "log", "csv"].includes(ext)) return "text";
+      if (["doc", "docx"].includes(ext)) return "word";
+      if (["pdf"].includes(ext)) return "pdf";
+      if (["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"].includes(ext))
+        return "image";
+      if (["mp4", "avi", "mov", "wmv", "flv", "mkv", "webm"].includes(ext))
+        return "video";
+      if (["mp3", "wav", "aac", "flac", "ogg", "m4a"].includes(ext))
+        return "audio";
+    }
 
     return "unknown";
   };
@@ -133,6 +151,15 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, fileType, fileName }) => {
 
   if (error && (actualType === "text" || actualType === "word")) {
     return <div className="p-4 text-center text-red-500">Error: {error}</div>;
+  }
+
+  if (actualType === "unknown") {
+    return (
+      <div className="p-4 text-center text-gray-400">
+        <p>No preview available for this file type</p>
+        <p className="text-xs mt-2">({fileType})</p>
+      </div>
+    );
   }
 
   switch (actualType) {
