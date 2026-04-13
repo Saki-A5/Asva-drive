@@ -1,24 +1,24 @@
-'use client';
-import { Button } from '@/components/ui/button';
-import { LogOut, Settings, Moon, Sun, Bell } from 'lucide-react';
-import { useTheme } from 'next-themes';
+"use client";
+import { Button } from "@/components/ui/button";
+import { LogOut, Settings, Moon, Sun, Bell } from "lucide-react";
+import { useTheme } from "next-themes";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
-import { getAuth, signOut } from 'firebase/auth';
-import {auth} from '@/lib/firebaseClient';
-import Link from 'next/link';
-import { getAvatarUrl, AvatarStyle } from '@/utils/avatar';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import SearchBar from './SearchBar';
-import NotificationBell from './NotificationBell';
+} from "@/components/ui/dropdown-menu";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { getAuth, signOut } from "firebase/auth";
+import { auth } from "@/lib/firebaseClient";
+import Link from "next/link";
+import { getAvatarUrl, AvatarStyle } from "@/utils/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import SearchBar from "./SearchBar";
+import NotificationBell from "./NotificationBell";
 
 type User = {
   id: string;
@@ -29,13 +29,19 @@ type User = {
 };
 
 const getInitials = (name: string | null | undefined) => {
-  if (!name) return 'U'; // Default initials
-  const names = name.split(' ');
+  if (!name) return "U"; // Default initials
+  const names = name.split(" ");
   if (names.length === 1) return names[0][0].toUpperCase();
   return (names[0][0] + names[1][0]).toUpperCase();
 };
 
-const Loginnav = () => {
+interface LoginnavProps {
+  searchQuery?: string;
+  setSearchQuery?: (value: string) => void;
+  filteredItems?: number;
+}
+
+const Loginnav = ({ searchQuery = "", setSearchQuery, filteredItems }: LoginnavProps) => {
   const { setTheme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
@@ -44,11 +50,11 @@ const Loginnav = () => {
     try {
       // const auth = getAuth();
       await signOut(auth);
-      await axios.post('/api/logout');
-      localStorage.removeItem('userId');
-      router.push('/login');
+      await axios.post("/api/logout");
+      localStorage.removeItem("userId");
+      router.push("/login");
     } catch (error) {
-      console.error('Logout Error:', error);
+      console.error("Logout Error:", error);
     }
   };
 
@@ -67,10 +73,10 @@ const Loginnav = () => {
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get('/api/me');
+      const res = await axios.get("/api/me");
       setUser(res.data.user);
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error("Error fetching user data:", error);
     }
   };
 
@@ -90,10 +96,10 @@ const Loginnav = () => {
   // Get avatar URL if user has selected an avatar style - use saved seed if available
   const avatarUrl =
     user?.avatarStyle &&
-    ['lorelei', 'notionists', 'open-peeps'].includes(user.avatarStyle)
+    ["lorelei", "notionists", "open-peeps"].includes(user.avatarStyle)
       ? getAvatarUrl(
           user.avatarStyle as AvatarStyle,
-          user?.avatarSeed || user?.email || user?.name || 'default',
+          user?.avatarSeed || user?.email || user?.name || "default",
           40
         )
       : null;
@@ -103,7 +109,14 @@ const Loginnav = () => {
       <div className="flex h-20 sm:p-0 pl-12 mt-4">
         <div className="flex-1 max-w-xl ml-2 mr-4">
           <div className="relative">
-            <SearchBar />
+            {setSearchQuery && (
+              <SearchBar
+                value={searchQuery || ""}
+                onChange={setSearchQuery}
+                placeholder="Search files..."
+                localResultsCount={filteredItems || 0}
+              />
+            )}
           </div>
         </div>
         <div className="flex ml-auto mr-4 gap-x-4">
@@ -119,10 +132,7 @@ const Loginnav = () => {
             <DropdownMenuTrigger asChild>
               {avatarUrl ? (
                 <Avatar className="w-10 h-10 cursor-pointer border-2 border-primary">
-                  <AvatarImage
-                    src={avatarUrl}
-                    alt={user?.name || 'User'}
-                  />
+                  <AvatarImage src={avatarUrl} alt={user?.name || "User"} />
                   <AvatarFallback className="bg-primary text-primary-foreground font-bold">
                     {initials}
                   </AvatarFallback>
@@ -133,9 +143,7 @@ const Loginnav = () => {
                 </button>
               )}
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-40">
+            <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem>
                 <Settings className="mr-2 h-4 w-4" />
                 <Link href="/settings">Settings</Link>
@@ -150,23 +158,20 @@ const Loginnav = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="hidden md:flex">
+              <Button variant="outline" size="icon" className="hidden md:flex">
                 <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
                 <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
                 <span className="sr-only">Toggle theme</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setTheme('light')}>
+              <DropdownMenuItem onClick={() => setTheme("light")}>
                 Light
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme('dark')}>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
                 Dark
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme('system')}>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
                 System
               </DropdownMenuItem>
             </DropdownMenuContent>

@@ -36,6 +36,7 @@ const Recent = () => {
     modified: "All",
     source: "All",
   });
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchRecentFiles = async () => {
     try {
@@ -80,16 +81,67 @@ const Recent = () => {
     fetchRecentFiles();
   }, []);
 
+  // const filteredItems = items
+  //   .filter((file) => {
+  //     if (filters.type !== "All") {
+  //       const typeMatch =
+  //         file.type.toLowerCase() === filters.type.toLowerCase();
+  //       if (!typeMatch) return false;
+  //     }
+
+  //     if (filters.modified !== "All") {
+  //       if (file.modified === "—") return false;
+  //       const fileDate = new Date(file.modified);
+  //       const now = new Date();
+
+  //       if (filters.modified === "Last 7 days") {
+  //         if (fileDate < subDays(now, 7)) return false;
+  //       } else if (filters.modified === "Last 14 days") {
+  //         if (fileDate < subDays(now, 14)) return false;
+  //       } else if (
+  //         filters.modified === "Custom Range" &&
+  //         filters.customRange?.from
+  //       ) {
+  //         const start = startOfDay(filters.customRange.from);
+  //         // If end isn't picked yet, use start as the end to show files for that day
+  //         const end = filters.customRange.to ? filters.customRange.to : start;
+
+  //         if (!isWithinInterval(fileDate, { start, end })) {
+  //           return false;
+  //         }
+  //       }
+  //     }
+
+  //     if (filters.source !== "All") {
+  //       if (file.author !== filters.source) return false;
+  //     }
+
+  //     return true;
+  //   })
+  //   .slice(0, 10);
+
   const filteredItems = items
     .filter((file) => {
+      // 🔎 SEARCH FILTER
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchesName = file.name.toLowerCase().includes(q);
+        const matchesAuthor = file.author.toLowerCase().includes(q);
+
+        if (!matchesName && !matchesAuthor) return false;
+      }
+
+      // 📂 TYPE FILTER
       if (filters.type !== "All") {
         const typeMatch =
           file.type.toLowerCase() === filters.type.toLowerCase();
         if (!typeMatch) return false;
       }
 
+      // 📅 MODIFIED FILTER
       if (filters.modified !== "All") {
         if (file.modified === "—") return false;
+
         const fileDate = new Date(file.modified);
         const now = new Date();
 
@@ -102,7 +154,6 @@ const Recent = () => {
           filters.customRange?.from
         ) {
           const start = startOfDay(filters.customRange.from);
-          // If end isn't picked yet, use start as the end to show files for that day
           const end = filters.customRange.to ? filters.customRange.to : start;
 
           if (!isWithinInterval(fileDate, { start, end })) {
@@ -111,6 +162,7 @@ const Recent = () => {
         }
       }
 
+      // 👤 SOURCE FILTER
       if (filters.source !== "All") {
         if (file.author !== filters.source) return false;
       }
@@ -121,7 +173,7 @@ const Recent = () => {
 
   return (
     <Sidenav>
-      <Loginnav />
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery}  filteredItems={filteredItems.length}/>
       <div className="px-6 flex flex-col flex-1 min-h-0">
         <div className="flex-between gap-2 mt-2">
           <h1 className="font-bold text-xl whitespace-nowrap">Recent</h1>
@@ -131,10 +183,7 @@ const Recent = () => {
           </div>
         </div>
 
-        <SortFilters
-          filters={filters}
-          setFilters={setFilters}
-        />
+        <SortFilters filters={filters} setFilters={setFilters} />
 
         <div className="space-y-8 flex-1 min-h-0 mt-6">
           {loading ? (

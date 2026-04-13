@@ -41,7 +41,7 @@ const FilePage = () => {
         setFileData({
           id: fileItem._id,
           name: fileItem.file.filename,
-          type: fileItem.file.resourceType,
+          type: fileItem.file.mimeType || fileItem.file.resourceType,
           author: fileItem.file.author,
           size: fileItem.file.size,
           modified: fileItem.file.modified,

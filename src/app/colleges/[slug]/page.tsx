@@ -61,6 +61,7 @@ const CollegeFiles = () => {
   const [folderName, setFolderName] = useState<string | null>(null);
   const [items, setItems] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchContents = async (folderId: string | null) => {
     if (!collegeId) return;
@@ -115,9 +116,21 @@ const CollegeFiles = () => {
     ? COLLEGE_META[collegeId as keyof typeof COLLEGE_META]?.label
     : slug;
 
+  const filteredItems = items.filter((file) => {
+    if (!searchQuery.trim()) return true;
+
+    const q = searchQuery.toLowerCase();
+
+    return (
+      file.name.toLowerCase().includes(q) ||
+      file.author.toLowerCase().includes(q) ||
+      file.type.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <Sidenav>
-      <Loginnav />
+      <Loginnav searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredItems={filteredItems.length} />
 
       <div className="px-6 flex flex-col flex-1 min-h-0">
         {currentFolderId && breadcrumbs.length > 0 && (
