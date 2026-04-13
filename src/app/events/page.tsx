@@ -53,8 +53,6 @@ const EventsPage = () => {
     "eventStart",
   );
   const [order, setOrder] = useState<"asc" | "desc">("asc");
-  const [createSubmitting, setCreateSubmitting] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
@@ -115,27 +113,6 @@ const EventsPage = () => {
     }
     fetchEvents();
   }, [user, userLoading, collegeFilter, sortBy, order, fetchEvents]);
-
-  const onCreateEvent = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setCreateError(null);
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-    try {
-      setCreateSubmitting(true);
-      await axios.post("/api/events", fd);
-      form.reset();
-      await fetchEvents();
-    } catch (err: unknown) {
-      const msg =
-        axios.isAxiosError(err) && err.response?.data?.error
-          ? String(err.response.data.error)
-          : "Failed to create event";
-      setCreateError(msg);
-    } finally {
-      setCreateSubmitting(false);
-    }
-  };
 
   const onDeleteEvent = async (eventId: string) => {
     const ok = window.confirm("Delete this event?");
@@ -222,73 +199,6 @@ const EventsPage = () => {
             name.
           </p>
         </div>
-
-        {user.role === "admin" && (
-          <section className="mb-8 rounded-xl border border-border p-4 md:p-6 bg-card/50">
-            <h2 className="font-semibold text-lg mb-4">Create event</h2>
-            <form
-              onSubmit={onCreateEvent}
-              className="grid gap-4 max-w-xl">
-              <div className="grid gap-2">
-                <Label htmlFor="eventName">Event name</Label>
-                <Input
-                  id="eventName"
-                  name="eventName"
-                  required
-                  placeholder="e.g. Welcome week"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="eventDescription">Description</Label>
-                <textarea
-                  id="eventDescription"
-                  name="eventDescription"
-                  required
-                  rows={4}
-                  className="min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  placeholder="What is this event about?"
-                />
-              </div>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="eventStartDate">Start</Label>
-                  <Input
-                    id="eventStartDate"
-                    name="eventStartDate"
-                    type="datetime-local"
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="eventEndDate">End</Label>
-                  <Input
-                    id="eventEndDate"
-                    name="eventEndDate"
-                    type="datetime-local"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="eventFlier">Flier (optional)</Label>
-                <Input
-                  id="eventFlier"
-                  name="eventFlier"
-                  type="file"
-                  accept="image/*,.pdf"
-                />
-              </div>
-              {createError && (
-                <p className="text-sm text-destructive">{createError}</p>
-              )}
-              <Button
-                type="submit"
-                disabled={createSubmitting}>
-                {createSubmitting ? "Posting…" : "Post event"}
-              </Button>
-            </form>
-          </section>
-        )}
 
         <div className="flex flex-col sm:flex-row flex-wrap gap-3 mb-6">
           <div className="flex flex-col gap-1 min-w-[200px]">

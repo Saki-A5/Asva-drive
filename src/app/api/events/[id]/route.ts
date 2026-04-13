@@ -7,6 +7,7 @@ import dbConnect from "@/lib/dbConnect";
 import User from "@/models/users";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import { getCloudinaryResourceType } from "../../upload/route";
+import { softDeletePastEvents } from "@/lib/eventCleanup";
 
 export const runtime = 'nodejs';
 
@@ -23,6 +24,8 @@ export const GET = async (req: Request, { params }: any) => {
         if (!viewer) {
             return NextResponse.json({ message: "User not found" }, { status: 404 });
         }
+
+        await softDeletePastEvents();
 
         const { id } = await params;
         const event = await EventModel.findOne({

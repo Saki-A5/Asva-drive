@@ -8,6 +8,7 @@ import User from "@/models/users";
 import { HydratedDocument, Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { getCloudinaryResourceType } from "../upload/route";
+import { softDeletePastEvents } from "@/lib/eventCleanup";
 
 export const runtime = "nodejs";
 
@@ -136,6 +137,8 @@ export const GET = async (req: NextRequest) => {
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
+
+    await softDeletePastEvents();
 
     const { searchParams } = req.nextUrl;
     const collegeIdParam = searchParams.get("collegeId");

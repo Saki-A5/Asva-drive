@@ -1,4 +1,5 @@
 import dbConnect from "@/lib/dbConnect";
+import { softDeletePastEvents } from "@/lib/eventCleanup";
 import { COLLEGE_IDS } from "@/models/colleges";
 import EventModel, { EventInterface } from "@/models/events";
 import User from "@/models/users";
@@ -96,21 +97,7 @@ const currentEvents = async (): Promise<boolean> => {
 
 const pastEvents = async () => {
     await dbConnect();
-    /* Soft-delete events that have ended */
-    const now = new Date();
-    await EventModel.updateMany(
-        {
-            eventEnd: { $lte: now },
-            isDeleted: { $ne: true },
-        },
-        {
-            $set: {
-                status: "COMPLETED",
-                isDeleted: true,
-                deletedAt: now,
-            },
-        },
-    );
+    await softDeletePastEvents();
 };
 
 const eventWorker = new Worker(

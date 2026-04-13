@@ -5,6 +5,7 @@ import Sidenav from '../components/Sidenav';
 import Loginnav from '../components/Loginnav';
 import Upload from '../components/Upload';
 import Create from '../components/Create';
+import CreateEventDialog from '../components/CreateEventDialog';
 import FileTable from '../components/FileTable';
 import { FileItem } from '@/types/File';
 import axios from 'axios';
@@ -59,6 +60,7 @@ const Dashboard = () => {
   const { user, loading } = useCurrentUser();
   const [starredFiles, setStarredFiles] = useState<FileItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [createEventOpen, setCreateEventOpen] = useState(false);
   const handleCreateFolder = () => {
     console.log('Create folder clicked');
   }
@@ -122,7 +124,14 @@ const Dashboard = () => {
 
           <div className="sm:flex space-x-2 px-2 lg:px-6 mb-6 hidden">
             {user?.role === 'admin' && <Upload />}
-            <Create onCreateFolderClick={handleCreateFolder} />
+            <Create
+              onCreateFolderClick={handleCreateFolder}
+              onCreateEventClick={
+                user?.role === "admin"
+                  ? () => setCreateEventOpen(true)
+                  : undefined
+              }
+            />
           </div>
           <Floating />
         </div>
@@ -173,6 +182,10 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      <CreateEventDialog
+        open={createEventOpen}
+        onOpenChange={setCreateEventOpen}
+      />
     </Sidenav>
   );
 };
