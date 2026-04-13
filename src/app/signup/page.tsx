@@ -15,39 +15,44 @@ const Signup = () => {
     else if (step === "otp") setStep("details");
   };
 
-  console.log("Email passed to details: ", email);
-
   return (
-    <>
-      <div className=" flex h-20 pt-2">
-        <Link href="/">
-          <h2 className="font-bold ml-4">ASVA</h2>
-        </Link>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col font-sans transition-colors duration-300">
+      {/* Navigation Header */}
+      <header className="flex items-center justify-between px-6 py-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 w-full shadow-sm">
         <Link
-          className="ml-auto mr-4"
-          href="/login">
-          <Button className="bg-blue-600 hover:bg-blue-800">Log in</Button>
+          href="/"
+          className="transition-transform hover:scale-105">
+          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tighter">
+            ASVA
+          </h2>
         </Link>
-      </div>
+        <Link href="/login">
+          <Button className="bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 rounded-full px-6 py-2 transition-all duration-300">
+            Log in
+          </Button>
+        </Link>
+      </header>
 
-      <div>
-        {step === "email" && (
-          <Emailstep
-            email={email}
-            setEmail={setEmail}
-            nextStep={nextStep}
-          />
-        )}
-
-        {step === "otp" && (
-          <OtpStep
-            email={email}
-            nextStep={nextStep}
-          />
-        )}
-        {step === "details" && <Details email={email} />}
-      </div>
-    </>
+      {/* Centered Step Content */}
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-8">
+        <div className="w-full max-w-md bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-gray-100 dark:border-gray-800 transition-colors duration-300">
+          {step === "email" && (
+            <Emailstep
+              email={email}
+              setEmail={setEmail}
+              nextStep={nextStep}
+            />
+          )}
+          {step === "otp" && (
+            <OtpStep
+              email={email}
+              nextStep={nextStep}
+            />
+          )}
+          {step === "details" && <Details email={email} />}
+        </div>
+      </main>
+    </div>
   );
 };
 
