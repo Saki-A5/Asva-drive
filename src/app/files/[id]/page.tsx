@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Breadcrumbs from "@/app/components/Breadcrumbs";
 import { FileItem } from "@/types/File";
-import { Download, Star, Trash2, Pencil } from "lucide-react";
+import { Download, Star, Trash2, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import AuthorCell from "@/app/components/AuthorCell";
 import Fileicon from "@/app/components/Fileicon";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ const FilePage = () => {
   const { id } = useParams();
   const router = useRouter();
   const { user } = useCurrentUser();
+  const [isFileInfoCollapsed, setIsFileInfoCollapsed] = useState(false);
 
   const [fileData, setFileData] = useState<
     | (FileItem & {
@@ -113,9 +114,23 @@ const FilePage = () => {
 
   return (
     <div className="flex w-full items-center justify-center h-screen lg:p-20">
+      {/* Back Button - Fixed at top-left */}
+      <button
+        onClick={() => router.back()}
+        className="fixed top-4 left-4 z-20 p-2 bg-white dark:bg-zinc-900 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg border border-gray-300 dark:border-zinc-700 transition-colors flex items-center gap-2 shadow-md"
+        title="Go back"
+      >
+        <ChevronLeft size={20} className="text-gray-700 dark:text-zinc-300" />
+        <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Back</span>
+      </button>
+
       <div className="flex flex-col md:flex-row h-[85vh] w-full mx-auto overflow-hidden bg-[#E5E7EB] dark:bg-zinc-900 rounded-xl shadow-2xl border border-gray-300 dark:border-zinc-800 transition-colors duration-300">
-        {/* LEFT PANEL: File Info (35%) */}
-        <div className="w-full md:w-[35%] bg-white dark:bg-zinc-950 p-8 flex flex-col justify-between border-r border-gray-200 dark:border-zinc-800">
+        {/* LEFT PANEL: File Info (Default focal point on mobile, 35% on desktop) */}
+        <div 
+          className={`${
+            isFileInfoCollapsed ? 'hidden' : 'flex'
+          } w-full md:w-[35%] h-auto md:h-full bg-white dark:bg-zinc-950 p-8 flex-col justify-between border-b md:border-b-0 md:border-r border-gray-200 dark:border-zinc-800 overflow-y-auto`}
+        >
           <div>
             {/* Breadcrumbs */}
             {folderPath && folderPath.length > 0 && (
@@ -208,8 +223,34 @@ const FilePage = () => {
           </div>
         </div>
 
-        {/* RIGHT PANEL: Preview (65%) */}
-        <div className="w-full md:w-[65%] bg-[#F3F4F6] dark:bg-zinc-900 p-8 flex items-center justify-center overflow-y-auto relative">
+        {/* RIGHT PANEL: Preview (Smaller on mobile, 65% on desktop) */}
+        <div 
+          className={`${
+            isFileInfoCollapsed ? 'w-full h-full' : 'w-full md:w-[65%] h-64 md:h-full'
+          } bg-[#F3F4F6] dark:bg-zinc-900 p-8 flex flex-col items-center justify-center overflow-y-auto relative transition-all duration-300`}
+        >
+          {/* Toggle Button - visible only on mobile */}
+          {!isFileInfoCollapsed && (
+            <button
+              onClick={() => setIsFileInfoCollapsed(true)}
+              className="md:hidden absolute top-4 left-4 p-2 bg-white dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded-lg border border-gray-200 dark:border-zinc-700 transition-colors z-10"
+              title="Collapse file info"
+            >
+              <ChevronLeft size={20} className="text-gray-600 dark:text-zinc-400" />
+            </button>
+          )}
+
+          {/* Expand Button - visible only on mobile when collapsed */}
+          {isFileInfoCollapsed && (
+            <button
+              onClick={() => setIsFileInfoCollapsed(false)}
+              className="md:hidden absolute top-4 left-4 p-2 bg-white dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded-lg border border-gray-200 dark:border-zinc-700 transition-colors z-10"
+              title="Show file info"
+            >
+              <ChevronRight size={20} className="text-gray-600 dark:text-zinc-400" />
+            </button>
+          )}
+
           <div className="absolute top-4 right-6 text-[10px] font-bold text-gray-400 dark:text-zinc-600 uppercase tracking-widest">
             Preview Mode
           </div>
