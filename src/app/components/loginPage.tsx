@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import z from "zod"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/PasswordInput"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import {auth, provider} from "@/lib/firebaseClient"
@@ -124,7 +125,7 @@ const Loginpage = () => {
                     <FormItem>
                         <div className="mx-auto mt-2 w-4/5">
                         <FormControl>
-                            <Input type="password" placeholder="Password" {...field}  className="h-12 pr-10"/>
+                            <PasswordInput placeholder="Password" {...field}  className="h-12 pr-10"/>
                         </FormControl>
                         </div>
                         <FormMessage className="text-center mb-4"/>

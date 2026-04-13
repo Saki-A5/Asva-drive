@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams, useRouter } from "next/navigation";
 import z from "zod";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import Link from "next/link";
@@ -174,9 +174,8 @@ export default function ResetPasswordPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input
+                      <PasswordInput
                         placeholder="New Password"
-                        type="password"
                         {...field}
                         className="h-12"
                         disabled={isLoading}
@@ -193,9 +192,8 @@ export default function ResetPasswordPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input
+                      <PasswordInput
                         placeholder="Confirm New Password"
-                        type="password"
                         {...field}
                         className="h-12"
                         disabled={isLoading}

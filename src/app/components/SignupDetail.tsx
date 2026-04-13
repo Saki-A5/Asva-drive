@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/form";
 import { CollegeSelect } from "./CollegeSelect";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { auth } from "@/lib/firebaseClient";
@@ -162,8 +163,7 @@ const Details = ({ email }: Detailsprop) => {
                 <FormItem>
                   <div className="mx-auto mt-4 w-4/5">
                     <FormControl>
-                      <Input
-                        type="password"
+                      <PasswordInput
                         placeholder="Password"
                         {...field}
                         className="h-11"
@@ -231,8 +231,7 @@ const Details = ({ email }: Detailsprop) => {
                 <FormItem>
                   <div className="mx-auto mt-4 w-4/5">
                     <FormControl>
-                      <Input
-                        type="password"
+                      <PasswordInput
                         placeholder="Confirm password"
                         {...field}
                         className="h-11"
