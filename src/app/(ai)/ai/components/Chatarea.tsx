@@ -196,14 +196,14 @@ export default function ChatArea({
       {/* Input area */}
       <div className="w-full px-3 sm:px-6 pb-3 sm:pb-5 pt-2 sm:pt-3 border-t border-gray-100">
         <div className="mx-auto w-full max-w-3xl">
-          <div className="border border-gray-200 rounded-2xl bg-white shadow-sm overflow-hidden">
+          <div className="border border-gray-200 rounded-2xl bg-white shadow-sm">
             {/* Attached files preview */}
             {attachedFiles.length > 0 && (
               <div className="flex flex-wrap gap-2 px-4 pt-3">
                 {attachedFiles.map((f) => (
                   <div
                     key={f.id}
-                    className="flex items-center gap-1.5 bg-gray-100 rounded-lg px-2 py-1.5 max-w-[160px]"
+                    className="flex items-center gap-1.5 bg-gray-100 rounded-lg px-2 py-1.5 max-w-40"
                   >
                     {fileIcon(f.type)}
                     <div className="min-w-0">
@@ -228,7 +228,7 @@ export default function ChatArea({
               {/* Paperclip */}
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex-shrink-0 text-gray-400 hover:text-[#02427E] transition-colors pb-0.5"
+                className="shrink-0 text-gray-400 hover:text-[#02427E] transition-colors pb-0.5"
                 aria-label="Attach file"
                 title="Attach file"
               >
@@ -259,7 +259,7 @@ export default function ChatArea({
               />
 
               {/* Mode selector */}
-              <div className="relative flex-shrink-0" ref={menuRef}>
+              <div className="relative shrink-0" ref={menuRef}>
                 <button
                   onClick={() => setShowModeMenu((v) => !v)}
                   className="flex items-center gap-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 transition-colors font-medium"
@@ -268,7 +268,7 @@ export default function ChatArea({
                   <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
                 </button>
                 {showModeMenu && (
-                  <div className="absolute bottom-full mb-2 right-0 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden w-32 sm:w-36 z-50">
+                  <div className="absolute bottom-8 right-0 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden w-32 sm:w-36 z-50">
                     {modes.map((m) => (
                       <button
                         key={m}
@@ -290,7 +290,7 @@ export default function ChatArea({
               <button
                 onClick={sendMessage}
                 disabled={!canSend}
-                className="flex-shrink-0 text-gray-400 hover:text-[#02427E] disabled:opacity-40 transition-colors"
+                className="shrink-0 text-gray-400 hover:text-[#02427E] disabled:opacity-40 transition-colors"
                 aria-label="Send"
               >
                 <Send className="h-4 w-4 sm:h-5 sm:w-5" />
