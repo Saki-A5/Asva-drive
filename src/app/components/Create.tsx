@@ -13,9 +13,15 @@ import { FC } from 'react';
 interface CreateProps {
   onCreateFolderClick: () => void;
   creating?: boolean;
+  /** Admins only: opens create-event dialog from dashboard Create menu */
+  onCreateEventClick?: () => void;
 }
 
-const Create: FC<CreateProps> = ({ onCreateFolderClick, creating }) => {
+const Create: FC<CreateProps> = ({
+  onCreateFolderClick,
+  creating,
+  onCreateEventClick,
+}) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -39,7 +45,16 @@ const Create: FC<CreateProps> = ({ onCreateFolderClick, creating }) => {
         >
           Folder
         </DropdownMenuItem>
-        {/* Add more items here in the future */}
+        {onCreateEventClick && (
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              onCreateEventClick();
+            }}
+          >
+            Event
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
