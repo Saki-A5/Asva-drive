@@ -33,12 +33,17 @@ export const GET = async (
   try {
     const { collegeId } = await params
 
+    if (!collegeId) {
+      return NextResponse.json({ error: "College ID not provided" }, { status: 400 });
+    }
+
     await dbConnect()
 
     const files = await FileItemModel.find({
       ownerId: collegeId,
       ownerType: "College",
       isDeleted: { $ne: true },
+      isRoot: { $ne: true },
     })
     .populate({
       path: "file",

@@ -64,7 +64,10 @@ const CollegeFiles = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const fetchContents = async (folderId: string | null) => {
-    if (!collegeId) return;
+    if (!collegeId) {
+      console.warn("College ID not found for slug:", slug);
+      return;
+    }
     setLoading(true);
     try {
       let data: ApiItem[];
@@ -72,11 +75,13 @@ const CollegeFiles = () => {
       let name: string | null = null;
 
       if (folderId) {
+        console.log("Fetching folder contents:", folderId);
         const res = await axios.get(`/api/file/folder/${folderId}`);
         data = res.data.contents;
         crumbs = res.data.breadcrumbs ?? [];
         name = res.data.folderName ?? null;
       } else {
+        console.log("Fetching college tree for collegeId:", collegeId);
         const res = await axios.get(`/api/colleges/${collegeId}/tree`);
         data = res.data.tree;
         crumbs = [];
@@ -101,8 +106,10 @@ const CollegeFiles = () => {
       setItems(mapped);
       setBreadcrumbs(crumbs);
       setFolderName(name);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error fetching college files:", err);
+      console.error("Response status:", err.response?.status);
+      console.error("Response data:", err.response?.data);
     } finally {
       setLoading(false);
     }
