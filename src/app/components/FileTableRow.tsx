@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import axios from "axios";
 import { useHighlightable } from "@/hooks/useHighlightable";
 import { TableCell, TableRow } from "@/components/ui/table";
 import {
@@ -29,6 +30,7 @@ import {
   Pencil,
   RotateCcw,
   BookmarkPlus,
+  Star,
 } from "lucide-react";
 import Fileicon from "./Fileicon";
 import { FileItem } from "@/types/File";
@@ -41,6 +43,7 @@ interface RowProps {
   onRenameClick?: (item: FileItem) => void;
   onRestoreClick?: (item: FileItem) => void;
   isCollegeView?: boolean;
+  onStarChange?: (fileId: string, starred: boolean) => void;
 }
 
 export function FileTableRow({
@@ -50,11 +53,30 @@ export function FileTableRow({
   onRenameClick,
   onRestoreClick,
   isCollegeView = false,
+  onStarChange,
 }: RowProps) {
   const { isSelected, eventHandlers } = useHighlightable(file.id);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [isStarring, setIsStarring] = useState(false);
 
   const canSave = isCollegeView && file.type !== "folder";
+
+  const handleToggleStar = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      setIsStarring(true);
+      const response = await axios.post(
+        `/api/file/${file.id}/star`,
+        {},
+        { withCredentials: true }
+      );
+      onStarChange?.(file.id, response.data.data.starred);
+    } catch (error) {
+      console.error("Error toggling star:", error);
+    } finally {
+      setIsStarring(false);
+    }
+  };
 
   return (
     <>
@@ -118,6 +140,13 @@ export function FileTableRow({
                       Save to My Files
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={handleToggleStar}
+                    disabled={isStarring}>
+                    <Star className="h-4 w-4 fill-current" />
+                    Star
+                  </DropdownMenuItem>
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="cursor-pointer">
                       <Share2 className="mr-2 h-4 w-4" />
@@ -220,7 +249,7 @@ export function MobileFileRow({
     <>
       <div
         {...eventHandlers}
-        onDoubleClick={() => onOpen?.(file)}
+        onClick={() => onOpen?.(file)}
         className={`
           flex items-center justify-between p-4 transition cursor-pointer select-none touch-pan-y
           ${isSelected ? "bg-[#0AFEF236]" : "hover:bg-muted/40"}

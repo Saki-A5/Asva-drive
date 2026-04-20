@@ -47,7 +47,7 @@ const FileGridItem: React.FC<FileGridItemProps> = ({
   return (
     <div
       {...eventHandlers}
-      onDoubleClick={() => onOpen(file)}
+      onClick={() => onOpen(file)}
       className={`flex flex-col items-start p-4 rounded-xl shadow-sm transition h-[200px] gap-3 w-full cursor-pointer touch-pan-y select-none
         ${
           selected

@@ -160,6 +160,7 @@ const CollegeFiles = () => {
           ) : (
             <FileTable
               files={items}
+              isCollegeView={true}
               onOpen={(item) => {
                 if (item.type === "folder") {
                   setCurrentFolderId(item.id);

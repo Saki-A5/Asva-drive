@@ -11,7 +11,8 @@ export interface FileItemInterface {
     deletedAt?: Date, 
     ownerType: 'User'|'College', 
     isReference: boolean, 
-    file?: Types.ObjectId
+    file?: Types.ObjectId,
+    starred?: boolean,
 }
 
 const fileItemSchema = new Schema<FileItemInterface>({
@@ -24,7 +25,8 @@ const fileItemSchema = new Schema<FileItemInterface>({
     deletedAt: {type: Date, default: null},
     ownerType: {type: String, enum: ['College', 'User'], required: true}, 
     isReference: {type: Boolean, default: false}, 
-    file: {type: Schema.Types.ObjectId, ref: 'File', default: null}
+    file: {type: Schema.Types.ObjectId, ref: 'File', default: null},
+    starred: {type: Boolean, default: false},
 }, {timestamps: true});
 
 fileItemSchema.path('isRoot').validate(function(v) {

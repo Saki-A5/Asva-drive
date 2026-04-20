@@ -26,49 +26,46 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        // Fetch starred files
-        const res = await axios.get(`/api/file`, { withCredentials: true });
-        const files: File[] = res.data.data;
+        // Fetch starred files (max 8, most recent first)
+        const starredRes = await axios.get(`/api/starred`, { withCredentials: true });
+        const starredFileItems = starredRes.data.data || [];
 
-        const data = files
-          .filter((file: any) => file.starred)
-          .map((file: any) => ({
-            id: file._id ?? '',
-            name: file.name ?? '',
-            type: file.mimeType ? file.mimeType.split('/')[0] : '',
-            size: file.size
-              ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+        const starredData = starredFileItems
+          .slice(0, 8)
+          .map((fileItem: any) => ({
+            id: fileItem._id ?? '',
+            name: fileItem.filename ?? '',
+            type: fileItem.isFolder ? 'folder' : (fileItem.file?.mimeType ? fileItem.file.mimeType.split('/')[0] : ''),
+            size: fileItem.file?.sizeBytes
+              ? `${(fileItem.file.sizeBytes / (1024 * 1024)).toFixed(1)} MB`
               : '',
             items: '',
             author: 'SMS',
-            modified: file.updatedAt
-              ? new Date(file.updatedAt).toDateString()
+            modified: fileItem.updatedAt
+              ? new Date(fileItem.updatedAt).toDateString()
               : '',
             sharedUsers: [],
           }));
 
-        const limitedData = data.slice(0, 7);
-        setStarredFiles(limitedData);
+        setStarredFiles(starredData);
 
         // Fetch recently opened/modified files
-        const recentData = files
-          .sort((a: any, b: any) => {
-            const dateA = new Date(a.updatedAt || a.createdAt).getTime();
-            const dateB = new Date(b.updatedAt || b.createdAt).getTime();
-            return dateB - dateA;
-          })
+        const recentRes = await axios.get(`/api/recent`, { withCredentials: true });
+        const recentFileItems = recentRes.data.data || [];
+
+        const recentData = recentFileItems
           .slice(0, 4)
-          .map((file: any) => ({
-            id: file._id ?? '',
-            name: file.name ?? '',
-            type: file.mimeType ? file.mimeType.split('/')[0] : '',
-            size: file.size
-              ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+          .map((fileItem: any) => ({
+            id: fileItem._id ?? '',
+            name: fileItem.filename ?? '',
+            type: fileItem.isFolder ? 'folder' : (fileItem.file?.mimeType ? fileItem.file.mimeType.split('/')[0] : ''),
+            size: fileItem.file?.sizeBytes
+              ? `${(fileItem.file.sizeBytes / (1024 * 1024)).toFixed(1)} MB`
               : '',
             items: '',
             author: 'SMS',
-            modified: file.updatedAt
-              ? new Date(file.updatedAt).toDateString()
+            modified: fileItem.updatedAt
+              ? new Date(fileItem.updatedAt).toDateString()
               : '',
             sharedUsers: [],
           }));
