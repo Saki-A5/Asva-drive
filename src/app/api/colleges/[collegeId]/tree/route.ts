@@ -38,8 +38,17 @@ export const GET = async (
     const files = await FileItemModel.find({
       ownerId: collegeId,
       ownerType: "College",
-      isDeleted: false,
-    }).lean()
+      isDeleted: { $ne: true },
+    })
+    .populate({
+      path: "file",
+      select: "sizeBytes mimeType updatedAt uploadedBy",
+      populate: {
+        path: "uploadedBy",
+        select: "email name"
+      }
+    })
+    .lean()
 
     const tree = buildTree(files, null)
 
