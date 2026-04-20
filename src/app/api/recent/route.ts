@@ -36,9 +36,11 @@ export const GET = async (req: Request) => {
     const ownerId = user.role === "admin" ? user.collegeId : user._id;
 
     // ── Get recent files sorted by updatedAt (most recent first) ──────────────
-    const files = await FileItemModel.find({
+    const fileItems = await FileItemModel.find({
       ownerId,
       isDeleted: { $ne: true },
+      isFolder: false,
+      isRoot: { $ne: true },
     })
       .sort({ "file.updatedAt": -1, updatedAt: -1 })
       .limit(50)
@@ -50,6 +52,16 @@ export const GET = async (req: Request) => {
           select: "email name",
         },
       });
+
+    // Deduplicate by file ID
+    const seen = new Set<string>();
+    const files = fileItems.filter(item => {
+      if (!item.file) return true; // Keep items without file reference
+      const fileId = (item.file as any)._id.toString();
+      if (seen.has(fileId)) return false;
+      seen.add(fileId);
+      return true;
+    });
 
     return NextResponse.json({
       message: "Recent files fetched",
