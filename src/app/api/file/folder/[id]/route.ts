@@ -114,30 +114,30 @@ export const GET = async (req: Request, { params }: any) => {
     isDeleted: { $ne: true },
   });
   if (!folder) return NextResponse.json({ error: "Folder not Found" }, { status: 404 });
-  if (!folder.isFolder) return NextResponse.json({ error: "This is not a folder" }, { status: 400 })
+  if (!folder.isFolder) return NextResponse.json({ error: "This is not a folder" }, { status: 400 });
 
-    const contents = await FileItemModel.find({
-      parentFolderId: folderId,
-      ownerId,
-      isDeleted: { $ne: true },
-    })
-    .populate({
-        path: "file",
-        select: "sizeBytes mimeType updatedAt uploadedBy",
-        populate: {
-          path: "uploadedBy",
-          select: "email name"
-        }
-      })
-     const breadcrumbs: { _id: string; filename: string }[] = [];
-      let currentFolder: any = folder;
-      while (currentFolder) {
-        breadcrumbs.unshift({ _id: currentFolder._id.toString(), filename: currentFolder.filename });
-        if (!currentFolder.parentFolderId) break;
-        currentFolder = await FileItemModel.findById(currentFolder.parentFolderId);
-      }
+  const contents = await FileItemModel.find({
+    parentFolderId: folderId,
+    ownerId,
+    isDeleted: { $ne: true },
+  }).populate({
+    path: "file",
+    select: "sizeBytes mimeType updatedAt uploadedBy",
+    populate: {
+      path: "uploadedBy",
+      select: "email name"
+    }
+  });
 
-    return NextResponse.json({ contents, breadcrumbs, folderName: folder.filename });
+  const breadcrumbs: { _id: string; filename: string }[] = [];
+  let currentFolder: any = folder;
+  while (currentFolder) {
+    breadcrumbs.unshift({ _id: currentFolder._id.toString(), filename: currentFolder.filename });
+    if (!currentFolder.parentFolderId) break;
+    currentFolder = await FileItemModel.findById(currentFolder.parentFolderId);
+  }
+
+  return NextResponse.json({ contents, breadcrumbs, folderName: folder.filename });
   } catch (error: any) {
     console.error("Error fetching folder contents:", error);
     return NextResponse.json(
