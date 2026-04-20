@@ -29,6 +29,15 @@ export const GET = async (req: Request, { params }: any) => {
     );
 
     try {
+        // Track file access by updating the updatedAt timestamp
+        if (fileItem.file) {
+          await FileModel.findByIdAndUpdate(
+            fileItem.file._id,
+            { updatedAt: new Date() },
+            { new: true }
+          );
+        }
+
         const signedUrl = getAssetDeliveryUrl(fileItem.file.cloudinaryUrl, {
             resource_type: fileItem.file.resourceType,
             sign_url: true,

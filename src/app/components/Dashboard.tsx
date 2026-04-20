@@ -13,51 +13,9 @@ import Floating from '../components/Floating';
 import Fileicon from '../components/Fileicon';
 import useCurrentUser from '@/hooks/useCurrentUser';
 
-const recentFiles: FileItem[] = [
-  {
-    id: '1',
-    name: 'Python',
-    size: '3.2GB',
-    items: '12 items',
-    type: 'folder',
-    author: 'SMS',
-    modified: '2024-06-01',
-    sharedUsers: [],
-  },
-  {
-    id: '2',
-    name: 'AutoCAD Workbook',
-    size: '320MB',
-    items: 'PDF',
-    type: 'pdf',
-    author: 'Engineering',
-    modified: '2024-05-30',
-    sharedUsers: ['user1'],
-  },
-  {
-    id: '3',
-    name: 'AutoCAD Workbook',
-    size: '320MB',
-    items: 'PDF',
-    type: 'pdf',
-    author: 'Engineering',
-    modified: '2024-05-29',
-    sharedUsers: ['user2'],
-  },
-  {
-    id: '4',
-    name: 'AutoCAD Workbook',
-    size: '320MB',
-    items: 'PDF',
-    type: 'pdf',
-    author: 'SMS',
-    modified: '2024-05-28',
-    sharedUsers: [],
-  },
-];
-
 const Dashboard = () => {
   const { user, loading } = useCurrentUser();
+  const [recentFiles, setRecentFiles] = useState<FileItem[]>([]);
   const [starredFiles, setStarredFiles] = useState<FileItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [createEventOpen, setCreateEventOpen] = useState(false);
@@ -68,6 +26,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
+        // Fetch starred files
         const res = await axios.get(`/api/file`, { withCredentials: true });
         const files: File[] = res.data.data;
 
@@ -90,10 +49,33 @@ const Dashboard = () => {
 
         const limitedData = data.slice(0, 7);
         setStarredFiles(limitedData);
+
+        // Fetch recently opened/modified files
+        const recentData = files
+          .sort((a: any, b: any) => {
+            const dateA = new Date(a.updatedAt || a.createdAt).getTime();
+            const dateB = new Date(b.updatedAt || b.createdAt).getTime();
+            return dateB - dateA;
+          })
+          .slice(0, 4)
+          .map((file: any) => ({
+            id: file._id ?? '',
+            name: file.name ?? '',
+            type: file.mimeType ? file.mimeType.split('/')[0] : '',
+            size: file.size
+              ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+              : '',
+            items: '',
+            author: 'SMS',
+            modified: file.updatedAt
+              ? new Date(file.updatedAt).toDateString()
+              : '',
+            sharedUsers: [],
+          }));
+
+        setRecentFiles(recentData);
       } catch (error) {
         console.error('Error fetching files:', error);
-      } finally {
-        // setLoading(false);
       }
     };
 
@@ -140,9 +122,9 @@ const Dashboard = () => {
           <section className="md:border pt-4 md:p-4 rounded-xl border-border/100 bg-card shrink-0">
             <h2 className="text-lg font-bold mb-3 md:px-2">Recent Files</h2>
 
-            {recentFiles.length > 0 ? (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {recentFiles.map((file, index) => (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {recentFiles.length > 0 ? (
+                recentFiles.map((file, index) => (
                   <div
                     key={index}
                     className="flex flex-col items-start p-4 border rounded-xl bg-white dark:bg-neutral-900 shadow-sm hover:shadow-md transition">
@@ -159,13 +141,21 @@ const Dashboard = () => {
                       {file.items}
                     </p>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Recent files show here
-              </p>
-            )}
+                ))
+              ) : (
+                <>
+                  {[...Array(4)].map((_, index) => (
+                    <div
+                      key={`placeholder-${index}`}
+                      className="flex flex-col items-start p-4 border border-dashed rounded-xl bg-gray-50 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 min-h-[120px] justify-center items-center">
+                      <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
+                        {index === 0 ? 'Open files to see them here' : ''}
+                      </p>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
           </section>
 
           <div className="flex flex-col flex-1 min-h-0">

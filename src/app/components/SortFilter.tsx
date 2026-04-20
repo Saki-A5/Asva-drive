@@ -143,6 +143,8 @@ interface SortFiltersProps {
 }
 
 const SortFilters = ({ filters, setFilters }: SortFiltersProps) => {
+  const [openDropdown, setOpenDropdown] = React.useState<string | null>(null);
+
   const fileTypes = [
     "All",
     "Folder",
@@ -176,7 +178,7 @@ const SortFilters = ({ filters, setFilters }: SortFiltersProps) => {
   return (
     <div className="my-6 flex flex-nowrap gap-2 overflow-x-auto scrollbar-hide whitespace-nowrap">
       {/* Type Filter */}
-      <DropdownMenu>
+      <DropdownMenu open={openDropdown === "type"} onOpenChange={(open) => setOpenDropdown(open ? "type" : null)}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
@@ -190,7 +192,10 @@ const SortFilters = ({ filters, setFilters }: SortFiltersProps) => {
           {fileTypes.map((t) => (
             <DropdownMenuItem
               key={t}
-              onClick={() => updateFilter("type", t)}>
+              onClick={() => {
+                updateFilter("type", t);
+                setOpenDropdown(null);
+              }}>
               {t} {filters.type === t && <Check className="ml-auto h-4 w-4" />}
             </DropdownMenuItem>
           ))}
@@ -198,7 +203,7 @@ const SortFilters = ({ filters, setFilters }: SortFiltersProps) => {
       </DropdownMenu>
 
       {/* Modified Filter (Integrated Calendar) */}
-      <DropdownMenu>
+      <DropdownMenu open={openDropdown === "modified"} onOpenChange={(open) => setOpenDropdown(open ? "modified" : null)}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
@@ -218,6 +223,7 @@ const SortFilters = ({ filters, setFilters }: SortFiltersProps) => {
               onClick={() => {
                 updateFilter("modified", d);
                 updateFilter("customRange", undefined);
+                setOpenDropdown(null);
               }}>
               {d}{" "}
               {filters.modified === d && <Check className="ml-auto h-4 w-4" />}
@@ -255,7 +261,7 @@ const SortFilters = ({ filters, setFilters }: SortFiltersProps) => {
       </DropdownMenu>
 
       {/* Source Filter */}
-      <DropdownMenu>
+      <DropdownMenu open={openDropdown === "source"} onOpenChange={(open) => setOpenDropdown(open ? "source" : null)}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
@@ -269,7 +275,10 @@ const SortFilters = ({ filters, setFilters }: SortFiltersProps) => {
           {colleges.map((c) => (
             <DropdownMenuItem
               key={c}
-              onClick={() => updateFilter("source", c)}>
+              onClick={() => {
+                updateFilter("source", c);
+                setOpenDropdown(null);
+              }}>
               {c}{" "}
               {filters.source === c && <Check className="ml-auto h-4 w-4" />}
             </DropdownMenuItem>

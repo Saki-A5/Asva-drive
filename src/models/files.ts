@@ -2,6 +2,7 @@ import { Model, model, models, Schema, Types } from "mongoose";
 import { COLLEGE_IDS } from "./colleges";
 
 export interface FileInterface {
+    _id?: Types.ObjectId,
     filename: string, 
     cloudinaryUrl: string, 
     ownerId: COLLEGE_IDS, 
