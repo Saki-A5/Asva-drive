@@ -165,7 +165,7 @@ const CollegeFiles = () => {
                 if (item.type === "folder") {
                   setCurrentFolderId(item.id);
                 } else {
-                  router.push(`/file/${item.id}`);
+                  router.push(`/files/${item.id}`);
                 }
               }}
             />

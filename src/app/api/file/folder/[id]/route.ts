@@ -7,6 +7,7 @@ import User from "@/models/users";
 import { HydratedDocument, Types } from "mongoose";
 import { NextResponse } from "next/server";
 import { deleteAssets } from "@/lib/cloudinary";
+import { adminAuth } from "@/lib/firebaseAdmin";
 
 export const runtime = 'nodejs';
 
@@ -71,17 +72,32 @@ async function deleteFolder(folderId: Types.ObjectId): Promise<{ success: boolea
 
 // get the contents of a folder
 export const GET = async (req: Request, { params }: any) => {
-  // const cookieStore = await cookies();
-  // const token = cookieStore.get('token')?.value;
+  try {
+    await dbConnect();
 
-  // if(!token) return NextResponse.json({error: "Not Authenticated"}, {status: 401});
+    // ── Auth ──────────────────────────────────────────────────────────────────
+    const cookies = req.headers.get("cookie") || "";
+    const match = cookies.match(/token=([^;]+)/);
+    const sessionCookie = match ? match[1] : null;
 
-  // const decodedToken = await adminAuth.verifyIdToken(token);
-  // const {email} = decodedToken;
+    if (!sessionCookie) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
 
-  await dbConnect();
-  const email = 'asvasoftwareteam@gmail.com'; // substitute for now
-  const user = await User.findOne({ email });
+    const decodedToken = await adminAuth.verifySessionCookie(
+      sessionCookie,
+      true,
+    );
+    const userEmail = decodedToken.email;
+
+    if (!userEmail) {
+      return NextResponse.json({ message: "Missing user id" }, { status: 401 });
+    }
+
+    const user = await User.findOne({ email: userEmail });
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
 
 
 
@@ -100,39 +116,66 @@ export const GET = async (req: Request, { params }: any) => {
   if (!folder) return NextResponse.json({ error: "Folder not Found" }, { status: 404 });
   if (!folder.isFolder) return NextResponse.json({ error: "This is not a folder" }, { status: 400 })
 
-  const contents = await FileItemModel.find({
-    parentFolderId: folderId,
-    ownerId,
-    isDeleted: { $ne: true },
-  })
-  .populate({
-      path: "file",
-      select: "sizeBytes mimeType updatedAt uploadedBy",
-      populate: {
-        path: "uploadedBy",
-        select: "email name"
-      }
+    const contents = await FileItemModel.find({
+      parentFolderId: folderId,
+      ownerId,
+      isDeleted: { $ne: true },
     })
-   const breadcrumbs: { _id: string; filename: string }[] = [];
-    let currentFolder: any = folder;
-    while (currentFolder) {
-      breadcrumbs.unshift({ _id: currentFolder._id.toString(), filename: currentFolder.filename });
-      if (!currentFolder.parentFolderId) break;
-      currentFolder = await FileItemModel.findById(currentFolder.parentFolderId);
-    }
+    .populate({
+        path: "file",
+        select: "sizeBytes mimeType updatedAt uploadedBy",
+        populate: {
+          path: "uploadedBy",
+          select: "email name"
+        }
+      })
+     const breadcrumbs: { _id: string; filename: string }[] = [];
+      let currentFolder: any = folder;
+      while (currentFolder) {
+        breadcrumbs.unshift({ _id: currentFolder._id.toString(), filename: currentFolder.filename });
+        if (!currentFolder.parentFolderId) break;
+        currentFolder = await FileItemModel.findById(currentFolder.parentFolderId);
+      }
 
-  return NextResponse.json({ contents, breadcrumbs, folderName: folder.filename });
+    return NextResponse.json({ contents, breadcrumbs, folderName: folder.filename });
+  } catch (error: any) {
+    console.error("Error fetching folder contents:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to fetch folder contents" },
+      { status: 500 }
+    );
+  }
 } 
 
 // delete a folder and its contents
 export const DELETE = async (req: Request, { params }: any) => {
   try {
     await dbConnect();
-    // const { user, error, status } = await requireRole(req, ['admin', 'user']);
 
-    // if (error) return NextResponse.json({ error }, { status });
+    // ── Auth ────────────────────────────────────────────────────────────────────
+    const cookies = req.headers.get("cookie") || "";
+    const match = cookies.match(/token=([^;]+)/);
+    const sessionCookie = match ? match[1] : null;
 
-    const user = await User.findOne({email: 'asvasoftwareteam@gmail.com'}); // comment this and uncomment the code block above in production
+    if (!sessionCookie) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const decodedToken = await adminAuth.verifySessionCookie(
+      sessionCookie,
+      true,
+    );
+    const userEmail = decodedToken.email;
+
+    if (!userEmail) {
+      return NextResponse.json({ message: "Missing user id" }, { status: 401 });
+    }
+
+    const user = await User.findOne({ email: userEmail });
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
     const ownerId = user.role === "admin" ? user.collegeId : user._id;
 
     const { id } = await params;
