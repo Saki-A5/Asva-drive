@@ -36,7 +36,7 @@ export const sendPush = async ({
   };
 
   try {
-    const response = await admin.messaging().sendEachForMulticast(message);
+    const response = await admin.messaging().sendMulticast(message);
 
     // Optional: cleanup invalid tokens
     const invalidTokens: string[] = [];
