@@ -170,6 +170,19 @@ export function getAssetDeliveryUrl(publicId: string, options: ConfigAndUrlOptio
     return signedUrl;
 }
 
+export async function getAssetUrl(publicId: string, options: ConfigAndUrlOptions){
+    const response = await cloudinary.api.resource(publicId, {
+        resource_type: options.resource_type ?? "raw",
+        type: options.type ?? "authenticated",
+        sign_url: true,
+        secure: true,
+        expires_at: options.expires_at ?? Math.floor(Date.now() / 1000) + 3600,
+        attachment: options.attachment ?? false,
+    });
+
+    return response.secure_url;
+}
+
 export async function uploadEventFlier(filename: string, file: Buffer, collegeId: string, resourceType: "image"|"video"|"raw"|"auto",): Promise<UploadApiResponse | null> {
 
     if (typeof file === 'string' && /^data:.*;base64,/.test(file)) {

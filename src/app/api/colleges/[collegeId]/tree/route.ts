@@ -43,7 +43,6 @@ export const GET = async (
       ownerId: collegeId,
       ownerType: "College",
       isDeleted: { $ne: true },
-      isRoot: { $ne: true },
     })
     .populate({
       path: "file",

@@ -1,4 +1,4 @@
-import { getAsset, getAssetDeliveryUrl, deleteAsset } from '@/lib/cloudinary';
+import { getAsset, getAssetDeliveryUrl, deleteAsset, getAssetUrl } from '@/lib/cloudinary';
 import dbConnect from '@/lib/dbConnect';
 import FileModel, { FileInterface } from '@/models/files';
 import { Types, Schema } from 'mongoose';
@@ -38,7 +38,14 @@ export const GET = async (req: Request, { params }: any) => {
           );
         }
 
-        const signedUrl = getAssetDeliveryUrl(fileItem.file.cloudinaryUrl, {
+        // const signedUrl = getAssetDeliveryUrl(fileItem.file.cloudinaryUrl, {
+        //     resource_type: fileItem.file.resourceType,
+        //     sign_url: true,
+        //     secure: true,
+        //     expires_at: Math.floor(Date.now() / 1000) + 3600, // default of one hour
+        //     type: 'authenticated'
+        // });
+        const signedUrl = await getAssetUrl(fileItem.file.cloudinaryUrl, {
             resource_type: fileItem.file.resourceType,
             sign_url: true,
             secure: true,
