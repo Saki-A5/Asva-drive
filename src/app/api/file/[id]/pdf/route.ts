@@ -6,7 +6,7 @@ import FileItemModel from "@/models/fileItem";
 import { Types } from "mongoose";
 import { v2 as cloudinary } from "cloudinary";
 import type { FileInterface } from "@/models/files";
-import { getAssetDeliveryUrl } from "@/lib/cloudinary";
+import { getAssetDeliveryUrl, getAssetUrl } from "@/lib/cloudinary";
 import https from 'https';
 
 export const runtime = "nodejs";
@@ -46,7 +46,7 @@ export async function GET(
     console.log("expires_at being passed:", expiresAt);
     console.log("Public ID for signed URL:", publicId);
     
-    const signedUrl = getAssetDeliveryUrl(publicId, {
+    const signedUrl = await getAssetUrl(publicId, {
       resource_type: "raw",
       type: "authenticated",
       expires_at: expiresAt,
