@@ -51,7 +51,7 @@ export function CollegeSelect({ value, onChange }: CollegeSelectProps) {
           <Button
             variant="outline"
             role="combobox"
-            className="justify-between border-gray-300 text-gray-300 placeholder:text-gray-400 focus:ring-0 font-normal h-11"
+            className="justify-between border-gray-300 text-gray-600 placeholder:text-gray-400 focus:ring-0 font-normal h-11"
           >
             {selectedCollege
               ? selectedCollege.name
