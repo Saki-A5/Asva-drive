@@ -174,7 +174,11 @@ const FilesView = ({ folderId, isCollegeView = false }: FilesViewProps) => {
     if (!confirm(`Are you sure you want to delete ${item.name}?`)) return;
     setItems((prev) => prev.filter((f) => f.id !== item.id));
     try {
-      await axios.delete(`/api/file/${item.id}`);
+      const deleteUrl =
+        item.type === "folder"
+          ? `/api/file/folder/${item.id}`
+          : `/api/file/${item.id}`;
+      await axios.delete(deleteUrl);
     } catch (error) {
       console.error("Error deleting file:", error);
       alert("Failed to delete file");

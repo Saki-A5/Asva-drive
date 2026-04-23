@@ -43,7 +43,7 @@ async function deleteFolder(folderId: Types.ObjectId): Promise<{ success: boolea
   const { descendantFileItems: fileItems, descendantFolderItems: folderItems } = await getAllDescendantIds(folderId);
 
   if (fileItems.concat(folderItems).length === 0) { // if there are no contents in this folder, permanently delete it
-    await FileItemModel.deleteOne(folderId);
+    await FileItemModel.deleteOne({ _id: folderId });
     return { success: true, permanentlyDeleted: true }
   }
 
@@ -195,7 +195,7 @@ export const DELETE = async (req: Request, { params }: any) => {
     if (isAdmin) {
       // Admin: soft delete (goes to trash)
       const { permanentlyDeleted } = await deleteFolder(folderId);
-      const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW) || 28;
+      const fileRestoreWindow = Number(process.env.FILE_RESTORE_WINDOW) || 28;
       const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
       if (!permanentlyDeleted) { // only add folders to the queue if they have not been permanently deleted
         await fileQueue.add(
