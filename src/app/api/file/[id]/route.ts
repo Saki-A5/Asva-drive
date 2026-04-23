@@ -98,6 +98,16 @@ export const DELETE = async (req: Request, { params }: any) => {
     if (!fileItem)
       return NextResponse.json({ message: 'No File Found' }, { status: 404 });
 
+    if (fileItem.isFolder) {
+      return NextResponse.json(
+        {
+          message:
+            'This item is a folder. Delete it from the files list or use DELETE /api/file/folder/:id.',
+        },
+        { status: 400 },
+      );
+    }
+
     // if file is a reference file, delete that reference file permanently
     if (fileItem.isReference) {
       await FileItemModel.findOneAndDelete({ _id: fileItemId });

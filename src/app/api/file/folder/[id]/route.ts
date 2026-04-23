@@ -43,7 +43,7 @@ async function deleteFolder(folderId: Types.ObjectId): Promise<{ success: boolea
   const { descendantFileItems: fileItems, descendantFolderItems: folderItems } = await getAllDescendantIds(folderId);
 
   if (fileItems.concat(folderItems).length === 0) { // if there are no contents in this folder, permanently delete it
-    await FileItemModel.deleteOne(folderId);
+    await FileItemModel.deleteOne({ _id: folderId });
     return { success: true, permanentlyDeleted: true }
   }
 
@@ -104,19 +104,28 @@ export const GET = async (req: Request, { params }: any) => {
   const { id } = await params;
   const folderId = new Types.ObjectId(id as string);
 
-  // if the user is an admin, they are accessing college files, if the user is a "user" they are accessing user files
-  const ownerId = user.role === "admin" ? user.collegeId : user._id;
-  const ownerType = user.role === "admin" ? "College" : "User";
-
+  // Lookup folder first (college pages browse College-owned folders even for normal users)
   const folder = await FileItemModel.findOne({
     _id: folderId,
     isFolder: true,
-    ownerId,
-    ownerType,
     isDeleted: { $ne: true },
   });
   if (!folder) return NextResponse.json({ error: "Folder not Found" }, { status: 404 });
   if (!folder.isFolder) return NextResponse.json({ error: "This is not a folder" }, { status: 400 });
+
+  // Authorize access based on the folder's actual owner
+  const ownerType = (folder as any).ownerType as "College" | "User";
+  const ownerId = (folder as any).ownerId as unknown;
+
+  if (ownerType === "User") {
+    if (String(ownerId) !== String(user._id)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  } else if (ownerType === "College") {
+    // College folders are browsable from the colleges pages.
+    // Keep auth (must be signed in), but do not restrict to same-college membership
+    // because `/api/colleges/:collegeId/tree` currently exposes the same data.
+  }
 
   const contents = await FileItemModel.find({
     parentFolderId: folderId,
@@ -195,7 +204,7 @@ export const DELETE = async (req: Request, { params }: any) => {
     if (isAdmin) {
       // Admin: soft delete (goes to trash)
       const { permanentlyDeleted } = await deleteFolder(folderId);
-      const fileRestoreWindow = +(!process.env.FILE_RESTORE_WINDOW) || 28;
+      const fileRestoreWindow = Number(process.env.FILE_RESTORE_WINDOW) || 28;
       const delay = fileRestoreWindow * (1000 * 60 * 60 * 24);
       if (!permanentlyDeleted) { // only add folders to the queue if they have not been permanently deleted
         await fileQueue.add(
